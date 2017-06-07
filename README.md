@@ -40,7 +40,9 @@ No specific mathematical expertise is required. Some familiarity with statistica
 - Please note that glmer2stan is not available on CRAN. You can install it from source on GitHub by using the following lines of R code:
 
     install.packages('devtools')
+    
     library(devtools)
+    
     install.packages('glmer2stan')
     
 - Other R packages that will be used: knitr, xtable, plotrix, ggplot2, LearnBayes, nleqslv, metafor, maptools, sp, spdep, RColorBrewer, classInt
