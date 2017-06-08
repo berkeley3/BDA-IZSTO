@@ -1,0 +1,919 @@
+---
+title: "Bayesian Data Analysis for Medical Data"
+subtitle: Bayesian Inference
+author      : Paola Berchialla
+job         : Department of Clinical and Biological Sciences, University of Torino
+output:
+  ioslides_presentation:
+    css: assets/css/ioslides.css
+    logo: assets/img/dscb.jpg
+    mathjax: local
+    self_contained: no
+    widescreen: yes
+  beamer_presentation: default
+  slidy_presentation: default
+---
+
+## Repeated i.i.d. trials
+
+- Suppose to generate a  outcome from among several potential outcomes
+- Suppose outcome chances are the same each time
+    - outcomes are independent and identically distributed (i.i.d)
+
+- Suppose the outcome is binary (e.g. 0,1; dead/alive,...)
+    - 20% chance of outcome 1
+    - 80% chance of outcome 0
+
+- Consider different numbers of trials
+    - how will proportion of successes in sample differ?
+    
+## Simulating i.i.d. Binary Trials
+```{r, eval=FALSE}
+
+rbinom(10, N, 0.2)/N
+
+```
+
+
+```{r, echo=FALSE, results='asis'}
+successes <- rbinom(10,10,0.2)
+cat(paste0('\n10 trials: (', 100*min(successes)/10,'% to ', 100*max(successes)/10, "% success rate)\n"))
+cat('\n',successes, '\n')
+successes <- rbinom(10,100,0.2)
+cat(paste0('\n100 trials: (', 100*min(successes)/100,'% to ', 100*max(successes)/100, "% success rate)\n"))
+cat('\n',successes, '\n')
+successes <- rbinom(10,1000,0.2)
+cat(paste0('\n100 trials: (', 100*min(successes)/1000,'% to ', 100*max(successes)/1000, "% success rate)\n"))
+cat('\n',successes, '\n')
+successes <- rbinom(10,10000,0.2)
+cat(paste0('\n100 trials: (', round(100*min(successes)/10000,1),'% to ', round(100*max(successes)/10000,1), "% success rate)\n"))
+cat('\n',successes, '\n')
+
+```
+
+
+## Simple point estimation
+- Estimate chance of success $\theta$ by proportion of successes
+$$
+\theta^* = \frac{\text{successes}}{\text{trials}}
+$$
+
+- Simulation shows accuraty depends on amount of data
+
+## Example Interval Calculation
+
+- P% _confidence interval:_ interval in which P% of the estimates are expected to fall
+- Simulation computes intervals to any accuracy
+- How to do: simulate, sort, inspect the central empirical interval
+
+## Example Interval Calculation
+
+- To calcualte 95% confidence interval of estimate based on 10000 samples
+
+```{r, results='hide'}
+
+sims <- rbinom(10000, 1000, 0.2)/1000
+quantile(sims, probs = c(0.025, 0.975))
+```
+
+```{r, echo=FALSE, results='asis'}
+q <- quantile(sims, probs = c(0.025, 0.975))
+cat('The 95% confidence interval is: (',q[1],',', q[2],')')
+```
+
+
+
+## Estimator Bias
+
+- _Bias:_ expected difference of estimate from true value
+
+- continuous previous examples
+
+```{r, eval=FALSE}
+
+sims <- rbinom(10000, 1000, 0.2)/1000
+quantile(sims, probs = 0.5))
+```
+
+```{r, results='asis'}
+
+sims <- rbinom(10000, 1000, 0.2)/1000
+quantile(sims, probs = 0.5)
+```
+
+- Central value of 0.2 shows this estiamator is __unbiased__
+
+## Simple Point Estimation
+
+- _Central Limit Theorem:_ __expected__ error in $\theta^{*}$ goes down as 
+$$
+\frac{1}{\sqrt{N}}
+$$ 
+- a decimal place of accuracy requires $100\times$ more samples
+- The width of confidence intervals shrinks at the same rate
+
+
+## Quiz!
+
+```{r quiz, echo=FALSE, warning=FALSE, message=FALSE, fig.align='center'}
+library(maps)
+kc8084 <- read.delim('data\\gd80to84.txt')
+names(kc8084) <- names(kc8084)[-grep('x', tolower(names(kc8084)))]
+
+kc8589 <- read.delim('data\\gd85to89.txt')
+
+kc <- data.frame(state=kc8589$state, 
+                 county=kc8589$county, 
+                 aakc=kc8084$aadc + kc8589$aadc
+                 #aakc=10^5*(kc8084$dc + kc8589$dc)/(kc8084$pop + kc8589$pop)
+)
+
+q90 <- with(kc, quantile(aakc, probs = 0.9, na.rm=T))
+kc90 <- subset(kc, aakc>q90)
+
+counties.90 <- paste0(tolower(kc90$state),',',tolower(kc90$county))
+
+
+library(maps)
+map('state')
+map('county', counties.90, col='black', fill=T, add=T)
+title('Highest kidney cancer death rates')
+
+
+```
+
+
+## Quiz!
+
+
+```{r quiz2, echo=FALSE, warning=FALSE, message=FALSE, fig.align='center'}
+library(maps)
+kc8084 <- read.delim('data\\gd80to84.txt')
+names(kc8084) <- names(kc8084)[-grep('x', tolower(names(kc8084)))]
+
+kc8589 <- read.delim('data\\gd85to89.txt')
+
+kc <- data.frame(state=kc8589$state, 
+                 county=kc8589$county, 
+                 aakc=kc8084$aadc + kc8589$aadc
+                 #aakc=10^5*(kc8084$dc + kc8589$dc)/(kc8084$pop + kc8589$pop)
+)
+
+q90 <- with(kc, quantile(aakc, probs = 0.9, na.rm=T))
+kc90 <- subset(kc, aakc>q90)
+
+counties.90 <- paste0(tolower(kc90$state),',',tolower(kc90$county))
+
+
+q10 <- with(kc, quantile(aakc, probs = 0.1, na.rm=T))
+kc10 <- subset(kc, aakc<q10)
+
+counties.10 <- paste0(tolower(kc10$state),',',tolower(kc10$county))
+
+par(mfrow=c(1,2))
+library(maps)
+map('state')
+map('county', counties.90, col='black', fill=T, add=T)
+title('Highest kidney cancer death rates')
+
+map('state')
+map('county', counties.10, col='black', fill=T, add=T)
+title('Lowest kidney cancer death rates')
+```
+
+
+## Quiz Answer
+
+- Mix simulation of repeated i.i.d trials with 20% of success and sort
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+x.10 <- rbinom(10, 10, prob = 0.2)
+x.100 <- rbinom(10, 100, prob = 0.2)
+x.1000 <- rbinom(10, 1000, prob = 0.2)
+
+dd <- data.frame(d = c(paste0(x.10,'/10'), paste0(x.100,'/100'), paste0(x.1000,'/1000')),
+           rate = c(x.10/10, x.100/100, x.1000/1000))
+
+output <- dd[sort.int(dd$rate, decreasing = FALSE, index.return = T)$ix,'d']
+output <- as.character(output)
+
+cat(output[1:5],'\n','\n', output[6:10],'\n','\n', output[11:15],'\n',
+            '\n',output[16:20],'\n','\n', output[21:25],'\n', '\n',output[26:30])                 
+```
+
+> - More variation in observed rates with smaller sample sizes
+
+> - _Answer:_ High cancer and low cancer counties are small populations
+
+## Observations, conterfactuals and random variables
+
+- Assume we observe data $\mathbf y = y_1,\ldots, y_N$
+- Statistical modelling assumes even though $\mathbf y$ is observed, the values could have been different
+- John Stuart Mill first characterized this _conterfactual_ nature of statistical modelling
+    - A System of Logic, Rationative and Inductive (1843)
+- In modern (Kolmogorov) language, $\mathbf y$ is a _random variable_
+
+## Likelihood functions
+
+- A _likelihood function_ is a probability function 
+    - density, mass or mixed
+$$
+p(y\vert\theta , x)
+$$
+where $\theta$ is a vector of __parameters__
+- $x$ is some fixed data
+    - regression predictors or _features_
+- A __likelihood function__ is considered as a function $L(\theta)$ of $\theta$ for fixed $x$ and $y$
+
+## Maximum Likelihood Estimation
+
+- The statistical inference problem is to estimate parameters $\theta$ given observations $y$
+
+- Maximum Likelihood Estimation (MLE) chooses the estimate $\theta^*$ that meximizes the likelihood function
+$$
+\theta^* = \text{arg max}_\theta L(\theta) = \text{arg max}_\theta p(y\vert\theta, x)
+$$
+- this function of $L$ and $y$ (and $x$) is called __estimator__
+
+
+## Example of MLE {.smaller}
+
+- The frequency-based estimate
+$$
+\theta^* = \frac{1}{N}\sum_{i=1}^N y_i
+$$
+is the observed rate of _success_ (outcome 1) observations
+
+- The MLE for the  model
+$$
+p(y\vert\theta) = \prod_{i=1}^N p(y_i\vert\theta) = \prod_{i=1}^N \text{Bernoulli}(y_i\vert\theta)
+$$
+where for $u\in\{0,1\}$
+$$
+\text{Bernoulli}(y_i\vert\theta) =\left\{ \begin{array}{ll}
+\theta & \text{if } u=1\\
+1-\theta & \text{if } u=0\\
+\end{array}
+\right.
+$$
+
+## Example of MLE {.smaller}
+
+- The frequency-based estimate is the MLE 
+    - derivative is zero (indicating min or max)
+$$
+L^{'}(\theta^*) =0
+$$
+    - second derivative is negative (indicating max)
+$$
+L^{''}(\theta^*) < 0
+$$
+
+
+## Example of MLE {.smaller}
+
+- First modelling __assumption__ is that data are i.i.d.
+
+$$
+p(y\vert\theta) = \prod_{i=1}^N p(y_i\vert\theta)
+$$
+
+- Second modelling __assumption__ is form of likelihood
+$$
+p(y_i\vert\theta) = \text{Bernoulli}(y_i\vert\theta)
+$$
+
+## Beware: MLEs can be dangerous
+
+- Recall cancer cluster example
+- Accuracy is low with smalls counts
+- Hierarchical models are what we need
+
+# Bayesian Inference
+
+## Bayesian Data Analysis
+- By Bayesian data analysis, we mean practical methods for making inferences from data using probability models for quantities we observe and about which we wish to learn
+
+- The essential characteristic of Bayesian methods is their __explicit use of probability for quantifying uncertainty__ in inferences based on statistical analysis
+
+- from Gelman et al. __Bayesian Data Analysis__ 3rd edition 2013
+
+
+## Bayesian Mechanics
+<!-- THIS IS A COMMENTED TEXT EVEN FOR MARKDOWN :-) -->
+
+1. Set up full probability model
+    - for all observable & unobservable quantities
+    - consistent with problem knowledge & data collection
+2.  Condition on observed data
+    + calculate posterior probability of unobserved quantities conditional on observed quantities
+3. Evaluate
+    + model fit
+    + implications of posterior
+
+
+## Notation 
+
+- Basic Quantities
+    + $y$: observed data
+    + $\theta$: parameters (and other unobserved quantities)
+    + $x$: constants, predictors for conditional models
+- Basic Predictive Quantities
+    - $\tilde y$: unknown, potentially observable quantities
+    - $\tilde x$: predictors for unknown quantities
+    
+## Naming Conventions
+
+- __Joint:__ $p(y,\theta)$
+
+- __Sampling/Likelihood:__ $p(y\vert \theta)$
+    - Sampling is function of $y$ with $\theta$ fixed (probability function)
+    - Likelihood is function of $\theta$ with $y$ fixed (_not_ probability function)
+- __Prior:__ $p(\theta)$
+- __Posterior:__ $p(\theta\vert y)$
+- __Data Marginal (Evidence):__ $p(y)$
+- __Posterior Predictive:__ $p(\tilde y\vert y)$
+
+## Bayes's Rule for Posterior
+\begin{equation}
+\begin{array}{rcl}
+p(\theta\vert y) &=& \frac{p(y, \theta)}{p(y)} \\
+\\
+ & = & \frac{p(y\vert\theta)p(\theta)}{p(y)} \\
+\\
+& = & \frac{p(y\vert\theta)p(\theta)}{\int_\Theta p(y\vert\theta)d\theta}\\
+\\
+& = & \frac{p(y\vert\theta)p(\theta)}{\int_\Theta p(y \vert\theta)p(\theta)d\theta}
+\end{array}
+\end{equation}
+
+- _Inversion:_ Final result depends only on sampling distribution (likelihood) $p(y\vert\theta)$ and prior $p(\theta)$
+
+##Bayes's Rule up to Proportion
+
+- If data $y$ are fixed, then
+$$
+\begin{array}{rcl}
+p(\theta\vert y ) & = & \frac{p(y\vert\theta)p(\theta)}{p(y)} \\
+\\
+& \propto & p(y\vert\theta)p(\theta) \\
+\\
+& = & p(y,\theta)
+\end{array}
+$$
+
+- Posterior proportional to likelihood times prior
+- Equivalently, posterior proportional to joint
+
+## Posterior Predictive Distribution
+
+- Predict new data $\tilde y$ based on observed data $y$
+- Marginalize out parameter from posterior
+$$
+p(\tilde y \vert y) = \int_\Theta p(\tilde y \vert \theta) p(\theta \vert y)d\theta
+$$
+averaging predcitions $p(\tilde y\vert\theta)$ weighted by posterior $p(\theta\vert y)$
+- $\Theta = \left\{\theta \vert p(\theta \vert y) >0 \right\}$ is the support of $p(\theta\vert y)$
+- For discrete parameters $\theta$,
+$$
+p(\tilde y \vert y)=\sum_{\theta \in \Theta} p(\tilde y \vert \theta)p(\theta\vert y)
+$$
+
+- Can mix continuous and discrete (integral as shorthand)
+
+## Event Probabilities
+
+- Recall that an event A is a collection of outcomes 
+- Suppose event $A$  is determined by indicator on parameters
+$$
+f(\theta) = \begin{cases} 1 & \mbox{if } \theta \in A \\ 
+0 & \mbox{if } \theta \notin A  \end{cases}
+$$
+- e.g. $f(\theta) = \theta_1 > \theta_2$ for $Pr(\theta_1 > \theta_2\vert y)$
+- Bayesian event probabilities compute posterior mass
+$$
+P(A) = \int_\Theta f(\theta)p(\theta\vert y)d\theta
+$$
+- Not frequentist, because involves parameter probabilities
+
+## Laplace's Data and Problems
+- Laplace's data on live birth in Paris from 1745-1770
+
+
+
+_sex_ |_live births_
+------|------------
+female| 241,945
+male  | 251,527
+
+- Question 1 (Event Probability)
+\par
+Is a boy more likely to be born than a girl?
+
+- Question 2 (Estimate)
+\par
+What is the birth rate of boys vs. girls?
+
+- Bayes formulated the basic binomial model 
+
+<!-- Laplace solved the integral (Bayes couldn't) -->
+
+## Binomial Distribution
+- Binomial distribution is number of successes $y$ in $N$ i.i.d. Bernoulli trials with chance of success $\theta$
+- If $y_1,\ldots , y_N\sim$ Bernoulli($\theta$),
+\par then $(y_1 + \ldots + y_N)\sim$ Binomial($N,\theta$)
+- The probabilistic model is
+$$
+Binomial (y\vert N, \theta) = {{N}\choose{y}}\theta^y(1-\theta)^{N-y}
+$$
+where the binomial coefficient normalizes for permutation (i.e., which subset of $n$ has $y_n =1$):
+$$
+{{N}\choose{y}} = \frac{N!}{y!(N-y)!}
+$$
+
+## Bayes's Binomial Model
+
+- Data
+    - $y:$ total number of male live births (241,945)
+    - $N:$ total number of live births (493,472)
+- Parameter
+    - $\theta \in (0,1)$: proportion of male live births
+- Likelihood
+$$
+p(y\vert N,\theta) = Binomial(y\vert N,\theta) ={{N}\choose{y}}\theta^y(1-\theta)^{N-y}
+$$
+- Prior
+$$
+p(\theta) = Uniform(\theta\vert 0,1)=1
+$$
+
+## Beta Distribution
+- Required for analytic posterior of Bayes's model
+- For parameters $\alpha, \beta>0$ and $\theta\in (0,1)$,
+$$
+Beta(\theta\vert \alpha, \beta) = \frac{1}{B(\alpha,\beta)}\theta^{\alpha-1}(1-\theta)^{\beta-1}
+$$
+- Euler's Beta function is used to normalize
+$$
+Beta(\theta\vert \alpha, \beta) = \int_0^1 u^{\alpha-1}(1-u)^{\beta-1}du = \frac{\Gamma(\alpha)\Gamma(\beta)}{\Gamma(\alpha+\beta)}
+$$
+where $\Gamma()$ is continuous generalization of factorial
+- Note: $Beta(\theta\vert 1,1)=Uniform(\theta, 0,1)$
+
+## Beta Distribution examples
+
+```{r,  echo=F, fig.width=10, fig.height=10}
+suppressWarnings(library(LearnBayes))
+pippo<-function (prior, data, where = "topright") 
+{
+    a = prior[1]
+    b = prior[2]
+    s = data[1]
+    f = data[2]
+    n=s+f
+    a1<-a+s
+    b1<-b+f
+    p = seq(0.005, 0.995, length = 500)
+    prior = dbeta(p, a, b)
+    like = dbeta(p, s + 1, f + 1)
+    #like = dbinom(s,n,p)
+    post = dbeta(p, a + s, b + f)
+    m = max(c(prior, like, post))
+  plot(p, post, type = "l", ylab = "Density", xlab=expression(theta), lty = 1, lwd = 3, 
+         main = "", ylim = c(0, m), col = "blue")
+  #  lines(p, prior, lty = 3, lwd = 3, col = "green")
+  #  lines(p, like, lty = 1, lwd = 3, col = "blue")
+  #  legend(where, c("Prior", "Likelihood", "Posterior"), lty = c(3, 
+  #      1, 2), lwd = c(3, 3, 3), col = c("green", "blue", "red"))
+  text(0.9,dbeta(0.6, a+s,b+f), paste('n =',data[1]+data[2],'\ny =',data[1]))
+}
+par(mfrow=c(2,2))
+prior=c(1, 1)  # proportion has a beta(2, 10) prior
+data=c(3, 2)   # observe 10 successes and 30 failures
+pippo(prior,data)
+
+data=c(12, 8)   # observe 10 successes and 30 failures
+pippo(prior,data)
+
+data=c(60, 40)   # observe 10 successes and 30 failures
+pippo(prior,data)
+
+data=c(600, 400)   # observe 10 successes and 30 failures
+pippo(prior,data)
+
+```
+
+## Posterior distribution
+- Given Baye's general formula for the posterior
+$$
+p(\theta\vert y, N)=\frac{Binomial(y\vert N,\theta)Uniform(\theta\vert 0,1)}{\int_\Theta Binomial(y\vert N,\theta')p(\theta')d\theta'}
+$$
+- Using Euler's Beta function to normalize the posterior with final solution
+$$
+p(\theta\vert y, N)= Beta(\theta\vert y+1, N-y+1)
+$$
+
+## Estimation
+- Posterior is $Beta(\theta \vert 1+ 241,945, 1+ 251,527)$
+- Posterior mean:
+$$
+\frac{1+ 241,945}{1+ 241,945+1+ 251,527}\approx 0.4902913
+$$
+- Maximum likelihood estimate same as posterior mode (because of uniform prior)
+$$
+\frac{241,945}{241,945+251,527}\approx 0.4902912
+$$
+- As number of observations $\to \infty$, MLE approaches to posterior mean
+
+
+## Event Probability Inference
+- What is probability that a male live birth is more likely than a female live birth?
+
+$$
+\begin{array}{rcl}
+Pr[\theta>0.5] & = & \int_\Theta I[\theta>0.5]p(\theta\vert y,N)d\theta \\
+\\
+& = & \int_{0.5}^1 p(\theta\vert y,N)d\theta \\
+\\
+& = & 1- F_{\theta\vert y,N}(0.5))\\
+\\
+&\approx & 1^{-42}
+\end{array}
+$$
+- $I[\theta>0.5] =1$ if $\theta>0.5$ is true and 0 otherwise
+- $F_{\theta\vert y,N}$ is posterior cumulative distribution function (cdf)
+
+
+## Bayesian Fisher Exact Test
+
+- Suppose we observe the following data on handedness
+
+ _Drug_ | _AEs_      |_Successes_|  Total
+------- |------------|-----------|------
+_A_     |9$(y_1)$    | 43        | 52 $(N_1)$
+_B_     | 4$(y_2)$   |44         | 48$(N_2)$
+
+
+
+- Assume likelihoods $Binomial(y_k\vert N_k, \theta_k)$, uniform priors
+- Is Drug B better than A?
+$$
+\begin{array}{rcl}
+Pr[\theta_1 > \theta_2 \vert y, N] &=&
+\int_0^1 \int_0^1 p(\theta_1\vert y_1, N_1)p(\theta_2\vert y_2, N_2)d\theta_1d\theta_2\\
+ &\approx & 0.91
+ \end{array}
+$$
+
+- Directly interpretable result; _not_ frequentist procedure
+
+## Visualizing Posterior Difference
+- Plot of posterior difference $p(\theta_2 -\theta_1 \vert y N)$ (B-A)
+
+```{r, echo=FALSE}
+library(LearnBayes)
+
+suppressWarnings(library(LearnBayes))
+pippo<-function (prior, data, where = "topright") 
+{
+    a = prior[1]
+    b = prior[2]
+    s = data[1]
+    f = data[2]
+    n=s+f
+    a1<-a+s
+    b1<-b+f
+    p = seq(0.005, 0.995, length = 500)
+    prior = dbeta(p, a, b)
+    like = dbeta(p, s + 1, f + 1)
+    #like = dbinom(s,n,p)
+    post = dbeta(p, a + s, b + f)
+    m = max(c(prior, like, post))
+  plot(p, post, type = "l", ylab = "Density", xlab=expression(theta), lty = 1, lwd = 3, 
+         main = "", ylim = c(0, m), col = "blue")
+  #  lines(p, prior, lty = 3, lwd = 3, col = "green")
+  #  lines(p, like, lty = 1, lwd = 3, col = "blue")
+  #  legend(where, c("Prior", "Likelihood", "Posterior"), lty = c(3, 
+  #      1, 2), lwd = c(3, 3, 3), col = c("green", "blue", "red"))
+  text(0.9,dbeta(0.6, a+s,b+f)+1, paste('n =',data[1]+data[2],'\ny =',data[1]))
+}
+par(mfrow=c(1,2))
+prior=c(1, 1)  # proportion has a beta(2, 10) prior
+dataA=c(43, 9)   # observe 10 successes and 30 failures
+dataB = c(44, 4)
+pippo(prior,dataA)
+pippo(prior,dataB)
+
+
+```
+
+
+## Visualizing Posterior Difference
+- Plot of posterior difference $p(\theta_2 -\theta_1 \vert y N)$ (B-A)
+
+```{r, echo=FALSE}
+library(LearnBayes)
+
+suppressWarnings(library(LearnBayes))
+pippo<-function (prior, data, where = "topright") 
+{
+    a = prior[1]
+    b = prior[2]
+    s = data[1]
+    f = data[2]
+    n=s+f
+    a1<-a+s
+    b1<-b+f
+    p = seq(0.005, 0.995, length = 500)
+    prior = dbeta(p, a, b)
+    like = dbeta(p, s + 1, f + 1)
+    #like = dbinom(s,n,p)
+    post = dbeta(p, a + s, b + f)
+    m = max(c(prior, like, post))
+  plot(p, post, type = "l", ylab = "Density", xlab=expression(theta), lty = 1, lwd = 3, 
+         main = "", ylim = c(0, m), col = "blue")
+  #  lines(p, prior, lty = 3, lwd = 3, col = "green")
+  #  lines(p, like, lty = 1, lwd = 3, col = "blue")
+  #  legend(where, c("Prior", "Likelihood", "Posterior"), lty = c(3, 
+  #      1, 2), lwd = c(3, 3, 3), col = c("green", "blue", "red"))
+  text(0.9,dbeta(0.6, a+s,b+f)+1, paste('n =',data[1]+data[2],'\ny =',data[1]))
+}
+par(mfrow=c(1,2))
+prior=c(1, 1)  # proportion has a beta(2, 10) prior
+dataA=c(43, 9)   # observe 10 successes and 30 failures
+dataB = c(44, 4)
+pippo(prior,dataA)
+pippo(prior,dataB)
+
+
+```
+
+## Visualizing Posterior Difference {.smaller}
+
+```{r, bugs, cache=T, eval=FALSE}
+
+library(R2OpenBUGS)
+mymodel = function(){
+  y1~ dbin(theta1, N1)
+  y2~ dbin(theta2, N2)
+  theta1~dbeta(1,1)
+  theta2~dbeta(1,1)
+  theta <- theta2-theta1
+}
+
+data = list(N1 =52, N2 =48, y1=43, y2 = 44)
+parameters=c("theta")
+bugsInits <- function() {
+  return(list(theta1=0.5, theta2=0.5)) 
+}
+
+resbugs = bugs(data, inits=bugsInits, parameters.to.save=parameters, model.file=mymodel,
+n.chains=1, n.iter=10000, n.burnin=2000, n.thin=1,
+                debug=TRUE)
+
+
+```
+
+## Visualizing Posterior Difference with STAN {.smaller}
+
+```{r}
+modelString <- " 
+  data{
+    // First declare all variables in the data block
+    int<lower=0> N1;
+    int<lower=0> y1;
+    int<lower=0> N2;
+    int<lower=0> y2;
+  }
+  parameters{
+    real<lower=0, upper=1> theta1;
+    real<lower=0, upper=1> theta2;
+  }
+  model{
+    theta1 ~ beta(1,1);
+    y1 ~ binomial(N1, theta1);
+    theta2 ~ beta(1,1);
+    y2 ~ binomial(N2, theta2);
+  }
+  generated quantities{
+    real theta;
+  theta <- theta1 - theta2;
+  }
+" 
+```
+
+## Visualizing Posterior Difference with STAN: compling in C++
+```{r, eval=FALSE}
+library(rstan)
+stanDso <- stan_model(model_code = modelString)
+
+```
+
+## Visualizing Posterior Difference with STAN: sampling from the posterior distribution
+
+```{r, eval=FALSE}
+dataList = list(N1 =52, N2 =48, y1=43, y2 = 44)
+
+stanFit <- sampling(object = stanDso, 
+                    data = dataList, 
+                    chains = 1, iter = 9000, warmup = 1000, thin = 1)
+
+samples <- extract(stanFit)
+thetas_post <- samples[['theta']]
+```
+
+
+
+## Visualizing Posterior Difference
+
+```{r stan, echo=FALSE}
+load('output\\ThetaPost.RData')
+```
+
+- Plot of posterior difference $p(\theta_2 -\theta_1 \vert y N)$ (B-A)
+- compute 95% credible interval
+
+```{r dependson="stan", fig.height=3, fig.width=3, fig.align='center'}
+plot(density(thetas_post), main= "posterior probability", 
+     xlab=expression(theta[2]-theta[1]) )
+
+
+
+```
+
+## Visualizing Posterior Difference
+
+- Plot of posterior difference $p(\theta_2 -\theta_1 \vert y N)$ (B-A)
+- compute 95% credible interval
+
+```{r dependson="stan", fig.height=3, fig.width=3}
+
+quantile(thetas_post, probs=c(.025, .5, .975))
+
+```
+
+
+## Conjugate Priors
+- Family $F$ is a conjugate prior for family $G$ if
+    - prior in $F$ and
+    - likelihood in $G$
+    - entails posterior in $F$
+
+- Before MCMC techniques became practical, Bayesian analysis mostly involved conjugate priors
+- Still widely used because analytic solutions are more efficient than MCMC
+
+## Beta is Conjugate to Binomial
+
+\begin{itemize}
+\item \begin{tabular}{p{2cm}p{1.6cm}p{2cm}} Prior & $p(\theta \vert \alpha, \beta) =$ & $Beta(\theta\vert\alpha, \beta)$ \end{tabular}
+
+\item \begin{tabular}{p{2cm}p{1.6cm}p{2cm}} Likelihood & $p(y \vert N, \theta) =$ & $Binomial(y\vert N, \theta)$ \end{tabular}
+\item \begin{tabular}{p{2cm}p{1.6cm}p{2cm}} 
+Posterior &  & \end{tabular}
+\end{itemize}
+\vspace{-1cm}
+$$
+\begin{array}{rcl}
+p(\theta\vert y, N, \alpha,\beta) &\approx& p(\theta\vert\alpha,\beta)p(y\vert N,\theta)\\
+\\
+&=& Beta(\theta\vert\alpha,\beta)Binomial(y\vert N,\theta)\\
+\\
+&=& \frac{1}{B(\alpha, \beta)}\theta^{\alpha-1}(1-\theta)^{\beta-1}{{N}\choose{y}}\theta^y(1-\theta)^{N-y}\\
+\\
+&\approx&\theta^{y+\alpha-1}(1-\theta)^{N-y+\beta-1}\\
+\\
+&\approx&Beta(\theta\vert \alpha + y, \beta +(N-y))
+\end{array}
+$$
+
+## Chaining Updates
+
+- Start with prior $Beta(\theta\vert\alpha,\beta)$
+- Receive binomial data in $K$ stages $(y_1, N_1),\ldots , (y_K, N_K)$
+- After $(y_1, N_1)$, posterior is $Beta(\theta\vert \alpha + y_1, \beta +N_1-y_1)$
+- Use as prior for $(y_2, N_2)$ with posterior
+$$
+Beta(\theta\vert \alpha + y_1 +y_2, \beta +(N_1-y_1) + (N_2-y_2))
+$$
+- Lather, rinse, repeate until final posterior
+$$
+Beta(\theta\vert \alpha + y_1 +\ldots +y_K, \beta +(N_1 +\ldots N_K) - (y_1+\ldots +y_K))
+$$
+- Same results as if we had updated with combined data
+$$
+Beta(y_1+\ldots +y_K, N_1 +\ldots N_K)
+$$
+
+## MAP Estimator 
+
+- For a Bayesian model $p(y,\theta) = p(y\vert\theta)p(\theta)$, the max a posteriori (MAP) estimate maximizes the posterior
+$$
+  \begin{array}{rcl}
+\theta^* & = & arg max_\theta p(\theta\vert y)\\
+\\
+& = & arg max_\theta \frac{p(y\vert \theta)p(\theta)}{p(y)}\\
+\\
+& = & arg max_\theta p(y\vert \theta)p(\theta)\\
+\\
+& = & arg max_\theta \log p(y\vert \theta) + \log p(\theta)\\
+\end{array}
+$$
+  - _not_ Bayesian because it does not integrate over uncertainty
+- _not_ frequentist because of distributions over parameters
+
+## MAP and the MLE
+- MAP estimate reduces to the MLE if the prior is uniform, i.e.,
+$$
+  p(\theta) = c
+  $$
+    because
+  $$
+    \begin{array}{rcl}
+  \theta^* & = & arg max_\theta p(y\vert \theta)p(\theta)\\
+  \\
+  & = & arg max_\theta p(y\vert \theta)c\\
+  \\
+  & = & arg max_\theta p(y\vert \theta)\\
+  \end{array}
+  $$
+  
+
+## Penalized Maximum Likelihood
+  - The MAP can be made palatable to frequentists via philosophical sleight of hand
+  - Treat the negative log prior $-\log p(\theta)$ as a _penalty_
+  - e.g. a $Normal(\theta\vert\mu,\sigma)$ prior becomes a penalty function
+  $$
+    \lambda_{\theta,\mu,\sigma} = - \left(
+      \log\sigma + \frac{1}{2}\left(\frac{\theta-\mu}{\sigma}\right)^2\right)
+    $$
+      - Maximize sum of log likelihood and negative penalty
+    
+$$
+  \begin{array}{rcl}
+  \theta^* & = & arg max_\theta \log p(y\vert \theta, x) - \lambda_{\theta,\mu,\sigma}\\
+    \\
+  & = & arg max_\theta \log p(y\vert \theta, x) + \log p(\theta\vert\mu,\sigma)
+  \end{array}
+  $$
+  
+## Proper Bayesian Point Estimates
+
+- Choose estimate to minimize some loss function
+
+- To minimize expected squared error (L2 loss), $E[(\theta - \theta^{'})^2]$, use the posterior mean
+
+$$
+\hat\theta = arg min_\theta E[(\theta - \theta^{'})^2] = \int_\Theta \theta\times p(\theta\vert y)d\theta
+$$
+
+- To minimize expected absolute error (L1 loss), $E[|\theta - \theta^{'}|]$, use posterior median
+
+- Other loss (utility) functions possible, study of which falls under decision theory
+
+- All share property of involving full Bayesian inference.
+
+
+## Homework: OPTIMISE Trial
+
+- OPTIMSE (Optimisation of Cardiovascular Management to Improve Surgical Outcome) is a multi-centre randomised controlled trial which was carried out to try and determine if the optimisation of Cardiovascular Management intervention was of benefit.
+JAMA. 2014;311(21):2181-2190. doi:10.1001/jama.2014.5305
+
+- Patients were randomised to a cardiac output-guided hemodynamic therapy for intravenous fluid and a drug to increase heart muscle contraction (the inotrope, dopexamine) during and 6 hours following surgery (intervention group) or to usual care (control group).
+
+- The primary outcome measure was the relative risk (RR) of a composite of 30-day moderate or major complications and mortality.
+
+
+## Homework: OPTIMISE Trial
+
+- __Results__
+
+- Focusing on the primary outcome measure, there were 158/364 (43.3%) and 134/366 (36.6%) patients with complication/mortality in the control and intervention group respectively. 
+Using the standard statistical approach, the relative risk (95% confidence interval) = 0.84 (0.70-1.01), p=0.07 and absolute risk difference = 6.8% (-0.3% to 13.9%), p=0.07. The authors reasonably concluded that:
+
+- In a randomized trial of high-risk patients undergoing major gastrointestinal surgery, use of a cardiac output-guided hemodynamic therapy algorithm compared with usual care did not reduce a composite outcome of complications and 30-day mortality.
+
+## Homework: OPTIMISE Trial
+
+- Focus on the absolute difference risk groups and repeat the analysis in a Bayesian framework. 
+
+- Assuming a non-informative prior, for example Beta(1,1), for complication/mortality rate in both groups, derive the posterior distribution for the absolute difference risk.
+
+- Using the posterior distribution of the intervention group complication/mortality rate and the posterior distribution of the usual care group, simulate patients' outcome to  determine the proportion of cases in which the intervention would result in no complication/death  while the usual care would result in complication/death: 
+    - what is the probability of patients to get benefit from the intervention compared with usual care?
+
+
+## Getting the slides
+
+* The slides for this course were created with Rmarkdown: [http://rmarkdown.rstudio.com/](http://rmarkdown.rstudio.com/). 
+* They are available from [https://github.com/berkeley3/BDA-IZSTO](https://github.com/berkeley3/BDA-IZSTO).
+* To re-compile the slides:
+
+    + Download the directory containing the lectures from Github
+    + In R open the .Rmd file and set the working directory to the lecture directory
+    + Click the *KnitHTML* button on Rstudio or run the following commands: 
+  
+```{r RmarkdownChunk, eval=FALSE}
+library(rmarkdown) 
+render("main.Rmd")
+```
