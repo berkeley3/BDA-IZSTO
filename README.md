@@ -44,7 +44,7 @@ No specific mathematical expertise is required. Some familiarity with statistica
     
     install.packages('glmer2stan')
     
-- Other R packages that will be used: knitr, xtable, plotrix, ggplot2, LearnBayes, nleqslv, metafor, maptools, sp, spdep, RColorBrewer, classInt
+- Other R packages that will be used: knitr, xtable, plotrix, ggplot2, gridExtra, LearnBayes, nleqslv, metafor, maptools, sp, spdep, RColorBrewer, classInt
  
 ### Contributors
 
