@@ -1,8 +1,6 @@
 # Bayesian Data Analysis for Medical Data
 
-This is the material for the two day course on **Bayesian Data Analysis for Medical Data**, at 
-the Ospedale Maggiore in Trieste (Italy), 15 - 16 June 2016  http://biostatistica.units.it/
-Istituto Zooprofilattico Sperimentale del Piemonte, Liguria e Valle d'Aosta, 13 - 14 June 2017
+This is the material for the two day course on **Bayesian Data Analysis for Medical Data** at the Istituto Zooprofilattico Sperimentale del Piemonte, Liguria e Valle d'Aosta, 13 - 14 June 2017
 
 
 ## Objectives
