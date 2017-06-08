@@ -1,0 +1,9 @@
+base
+ggplot2
+MASS
+Matrix
+lme4
+arm
+gridExtra
+StanHeaders
+rstan

@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bayesian Data Analysis for Medical Data</title>
+
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <meta name="generator" content="pandoc" />
+
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <base target="_blank">
+
+  <script type="text/javascript">
+    var SLIDE_CONFIG = {
+      // Slide settings
+      settings: {
+                title: 'Bayesian Data Analysis for Medical Data',
+                        subtitle: 'Regression',
+                useBuilds: true,
+        usePrettify: true,
+        enableSlideAreas: true,
+        enableTouch: true,
+                        favIcon: 'main_files/logo.jpg',
+              },
+
+      // Author information
+      presenters: [
+            {
+        name:  'Paola Berchialla' ,
+        company: '',
+        gplus: '',
+        twitter: '',
+        www: '',
+        github: ''
+      },
+            ]
+    };
+  </script>
+
+  <link href="main_files/ioslides-13.5.1/fonts/fonts.css" rel="stylesheet" />
+  <link href="main_files/ioslides-13.5.1/theme/css/default.css" rel="stylesheet" />
+  <link href="main_files/ioslides-13.5.1/theme/css/phone.css" rel="stylesheet" />
+  <script src="main_files/ioslides-13.5.1/js/modernizr.custom.45394.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/prettify/prettify.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/prettify/lang-r.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/prettify/lang-yaml.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/hammer.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/slide-controller.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/slide-deck.js"></script>
+
+  <style type="text/css">
+
+    b, strong {
+      font-weight: bold;
+    }
+
+    em {
+      font-style: italic;
+    }
+
+    slides > slide {
+      -webkit-transition: all 0.4s ease-in-out;
+      -moz-transition: all 0.4s ease-in-out;
+      -o-transition: all 0.4s ease-in-out;
+      transition: all 0.4s ease-in-out;
+    }
+
+    .auto-fadein {
+      -webkit-transition: opacity 0.6s ease-in;
+      -webkit-transition-delay: 0.4s;
+      -moz-transition: opacity 0.6s ease-in 0.4s;
+      -o-transition: opacity 0.6s ease-in 0.4s;
+      transition: opacity 0.6s ease-in 0.4s;
+      opacity: 0;
+    }
+
+    slides > slide:not(.nobackground):before {
+      font-size: 12pt;
+      content: "";
+      position: absolute;
+      bottom: 20px;
+      left: 60px;
+      background: url(main_files/logo.jpg) no-repeat 0 50%;
+      -webkit-background-size: 30px 30px;
+      -moz-background-size: 30px 30px;
+      -o-background-size: 30px 30px;
+      background-size: 30px 30px;
+      padding-left: 40px;
+      height: 30px;
+      line-height: 1.9;
+    }
+  </style>
+
+  <link rel="stylesheet" href="assets\css\ioslides.css" type="text/css" />
+
+</head>
+
+<body style="opacity: 0">
+
+<slides class="layout-widescreen">
+
+  <slide class="title-slide segue nobackground">
+        <aside class="gdbar"><img src="main_files/logo.jpg"></aside>
+        <!-- The content of this hgroup is replaced programmatically through the slide_config.json. -->
+    <hgroup class="auto-fadein">
+      <h1 data-config-title><!-- populated from slide_config.json --></h1>
+      <h2 data-config-subtitle><!-- populated from slide_config.json --></h2>
+      <p data-config-presenter><!-- populated from slide_config.json --></p>
+          </hgroup>
+  </slide>
+
+<style>
+  .col2 {
+    columns: 2 200px;         /* number of columns and width in pixels*/
+    -webkit-columns: 2 200px; /* chrome, safari */
+    -moz-columns: 2 200px;    /* firefox */
+  }
+ </style>
+
+<slide class=''><hgroup><h2>Why linear regression</h2></hgroup><article  id="why-linear-regression">
+
+<ul>
+<li>We recognize a set of measurements and we want to make predictions or quantify relationships between <em>outcome</em> variable and <em>predictors</em></li>
+<li>For the <em>outcome variable</em> we define a <strong>likelihood</strong> distribution that defines the plausability of individual observations
+
+<ul>
+<li>in linear regressione, the distribution is always Gaussian</li>
+</ul></li>
+<li>We relate the the mean of likelihood distribution to a linear</li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>A simple motivating example: Plasma dataset</h2></hgroup><article  id="a-simple-motivating-example-plasma-dataset">
+
+<pre class = 'prettyprint lang-r'>load(&#39;data\\plasma.RData&#39;)</pre>
+
+<ul>
+<li><p>Observational studies have suggested that low dietary intake or low plasma concentrations of retinol, beta-carotene, or other carotenoids might be associated with increased risk of developing certain types of cancer.</p></li>
+<li><p>A cross-sectional study has been designed to investigate the relationship between personal characteristics and dietary factors, plasma concentrations of retinol, beta-carotene and other carotenoids.</p></li>
+<li><p>Study subjects (N = 315) were patients who had an elective surgical procedure during a three-year period to biopsy or remove a lesion of the lung, colon, breast, skin, ovary or uterus that was found to be non-cancerous. We display the data for only two of the analytes.</p></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>A simple motivating example: Plasma dataset</h2></hgroup><article  id="a-simple-motivating-example-plasma-dataset-1">
+
+<p><img src="main_files/figure-html/unnamed-chunk-2-1.png" width="720" style="display: block; margin: auto;" /></p>
+
+</article></slide><slide class=''><hgroup><h2>A simple frequentist model</h2></hgroup><article  id="a-simple-frequentist-model" class="smaller">
+
+<pre class = 'prettyprint lang-r'>library(arm)
+mod_f &lt;- lm(log(betaplasma) ~ betadiet, data = plasma, subset=betaplasma&gt;0)
+
+arm::display(mod_f)</pre>
+
+<pre >## lm(formula = log(betaplasma) ~ betadiet, data = plasma, subset = betaplasma &gt; 
+##     0)
+##             coef.est coef.se
+## (Intercept) 4.74     0.07   
+## betadiet    0.00     0.00   
+## ---
+## n = 314, k = 2
+## residual sd = 0.73, R-Squared = 0.04</pre>
+
+<pre class = 'prettyprint lang-r'>confint(mod_f)</pre>
+
+<pre >##                    2.5 %       97.5 %
+## (Intercept) 4.597566e+00 4.8898808606
+## betadiet    4.318321e-05 0.0001539765</pre>
+
+</article></slide><slide class=''><hgroup><h2>A simple Bayesian model</h2></hgroup><article  id="a-simple-bayesian-model">
+
+<p>\[
+Y_i \sim \textrm{Normal}(\beta\times X_i, \sigma) 
+\]</p>
+
+<pre class = 'prettyprint lang-r'>mod_f &lt;- lm(log(betaplasma) ~ betadiet, data = plasma, subset=betaplasma&gt;0)
+simple_bayesian_lm &lt;- sim(mod_f, n.sims = 1000)
+cat(&#39;Credible intervals for the model parameters:\n&#39;)</pre>
+
+<pre >## Credible intervals for the model parameters:</pre>
+
+<pre class = 'prettyprint lang-r'>apply(coef(simple_bayesian_lm), 2, quantile, prob = c(0.025, 0.975))</pre>
+
+<pre >##       (Intercept)     betadiet
+## 2.5%     4.603692 4.448904e-05
+## 97.5%    4.892252 1.574685e-04</pre>
+
+</article></slide><slide class=''><hgroup><h2>A simple Bayesian model</h2></hgroup><article  id="a-simple-bayesian-model-1">
+
+<pre class = 'prettyprint lang-r'>cat(&#39;\nCredible interval for the estimated residual standard deviation:\n&#39;)</pre>
+
+<pre >## 
+## Credible interval for the estimated residual standard deviation:</pre>
+
+<pre class = 'prettyprint lang-r'>quantile(simple_bayesian_lm@sigma, prob = c(0.025, 0.975))</pre>
+
+<pre >##      2.5%     97.5% 
+## 0.6826706 0.7943013</pre>
+
+</article></slide><slide class=''><hgroup><h2>A simple Bayesian model</h2></hgroup><article  id="a-simple-bayesian-model-2">
+
+<ul>
+<li>Bayesian methods get a posterior probability for specific hypotheses:
+
+<ul>
+<li>the slope parameter is greater than 0?</li>
+<li>the slope parameter is greater than 0.001?</li>
+</ul></li>
+</ul>
+
+<pre >## Probability the slope parameter is &gt; 0:  0.999</pre>
+
+<pre >## Probability the slope parameter is &gt; 0.0001:  0.493</pre>
+
+</article></slide><slide class=''><hgroup><h2>Plot the effect of X on Y</h2></hgroup><article  id="plot-the-effect-of-x-on-y">
+
+<p><img src="main_files/figure-html/unnamed-chunk-7-1.png" width="720" style="display: block; margin: auto;" /></p>
+
+</article></slide><slide class=''><hgroup><h2>Predictive distribution</h2></hgroup><article  id="predictive-distribution">
+
+<ul>
+<li>We can get a sample of random draws from the posterior predictive distribution \[
+y^*\vert\beta,\sigma^2,X \sim \textrm{Normal}(X\beta, \sigma^2)
+\] using the simulated joint posterior distributions of the model parameters
+
+<ul>
+<li>it allows for taking the uncertainty of the parameter estimates</li>
+</ul></li>
+<li>A new value \(y^*\) is drawn from the posterior distribution \(\textrm{Normal}(X\beta, \sigma^2)\) for each simulated set of model parameters</li>
+<li>2.5% and 97.5% quantiles of the predictive distribution can be visualize for each x value</li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Predictive distribution</h2></hgroup><article  id="predictive-distribution-1">
+
+<p><img src="main_files/figure-html/unnamed-chunk-8-1.png" width="720" style="display: block; margin: auto;" /></p>
+
+</article></slide><slide class=''><hgroup><h2>Predictive distribution</h2></hgroup><article  id="predictive-distribution-2">
+
+<ul>
+<li>Future observations are expected to be within the interval defined by the dashed lines in with a probability of 95%</li>
+<li>Increasing sample size will not give a narrower, but a more precise predictive distribution</li>
+<li>once we have a simulated sample of the posterior predictive distribution, we can give an estimate for the proportion of observations greater than any relevant thresholds</li>
+</ul>
+
+<pre >## Probability a future observation with x = 5000 is higher than 5:</pre>
+
+<pre class = 'prettyprint lang-r'>sum(newy[newdat$x==5000,]&gt;5)/1000</pre>
+
+<pre >## [1] 0.607</pre>
+
+</article></slide><slide class=''><hgroup><h2>What does sim do?</h2></hgroup><article  id="what-does-sim-do">
+
+<ul>
+<li>In the Bayesian framework we are interested in the joint posterior distribution of \(\mathbf{\beta} = (\beta_0, \beta_1)\) and the residual variance \(\sigma^2\)</li>
+</ul>
+
+<p>\[
+P(\mathbf{\beta}, \sigma^2 \vert \mathbf{y, X}) = P(\mathbf{\beta}\vert \sigma^2 \mathbf{y, X}) \times P( \sigma^2 \vert \mathbf{y, X})
+\] - The conditional posterior distribution \(P(\mathbf{\beta}\vert, \sigma^2 \mathbf{y, X})\) of \(\mathbf\beta\) is the posterior distribution of \(\mathbf\beta\) given a specific value of \(\sigma^2\)</p>
+
+<ul>
+<li><strong>sim</strong> simulates 1000 values from the joint posterior distribution of the three model parameters:
+
+<ul>
+<li>draws a random value from the marginal posterior distribution \(\sigma^2\)</li>
+<li>draws random values from the conditional posterior distribution for \(\mathbf\beta\)</li>
+</ul></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>What does sim do?</h2></hgroup><article  id="what-does-sim-do-1">
+
+<p>\[
+P(\mathbf{\beta}, \sigma^2 \vert \mathbf{y, X}) = P(\mathbf{\beta}\vert \sigma^2 \mathbf{y, X}) \times P( \sigma^2 \vert \mathbf{y, X})
+\]</p>
+
+<ul>
+<li>\(P(\mathbf{\beta}\vert \sigma^2 \mathbf{y, X})\) can be analytically derived
+
+<ul>
+<li>with <strong>flat prior distributions</strong> it is uni(or multi)&#8211;variate <em>Normal</em> distribution \(\textrm{Normal}(\mathbf\beta), V_\beta\sigma^2)\)</li>
+<li>For models with the normal error distribution, estimates for \(\mathbf\beta\) equal ML estimates</li>
+</ul></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>What does sim do?</h2></hgroup><article  id="what-does-sim-do-2">
+
+<ul>
+<li>The marginal posterior distribution of \(\sigma^2\) is independent of specific values of \(\mathbf\beta\)
+
+<ul>
+<li>with <strong>flat prior distributions</strong> it is an <em>inverse</em> \(\chi^2\) distribution \(P( \sigma^2 \vert \mathbf{y, X}) = \textrm{Inv-}\chi^2(n-k,s )\)</li>
+</ul></li>
+<li>The marginal posterior distribution of \(\mathbf\beta\) can be obtained by integrating the conditional posterior distribution \(P(\mathbf{\beta}\vert \sigma^2 \mathbf{y, X}) = \textrm{Normal}(\mathbf\beta), V_\beta\sigma^2)\) over the distribution of \(\sigma^2\)
+
+<ul>
+<li>it results in a uni-multivariate \(t\)-distribution.</li>
+</ul></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>What does sim do?</h2></hgroup><article  id="what-does-sim-do-3">
+
+<p><em>sim</em> uses <strong>improper priors</strong>: \[
+\begin{align}
+p(\beta) &amp; \propto 1\\
+p(\sigma^2) &amp;\propto 1/\sigma^2 \\
+\end{align}
+\] - These priors are called <strong>improper</strong> because they are not proper probability distribution since their density function do not integrate to 1</p>
+
+<ul>
+<li>\(p(\beta)\) is a uniform distribution (a horizontal line at 1)</li>
+<li>\(p(\sigma^2) \propto 1/\sigma^2\) is equivalent to uniform distribution on \(\log\sigma\)</li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Describing the model</h2></hgroup><article  id="describing-the-model">
+
+<center>
+
+<img src="images/HierarchicalDiagram.jpg" />
+
+</center>
+
+</article></slide><slide class=''><hgroup><h2>A language for describing the model</h2></hgroup><article  id="a-language-for-describing-the-model">
+
+<p>\[
+\begin{align}
+\textrm{outcome}_i &amp;\sim \textrm{Normal}(\mu_i, \sigma)\\
+\mu_i &amp; = \beta\times\textrm{predictor}_i\\
+\beta &amp;\sim \textrm{Normal}(0, 10)\\
+\sigma &amp; \sim \textrm{HalfCauchy}(0,1)
+\end{align}
+\] - \(\beta\) and \(\sigma\) have now proper, <strong>weakly informative</strong> priors</p>
+
+</article></slide><slide class=''><hgroup><h2>Stan: specify the data</h2></hgroup><article  id="stan-specify-the-data">
+
+<p>Do you remember? - <em>Important annoying fact #1: STAN needs data as a list not a dataframe</em> - specify data as well as meta data (i.e. the number of groups)</p>
+
+<pre class = 'prettyprint lang-r'>plasma_g0 &lt;- subset(plasma, betaplasma&gt;0)
+plasma_dat &lt;- list(N = 314 , #specify number of observations as a scalar
+                    log_betaplasma = log(plasma_g0$betaplasma), # data vector
+                    betadiet = plasma_g0$betadiet # data vector (predictor) 
+                    )</pre>
+
+</article></slide><slide class=''><hgroup><h2>Stan: write your code</h2></hgroup><article  id="stan-write-your-code">
+
+<pre class = 'prettyprint lang-r'>model_string &lt;- &#39;data {
+  // First we declare all of our variables in the data block
+  int&lt;lower=0&gt; N;// Number of observations
+  vector[N] log_betaplasma; //Specify the outcome as a vector
+  vector[N] betadiet;  //Specify the covariate as a vector
+}
+parameters {
+  vector[2] beta; // Betas are a vector of length 2 (intercept and slope)
+  real&lt;lower=0&gt; sigma; //error parameter
+}
+model {
+  //Priors
+  beta[1] ~ normal(0, 10); //intercept
+  beta[2] ~ normal(0, 5); //slope
+  sigma ~ cauchy(0, 5); //error
+  log_betaplasma ~ normal(beta[1] + beta[2] * betadiet, sigma);
+}&#39;</pre>
+
+</article></slide><slide class=''><hgroup><h2>Compile the model</h2></hgroup><article  id="compile-the-model">
+
+<pre class = 'prettyprint lang-r'>library(rstan)
+stanDso &lt;- stan_model( model_code = model_string )</pre>
+
+</article></slide><slide class=''><hgroup><h2>Sample from the posterior distribution</h2></hgroup><article  id="sample-from-the-posterior-distribution" class="smaller">
+
+<pre class = 'prettyprint lang-r'>stanFit &lt;- sampling(object = stanDso, 
+                    data = plasma_dat, 
+                    chains = 3, iter = 9000, warmup = 1000, thin = 1)</pre>
+
+<pre >## 
+## SAMPLING FOR MODEL &#39;6d1e9472ad354e035c2076250494e255&#39; NOW (CHAIN 1).
+## 
+## Gradient evaluation took 0 seconds
+## 1000 transitions using 10 leapfrog steps per transition would take 0 seconds.
+## Adjust your expectations accordingly!
+## 
+## 
+## Iteration:    1 / 9000 [  0%]  (Warmup)
+## Iteration:  900 / 9000 [ 10%]  (Warmup)
+## Iteration: 1001 / 9000 [ 11%]  (Sampling)
+## Iteration: 1900 / 9000 [ 21%]  (Sampling)
+## Iteration: 2800 / 9000 [ 31%]  (Sampling)
+## Iteration: 3700 / 9000 [ 41%]  (Sampling)
+## Iteration: 4600 / 9000 [ 51%]  (Sampling)
+## Iteration: 5500 / 9000 [ 61%]  (Sampling)
+## Iteration: 6400 / 9000 [ 71%]  (Sampling)
+## Iteration: 7300 / 9000 [ 81%]  (Sampling)
+## Iteration: 8200 / 9000 [ 91%]  (Sampling)
+## Iteration: 9000 / 9000 [100%]  (Sampling)
+## 
+##  Elapsed Time: 4.624 seconds (Warm-up)
+##                41.329 seconds (Sampling)
+##                45.953 seconds (Total)
+## 
+## 
+## SAMPLING FOR MODEL &#39;6d1e9472ad354e035c2076250494e255&#39; NOW (CHAIN 2).
+## 
+## Gradient evaluation took 0 seconds
+## 1000 transitions using 10 leapfrog steps per transition would take 0 seconds.
+## Adjust your expectations accordingly!
+## 
+## 
+## Iteration:    1 / 9000 [  0%]  (Warmup)
+## Iteration:  900 / 9000 [ 10%]  (Warmup)
+## Iteration: 1001 / 9000 [ 11%]  (Sampling)
+## Iteration: 1900 / 9000 [ 21%]  (Sampling)
+## Iteration: 2800 / 9000 [ 31%]  (Sampling)
+## Iteration: 3700 / 9000 [ 41%]  (Sampling)
+## Iteration: 4600 / 9000 [ 51%]  (Sampling)
+## Iteration: 5500 / 9000 [ 61%]  (Sampling)
+## Iteration: 6400 / 9000 [ 71%]  (Sampling)
+## Iteration: 7300 / 9000 [ 81%]  (Sampling)
+## Iteration: 8200 / 9000 [ 91%]  (Sampling)
+## Iteration: 9000 / 9000 [100%]  (Sampling)
+## 
+##  Elapsed Time: 6.338 seconds (Warm-up)
+##                45.131 seconds (Sampling)
+##                51.469 seconds (Total)
+## 
+## 
+## SAMPLING FOR MODEL &#39;6d1e9472ad354e035c2076250494e255&#39; NOW (CHAIN 3).
+## 
+## Gradient evaluation took 0 seconds
+## 1000 transitions using 10 leapfrog steps per transition would take 0 seconds.
+## Adjust your expectations accordingly!
+## 
+## 
+## Iteration:    1 / 9000 [  0%]  (Warmup)
+## Iteration:  900 / 9000 [ 10%]  (Warmup)
+## Iteration: 1001 / 9000 [ 11%]  (Sampling)
+## Iteration: 1900 / 9000 [ 21%]  (Sampling)
+## Iteration: 2800 / 9000 [ 31%]  (Sampling)
+## Iteration: 3700 / 9000 [ 41%]  (Sampling)
+## Iteration: 4600 / 9000 [ 51%]  (Sampling)
+## Iteration: 5500 / 9000 [ 61%]  (Sampling)
+## Iteration: 6400 / 9000 [ 71%]  (Sampling)
+## Iteration: 7300 / 9000 [ 81%]  (Sampling)
+## Iteration: 8200 / 9000 [ 91%]  (Sampling)
+## Iteration: 9000 / 9000 [100%]  (Sampling)
+## 
+##  Elapsed Time: 5.657 seconds (Warm-up)
+##                46.708 seconds (Sampling)
+##                52.365 seconds (Total)</pre>
+
+<pre >## Warning: There were 1141 transitions after warmup that exceeded the maximum treedepth. Increase max_treedepth above 10. See
+## http://mc-stan.org/misc/warnings.html#maximum-treedepth-exceeded</pre>
+
+<pre >## Warning: Examine the pairs() plot to diagnose sampling problems</pre>
+
+</article></slide><slide class=''><hgroup><h2>Print the fit</h2></hgroup><article  id="print-the-fit" class="smaller">
+
+<pre class = 'prettyprint lang-r'>print(stanFit)</pre>
+
+<pre >## Inference for Stan model: 6d1e9472ad354e035c2076250494e255.
+## 3 chains, each with iter=9000; warmup=1000; thin=1; 
+## post-warmup draws per chain=8000, total post-warmup draws=24000.
+## 
+##           mean se_mean   sd   2.5%    25%    50%    75%  97.5% n_eff Rhat
+## beta[1]   4.74    0.00 0.07   4.60   4.69   4.74   4.79   4.89  8301    1
+## beta[2]   0.00    0.00 0.00   0.00   0.00   0.00   0.00   0.00 10646    1
+## sigma     0.74    0.00 0.03   0.68   0.72   0.74   0.76   0.80  7801    1
+## lp__    -61.09    0.02 1.23 -64.29 -61.63 -60.77 -60.20 -59.70  6106    1
+## 
+## Samples were drawn using NUTS(diag_e) at Thu Jun 08 13:53:23 2017.
+## For each parameter, n_eff is a crude measure of effective sample size,
+## and Rhat is the potential scale reduction factor on split chains (at 
+## convergence, Rhat=1).</pre>
+
+<ul>
+<li><strong>n_eff</strong>: effective sample size, a measure of autocorrelation among samples</li>
+<li><strong>Rhat</strong>: split-chain convergence diagnostic
+
+<ul>
+<li><blockquote>
+<p>1.1 suggests poor convergance</p>
+</blockquote></li>
+</ul></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Posterior distributions</h2></hgroup><article  id="posterior-distributions">
+
+<pre class = 'prettyprint lang-r'>samples &lt;- extract(stanFit)
+beta_post &lt;- samples[[&#39;beta&#39;]]</pre>
+
+<p><img src="main_files/figure-html/unnamed-chunk-15-1.png" width="384" style="display: block; margin: auto;" /></p>
+
+</article></slide><slide class=''><hgroup><h2>Plot credible intervals</h2></hgroup><article  id="plot-credible-intervals" class="smaller">
+
+<pre class = 'prettyprint lang-r'>plot(stanFit, pars=c(&#39;beta&#39;, &#39;sigma&#39;))</pre>
+
+</article></slide><slide class=''><hgroup><h2>Plot credible intervals</h2></hgroup><article  id="plot-credible-intervals-1" class="smaller">
+
+<pre >## ci_level: 0.8 (80% intervals)</pre>
+
+<pre >## outer_level: 0.95 (95% intervals)</pre>
+
+<p><img src="main_files/figure-html/unnamed-chunk-17-1.png" width="720" style="display: block; margin: auto;" /></p>
+
+</article></slide><slide class=''><hgroup><h2>Check the fit with MLE estimates</h2></hgroup><article  id="check-the-fit-with-mle-estimates">
+
+<p><img src="main_files/figure-html/unnamed-chunk-18-1.png" width="720" style="display: block; margin: auto;" /></p>
+
+</article></slide><slide class=''><hgroup><h2>View trace plots of each parameter (fuzzier is better)</h2></hgroup><article  id="view-trace-plots-of-each-parameter-fuzzier-is-better">
+
+<pre class = 'prettyprint lang-r'>traceplot(stanFit, ncol = 1)</pre>
+
+<p><img src="main_files/figure-html/unnamed-chunk-19-1.png" width="720" /></p>
+
+</article></slide><slide class=''><hgroup><h2>Getting the slides</h2></hgroup><article  id="getting-the-slides">
+
+<ul>
+<li>The slides for this course were created with Rmarkdown: <a href='http://rmarkdown.rstudio.com/' title=''>http://rmarkdown.rstudio.com/</a>.</li>
+<li>They are available from <a href='https://github.com/berkeley3/BDA-IZSTO' title=''>https://github.com/berkeley3/BDA-IZSTO</a>.</li>
+<li><p>To re-compile the slides:</p>
+
+<ul>
+<li>Download the directory containing the lectures from Github</li>
+<li>In R open the .Rmd file and set the working directory to the lecture directory</li>
+<li>Click the <em>Knit</em> button on Rstudio or run the following commands:</li>
+</ul></li>
+</ul>
+
+<pre class = 'prettyprint lang-r'>library(rmarkdown) 
+render(&quot;main.Rmd&quot;)</pre></article></slide>
+
+
+  <slide class="backdrop"></slide>
+
+</slides>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "main_files/mathjax-local/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+<!-- map slide visiblity events into shiny -->
+<script>
+  (function() {
+    if (window.jQuery) {
+       window.jQuery(document).on('slideleave', function(e) {
+         window.jQuery(e.target).trigger('hidden');
+      });
+       window.jQuery(document).on('slideenter', function(e) {
+         window.jQuery(e.target).trigger('shown');
+      });
+    }
+  })();
+</script>
+
+</body>
+</html>
