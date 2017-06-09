@@ -380,7 +380,7 @@ data_list &lt;- list(N = nrow(cortbowl),
                     chains = 1, iter = 9000, 
                     warmup = 1000, thin = 1)</pre>
 
-</article></slide><slide class=''><hgroup><h2>Print the output</h2></hgroup><article  id="print-the-output">
+</article></slide><slide class=''><hgroup><h2>Print the output</h2></hgroup><article  id="print-the-output" class="smaller">
 
 <pre class = 'prettyprint lang-r'>stanmer2(stanFit)</pre>
 
@@ -406,6 +406,11 @@ data_list &lt;- list(N = nrow(cortbowl),
 ## ImplantP_X_days20          1.6398 0.1928  1.2627  2.0174
 ## ImplantP_X_daysbefore      1.7338 0.1800  1.3711  2.0939
 ## sigma                      0.6207 0.0329  0.5581  0.6868</pre>
+
+</article></slide><slide class=''><hgroup><h2>Launch Shinystan</h2></hgroup><article  id="launch-shinystan">
+
+<pre class = 'prettyprint lang-r'>library(shinystan)
+shinystan(stanFit)</pre>
 
 </article></slide><slide class=''><hgroup><h2>Getting the slides</h2></hgroup><article  id="getting-the-slides">
 

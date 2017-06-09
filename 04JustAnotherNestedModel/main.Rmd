@@ -245,7 +245,7 @@ stanmer2(stanFit)
 
 ## Launch Shinystan
 
-```{r}
+```{r, eval=FALSE}
 library(shinystan)
 shinystan(stanFit)
 ```
