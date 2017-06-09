@@ -15,7 +15,7 @@ The course is intended for students, researchers from all disciplines and clinic
 ## Program
 - Introduction to Bayesian Inference
 - Hierarchical Modeling
-    - with examples in BUGS
+    - with examples in STAN
 - Bayesian meta-analysis
 - Introduction to MCMC
 - Predictive Distribution Model Checking
