@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bayesian Data Analysis for Medical Data</title>
+
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <meta name="generator" content="pandoc" />
+
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <base target="_blank">
+
+  <script type="text/javascript">
+    var SLIDE_CONFIG = {
+      // Slide settings
+      settings: {
+                title: 'Bayesian Data Analysis for Medical Data',
+                        subtitle: 'Hierarchical Modeling',
+                useBuilds: true,
+        usePrettify: true,
+        enableSlideAreas: true,
+        enableTouch: true,
+                        favIcon: 'main_files/logo.jpg',
+              },
+
+      // Author information
+      presenters: [
+            {
+        name:  'Paola Berchialla' ,
+        company: '',
+        gplus: '',
+        twitter: '',
+        www: '',
+        github: ''
+      },
+            ]
+    };
+  </script>
+
+  <link href="main_files/ioslides-13.5.1/fonts/fonts.css" rel="stylesheet" />
+  <link href="main_files/ioslides-13.5.1/theme/css/default.css" rel="stylesheet" />
+  <link href="main_files/ioslides-13.5.1/theme/css/phone.css" rel="stylesheet" />
+  <script src="main_files/ioslides-13.5.1/js/modernizr.custom.45394.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/prettify/prettify.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/prettify/lang-r.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/prettify/lang-yaml.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/hammer.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/slide-controller.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/slide-deck.js"></script>
+
+  <style type="text/css">
+
+    b, strong {
+      font-weight: bold;
+    }
+
+    em {
+      font-style: italic;
+    }
+
+    slides > slide {
+      -webkit-transition: all 0.4s ease-in-out;
+      -moz-transition: all 0.4s ease-in-out;
+      -o-transition: all 0.4s ease-in-out;
+      transition: all 0.4s ease-in-out;
+    }
+
+    .auto-fadein {
+      -webkit-transition: opacity 0.6s ease-in;
+      -webkit-transition-delay: 0.4s;
+      -moz-transition: opacity 0.6s ease-in 0.4s;
+      -o-transition: opacity 0.6s ease-in 0.4s;
+      transition: opacity 0.6s ease-in 0.4s;
+      opacity: 0;
+    }
+
+    slides > slide:not(.nobackground):before {
+      font-size: 12pt;
+      content: "";
+      position: absolute;
+      bottom: 20px;
+      left: 60px;
+      background: url(main_files/logo.jpg) no-repeat 0 50%;
+      -webkit-background-size: 30px 30px;
+      -moz-background-size: 30px 30px;
+      -o-background-size: 30px 30px;
+      background-size: 30px 30px;
+      padding-left: 40px;
+      height: 30px;
+      line-height: 1.9;
+    }
+  </style>
+
+  <link rel="stylesheet" href="assets\css\ioslides.css" type="text/css" />
+
+</head>
+
+<body style="opacity: 0">
+
+<slides class="layout-widescreen">
+
+  <slide class="title-slide segue nobackground">
+        <aside class="gdbar"><img src="main_files/logo.jpg"></aside>
+        <!-- The content of this hgroup is replaced programmatically through the slide_config.json. -->
+    <hgroup class="auto-fadein">
+      <h1 data-config-title><!-- populated from slide_config.json --></h1>
+      <h2 data-config-subtitle><!-- populated from slide_config.json --></h2>
+      <p data-config-presenter><!-- populated from slide_config.json --></p>
+          </hgroup>
+  </slide>
+
+<style>
+  .col2 {
+    columns: 2 200px;         /* number of columns and width in pixels*/
+    -webkit-columns: 2 200px; /* chrome, safari */
+    -moz-columns: 2 200px;    /* firefox */
+  }
+ </style>
+
+<slide class=''><hgroup><h2>Multilevel model</h2></hgroup><article  id="multilevel-model">
+
+<ul>
+<li>Multilevel model are used to analyze non-independent, grouped data
+
+<ul>
+<li>hierarchical models</li>
+<li>linear mixed effect models</li>
+<li>random models</li>
+</ul></li>
+<li>see <strong>Gelman &amp; Hill, Data Analysis Using Regression and Multilevel/Hierarchical Modelsing</strong> (2006) for a discussion on the terminology</li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Hierarchical model</h2></hgroup><article  id="hierarchical-model">
+
+<ul>
+<li>Suppose \(K\) groups or units under investigation:
+
+<ul>
+<li>a sample of responses \(Y_{ik}\), \(i=1,\ldots n_k\) and \(k = 1,\ldots, K\)</li>
+</ul></li>
+</ul>
+
+<p>Consider two alternative models:</p>
+
+<ol>
+<li>A model that estimates a common mean effect \(\mu\) (pooled effect)
+
+<ul>
+<li>when a normal distribution is assume, the model is expressed as \[
+Y_{ik} \sim N(\mu,\sigma^2) \text{ for } i=1,\ldots n_k \textrm{ and } k = 1,\ldots, K
+\]</li>
+</ul></li>
+<li>A model that estimates different independent mean effects \(\mu_k\) for each group (fixed effects)
+
+<ul>
+<li>when a normal distribution is assume, the model is expressed as \[
+Y_{ik} \sim N(\mu_k,\sigma^2) \text{ for } i=1,\ldots n_k \textrm{ and } k = 1,\ldots, K
+\]</li>
+</ul></li>
+</ol>
+
+</article></slide><slide class=''><hgroup><h2>Hierarchical model</h2></hgroup><article  id="hierarchical-model-1">
+
+<p>\[
+  Y_{ik} \sim N(\mu_{ik},\sigma^2) \text{ for } i=1,\ldots n_k \text{ and } k = 1,\ldots, K
+\]</p>
+
+<ul>
+<li>It estimates the expected performance of each group/unit</li>
+<li>Each mean effect \(\mu_k\) is estimated independently from the other groups
+
+<ul>
+<li>in a group with small sample size, the posterior uncertainty will be large</li>
+</ul></li>
+<li>It is logical to assume all \(\mu_k\)s are observables from a popolation distribution with mean \(\mu\), an overall population average effect \[
+\mu_k \sim N(\mu,w^2)
+\]</li>
+<li>All mean effects allow for <em>borrowing strengh</em> between groups/units
+
+<ul>
+<li>the posterior mean of each \(\mu_k\) is a weighted mean of the corresponding sample mean of the \(k\)-group and the overall mean effect \(\mu\)</li>
+</ul></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Hierarchical Regression Model</h2></hgroup><article  id="hierarchical-regression-model">
+
+<p>\[
+  Y_{ik} \sim N(\mu_{ik},\sigma^2) 
+\]</p>
+
+<p>\[
+\mu_{ik} = \beta_0 + \beta_1x_{ik} + u_k
+\] \[
+u_k \sim \textrm{N}(0, \sigma^2_u)
+\]</p>
+
+</article></slide><slide class=''><hgroup><h2>The effect of partial pooling</h2></hgroup><article  id="the-effect-of-partial-pooling">
+
+<center>
+
+<img src="images/Pooling.png" width="800" />
+
+</center>
+
+</article></slide><slide class=''><hgroup><h2>Shrinkage in Hierarchical models</h2></hgroup><article  id="shrinkage-in-hierarchical-models">
+
+<ul>
+<li>Information is exchanged between groups
+
+<ul>
+<li>estimated means for groups with low sample sizes, large variances, and means far away from the population mean are shrunk toward the population mean</li>
+<li>group means that are estimated with a lot of imprecision (low sample size and high variance) are shrunk toward the population mean</li>
+</ul></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>A simple motivating example</h2></hgroup><article  id="a-simple-motivating-example">
+
+<ul>
+<li>Stress Hormone Data Of Nestling Barn Owls Which Were Either Treated With A Corticosterone-Implant Or With A Placebo-Implant As Control
+
+<ul>
+<li>Almasi, B., Roulin, A., Jenni-Eiermann, S., Breuner, C.W., Jenni, L., 2009. Regulation of free corticosterone and CBG capacity under different environmental conditions in altricial nestlings. Gen. Comp. Endocr. 164, 117-124</li>
+</ul></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>A simple motivating example</h2></hgroup><article  id="a-simple-motivating-example-1">
+
+<table class = 'rmdtable'>
+<tr class="header">
+<th align="left">Brood</th>
+<th align="left">Ring</th>
+<th align="left">Implant</th>
+<th align="right">Age</th>
+<th align="left">days</th>
+<th align="right">totCort</th>
+</tr>
+<tr class="odd">
+<td align="left">301</td>
+<td align="left">898331</td>
+<td align="left">P</td>
+<td align="right">49</td>
+<td align="left">20</td>
+<td align="right">5.761</td>
+</tr>
+<tr class="even">
+<td align="left">301</td>
+<td align="left">898332</td>
+<td align="left">P</td>
+<td align="right">29</td>
+<td align="left">2</td>
+<td align="right">8.418</td>
+</tr>
+<tr class="odd">
+<td align="left">301</td>
+<td align="left">898332</td>
+<td align="left">P</td>
+<td align="right">47</td>
+<td align="left">20</td>
+<td align="right">8.047</td>
+</tr>
+<tr class="even">
+<td align="left">301</td>
+<td align="left">898333</td>
+<td align="left">C</td>
+<td align="right">25</td>
+<td align="left">2</td>
+<td align="right">25.744</td>
+</tr>
+<tr class="odd">
+<td align="left">302</td>
+<td align="left">898185</td>
+<td align="left">P</td>
+<td align="right">57</td>
+<td align="left">20</td>
+<td align="right">8.041</td>
+</tr>
+<tr class="even">
+<td align="left">302</td>
+<td align="left">898188</td>
+<td align="left">C</td>
+<td align="right">28</td>
+<td align="left">before</td>
+<td align="right">6.338</td>
+</tr>
+</table>
+
+</article></slide><slide class=''><hgroup><h2>The model formulation</h2></hgroup><article  id="the-model-formulation">
+
+<p>\[
+\begin{align}
+y_{ik} &amp;\sim \textrm N(\mu_{ik},\sigma^2)\\
+\mu_{ik} &amp;= \beta_0 + \beta_1x_{ik} + u_k\\
+\beta_0&amp;\sim \textrm N(0,100)\\
+\beta_1&amp;\sim \textrm N(0,100)\\
+\sigma^2 &amp;\sim \textrm{Uniform}(0,100)\\
+u_k &amp; \sim  \textrm N(0,\sigma_u^2)\\
+\sigma_u^2 &amp;\sim \textrm{Uniform}(0,100)\\
+\end{align}
+\]</p>
+
+</article></slide><slide class=''><hgroup><h2>The classical approach</h2></hgroup><article  id="the-classical-approach">
+
+<pre class = 'prettyprint lang-r'>library(lme4)
+
+mod_lmer &lt;- lmer(log(totCort)  ~ Implant + days + Implant:days + (1|Ring),
+data = cortbowl, REML = TRUE)</pre>
+
+<ul>
+<li>REML instead of ML because ML underestimates the variance parameters
+
+<ul>
+<li>ML assumes the fixed parameters are known without uncertainty</li>
+</ul></li>
+<li>ML estimates are unbiased for the fixed effects but biased for the random effects</li>
+<li>REML estimates are biased for the fixed effects but unbiased for the random effects</li>
+<li>When sample size is large compared to the number of the model parameters, differences between ML and REML are negligible</li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>The classical approach</h2></hgroup><article  id="the-classical-approach-1">
+
+<pre >## lmer(formula = log(totCort) ~ Implant + days + Implant:days + 
+##     (1 | Ring), data = cortbowl, REML = TRUE)
+##                     coef.est coef.se
+## (Intercept)          3.57     0.10  
+## ImplantP            -1.81     0.15  
+## days20              -1.39     0.14  
+## daysbefore          -1.65     0.12  
+## ImplantP:days20      1.62     0.19  
+## ImplantP:daysbefore  1.72     0.18  
+## 
+## Error terms:
+##  Groups   Name        Std.Dev.
+##  Ring     (Intercept) 0.34    
+##  Residual             0.61    
+## ---
+## number of obs: 287, groups: Ring, 151
+## AIC = 627.9, DIC = 578.5
+## deviance = 595.2</pre>
+
+</article></slide><slide class=''><hgroup><h2>The simplest Bayesian model</h2></hgroup><article  id="the-simplest-bayesian-model">
+
+<pre class = 'prettyprint lang-r'>library(arm)
+nsim &lt;- 3000
+mod_sim &lt;- sim(mod_lmer, n.sim = nsim)
+
+resout &lt;- round(apply(mod_sim@fixef, 2,quantile, prob=c(0.025,0.5,0.975)),3)
+kable(resout)</pre>
+
+<table class = 'rmdtable'>
+<tr class="header">
+<th align="left"></th>
+<th align="right">(Intercept)</th>
+<th align="right">ImplantP</th>
+<th align="right">days20</th>
+<th align="right">daysbefore</th>
+<th align="right">ImplantP:days20</th>
+<th align="right">ImplantP:daysbefore</th>
+</tr>
+<tr class="odd">
+<td align="left">2.5%</td>
+<td align="right">3.371</td>
+<td align="right">-2.089</td>
+<td align="right">-1.654</td>
+<td align="right">-1.896</td>
+<td align="right">1.247</td>
+<td align="right">1.357</td>
+</tr>
+<tr class="even">
+<td align="left">50%</td>
+<td align="right">3.567</td>
+<td align="right">-1.807</td>
+<td align="right">-1.391</td>
+<td align="right">-1.649</td>
+<td align="right">1.625</td>
+<td align="right">1.723</td>
+</tr>
+<tr class="odd">
+<td align="left">97.5%</td>
+<td align="right">3.763</td>
+<td align="right">-1.519</td>
+<td align="right">-1.123</td>
+<td align="right">-1.413</td>
+<td align="right">2.016</td>
+<td align="right">2.077</td>
+</tr>
+</table>
+
+</article></slide><slide class=''><hgroup><h2>The simplest Bayesian model</h2></hgroup><article  id="the-simplest-bayesian-model-1">
+
+<pre class = 'prettyprint lang-r'>newdata &lt;- expand.grid(
+  implant = factor(c(&#39;C&#39;, &#39;P&#39;), levels(cortbowl$Implant)),
+  days = factor(c(&#39;2&#39;,&#39;20&#39;,&#39;before&#39;),levels(cortbowl$days))
+  )
+
+Xmat &lt;-  model.matrix(~ implant + days + implant:days, 
+                      data = newdata)
+
+fitmat &lt;-  matrix(ncol = nsim, nrow = nrow(newdata))
+
+for(i in 1:nsim) 
+  fitmat[,i] &lt;- Xmat %*% mod_sim@fixef[i,] # fitted values
+newdata$lower &lt;- apply(fitmat, 1, quantile, prob=0.025)
+newdata$upper &lt;- apply(fitmat, 1, quantile, prob=0.975)
+newdata$fit &lt;- Xmat %*% fixef(mod_lmer)</pre>
+
+</article></slide><slide class=''><hgroup><h2>Predictive distribution</h2></hgroup><article  id="predictive-distribution">
+
+<center>
+
+<img src="images/fig1.png" width="600" />
+
+</center>
+
+</article></slide><slide class=''><hgroup><h2>glmer2stan</h2></hgroup><article  id="glmer2stan">
+
+<pre class = 'prettyprint lang-r'>library(glmer2stan)</pre>
+
+<p><em>glmer2stan</em>:</p>
+
+<ul>
+<li>allows for writing hierarchical (mixed effects) formulas using <strong>lme4</strong> syntax</li>
+<li>converts formula and data to STAN friendly formats</li>
+<li>returns stanmer object</li>
+<li>computes WAIC (a bayesian model comparison statistics)</li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Some annoying fact of Stan</h2></hgroup><article  id="some-annoying-fact-of-stan">
+
+<ul>
+<li><p><em>Important annoying fact #1: STAN needs data as a list not a dataframe</em></p></li>
+<li><em>Important annoying fact #2: STAN doesn&#39;t deal with non-numeric variables</em>
+
+<ul>
+<li>factors must be converted into contrast codes if you use <strong>lmer2stan</strong></li>
+<li>otherwise the function <strong>glmer2stan</strong> in the R folder does that for you</li>
+</ul></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2></h2></hgroup><article  id="section">
+
+<pre class = 'prettyprint lang-r'>cortbowl$totCortlog &lt;- log(cortbowl$totCort)
+cortbowl$Ring &lt;- as.integer(as.factor(cortbowl$Ring)) 
+source(&#39;R\\myglmer2stan.R&#39;)
+
+
+my_stan_weak &lt;- myglmer2stan(totCortlog ~ Implant + days + Implant:days +  (1|Ring),
+                    data = cortbowl, varpriors = &#39;weak&#39;,
+                    calcWAIC = T,
+                    warmup = 500, 
+                    iter = 2000, 
+                    chains = 2) </pre>
+
+</article></slide><slide class=''><hgroup><h2>STAN output</h2></hgroup><article  id="stan-output">
+
+<ul>
+<li>standard STAN output</li>
+</ul>
+
+<pre class = 'prettyprint lang-r'>print(my_stan) </pre>
+
+<pre >## Inference for Stan model: totCortlog ~ Implant + days + Implant:days + (1 | Ring) [gaussian].
+## 2 chains, each with iter=2000; warmup=500; thin=1; 
+## post-warmup draws per chain=1500, total post-warmup draws=3000.
+## 
+##                              mean se_mean    sd   2.5%    25%    50%
+## Intercept                    3.57    0.00  0.10   3.38   3.50   3.56
+## beta_ImplantP               -1.80    0.01  0.15  -2.10  -1.90  -1.80
+## beta_days20                 -1.39    0.00  0.14  -1.66  -1.49  -1.39
+## beta_daysbefore             -1.65    0.00  0.13  -1.90  -1.74  -1.65
+## beta_ImplantP_X_days20       1.63    0.01  0.20   1.24   1.49   1.63
+## beta_ImplantP_X_daysbefore   1.72    0.01  0.19   1.35   1.59   1.72
+## sigma                        0.62    0.00  0.04   0.55   0.59   0.62
+## vary_Ring[1]                 0.25    0.01  0.31  -0.34   0.04   0.24
+## vary_Ring[2]                 0.12    0.00  0.27  -0.43  -0.06   0.12
+## vary_Ring[3]                -0.12    0.01  0.29  -0.71  -0.31  -0.12
+## vary_Ring[4]                 0.07    0.00  0.25  -0.43  -0.10   0.06
+## vary_Ring[5]                -0.08    0.00  0.24  -0.56  -0.23  -0.08
+## vary_Ring[6]                -0.08    0.01  0.31  -0.71  -0.28  -0.08
+## vary_Ring[7]                 0.26    0.00  0.25  -0.21   0.08   0.25
+## vary_Ring[8]                 0.01    0.00  0.27  -0.51  -0.17   0.01
+## vary_Ring[9]                -0.07    0.00  0.27  -0.60  -0.25  -0.08
+## vary_Ring[10]                0.20    0.00  0.27  -0.34   0.01   0.19
+## vary_Ring[11]                0.25    0.01  0.28  -0.28   0.06   0.24
+## vary_Ring[12]               -0.12    0.01  0.29  -0.70  -0.31  -0.12
+## vary_Ring[13]               -0.10    0.00  0.27  -0.64  -0.28  -0.09
+## vary_Ring[14]                0.03    0.01  0.30  -0.53  -0.16   0.03
+## vary_Ring[15]                0.04    0.00  0.27  -0.49  -0.13   0.04
+## vary_Ring[16]               -0.09    0.01  0.30  -0.70  -0.28  -0.08
+## vary_Ring[17]                0.08    0.00  0.27  -0.46  -0.10   0.08
+## vary_Ring[18]                0.23    0.01  0.30  -0.33   0.03   0.23
+## vary_Ring[19]               -0.16    0.01  0.31  -0.79  -0.36  -0.15
+## vary_Ring[20]               -0.10    0.01  0.30  -0.71  -0.28  -0.09
+## vary_Ring[21]                0.15    0.01  0.31  -0.44  -0.04   0.14
+## vary_Ring[22]                0.04    0.01  0.28  -0.51  -0.14   0.03
+## vary_Ring[23]                0.07    0.00  0.27  -0.46  -0.10   0.07
+## vary_Ring[24]                0.03    0.01  0.30  -0.57  -0.16   0.03
+## vary_Ring[25]                0.22    0.01  0.27  -0.30   0.04   0.21
+## vary_Ring[26]                0.13    0.01  0.29  -0.45  -0.07   0.12
+## vary_Ring[27]                0.22    0.01  0.30  -0.34   0.02   0.22
+## vary_Ring[28]                0.07    0.01  0.30  -0.52  -0.13   0.06
+## vary_Ring[29]                0.01    0.01  0.27  -0.53  -0.17   0.01
+## vary_Ring[30]               -0.22    0.00  0.27  -0.77  -0.40  -0.21
+## vary_Ring[31]                0.02    0.01  0.30  -0.55  -0.17   0.02
+## vary_Ring[32]               -0.01    0.01  0.30  -0.59  -0.22  -0.01
+## vary_Ring[33]                0.04    0.00  0.27  -0.48  -0.15   0.03
+## vary_Ring[34]               -0.03    0.00  0.24  -0.51  -0.19  -0.03
+## vary_Ring[35]               -0.01    0.00  0.26  -0.54  -0.18   0.00
+## vary_Ring[36]               -0.04    0.00  0.27  -0.56  -0.22  -0.04
+## vary_Ring[37]               -0.06    0.00  0.27  -0.59  -0.23  -0.05
+## vary_Ring[38]                0.08    0.01  0.29  -0.49  -0.12   0.08
+## vary_Ring[39]                0.14    0.01  0.30  -0.44  -0.07   0.13
+## vary_Ring[40]               -0.03    0.00  0.27  -0.56  -0.21  -0.03
+## vary_Ring[41]                0.00    0.01  0.29  -0.55  -0.20   0.00
+## vary_Ring[42]               -0.01    0.01  0.30  -0.61  -0.21  -0.01
+## vary_Ring[43]                0.35    0.01  0.28  -0.18   0.16   0.34
+## vary_Ring[44]               -0.05    0.01  0.29  -0.63  -0.24  -0.05
+## vary_Ring[45]                0.09    0.00  0.27  -0.42  -0.09   0.08
+## vary_Ring[46]               -0.07    0.01  0.30  -0.69  -0.27  -0.07
+## vary_Ring[47]                0.23    0.01  0.30  -0.34   0.03   0.22
+## vary_Ring[48]                0.02    0.00  0.23  -0.43  -0.14   0.01
+## vary_Ring[49]                0.37    0.00  0.26  -0.12   0.19   0.37
+## vary_Ring[50]                0.06    0.01  0.30  -0.53  -0.14   0.06
+## vary_Ring[51]                0.04    0.01  0.30  -0.54  -0.15   0.04
+## vary_Ring[52]               -0.07    0.01  0.29  -0.65  -0.26  -0.07
+## vary_Ring[53]                0.01    0.01  0.29  -0.55  -0.18   0.01
+## vary_Ring[54]               -0.02    0.01  0.30  -0.62  -0.21  -0.02
+## vary_Ring[55]                0.06    0.01  0.30  -0.54  -0.13   0.06
+## vary_Ring[56]                0.22    0.00  0.27  -0.29   0.03   0.22
+## vary_Ring[57]                0.19    0.00  0.26  -0.32   0.01   0.19
+## vary_Ring[58]                0.18    0.01  0.28  -0.33  -0.01   0.18
+## vary_Ring[59]                0.01    0.01  0.30  -0.60  -0.19   0.01
+## vary_Ring[60]               -0.06    0.01  0.31  -0.65  -0.26  -0.06
+## vary_Ring[61]               -0.01    0.00  0.25  -0.48  -0.18  -0.01
+## vary_Ring[62]               -0.01    0.01  0.30  -0.58  -0.21  -0.01
+## vary_Ring[63]                0.31    0.01  0.31  -0.28   0.09   0.30
+## vary_Ring[64]                0.05    0.01  0.29  -0.53  -0.14   0.05
+## vary_Ring[65]                0.10    0.01  0.30  -0.48  -0.10   0.09
+## vary_Ring[66]               -0.22    0.01  0.30  -0.84  -0.42  -0.21
+## vary_Ring[67]                0.26    0.01  0.28  -0.25   0.08   0.26
+## vary_Ring[68]               -0.26    0.00  0.25  -0.76  -0.42  -0.25
+## vary_Ring[69]                0.08    0.00  0.24  -0.39  -0.09   0.07
+## vary_Ring[70]                0.08    0.01  0.30  -0.49  -0.12   0.07
+## vary_Ring[71]                0.34    0.01  0.28  -0.19   0.16   0.33
+## vary_Ring[72]                0.24    0.00  0.27  -0.28   0.05   0.23
+## vary_Ring[73]                0.06    0.01  0.30  -0.52  -0.15   0.05
+## vary_Ring[74]                0.10    0.00  0.25  -0.37  -0.07   0.11
+## vary_Ring[75]               -0.21    0.00  0.23  -0.67  -0.37  -0.21
+## vary_Ring[76]                0.03    0.00  0.26  -0.49  -0.14   0.03
+## vary_Ring[77]                0.06    0.00  0.27  -0.46  -0.12   0.06
+## vary_Ring[78]               -0.01    0.00  0.25  -0.49  -0.17  -0.01
+## vary_Ring[79]               -0.01    0.00  0.26  -0.53  -0.18  -0.01
+## vary_Ring[80]               -0.29    0.01  0.28  -0.87  -0.47  -0.28
+## vary_Ring[81]                0.22    0.00  0.27  -0.28   0.03   0.21
+## vary_Ring[82]               -0.45    0.01  0.32  -1.16  -0.65  -0.43
+## vary_Ring[83]                0.42    0.01  0.29  -0.11   0.22   0.41
+## vary_Ring[84]                0.15    0.00  0.24  -0.33  -0.02   0.14
+## vary_Ring[85]               -0.22    0.01  0.28  -0.79  -0.39  -0.21
+## vary_Ring[86]               -0.17    0.00  0.27  -0.71  -0.35  -0.17
+## vary_Ring[87]               -0.35    0.00  0.27  -0.90  -0.53  -0.35
+## vary_Ring[88]               -0.03    0.00  0.25  -0.53  -0.19  -0.02
+## vary_Ring[89]               -0.51    0.01  0.29  -1.10  -0.71  -0.49
+## vary_Ring[90]               -0.05    0.00  0.25  -0.53  -0.21  -0.05
+## vary_Ring[91]               -0.08    0.00  0.25  -0.57  -0.24  -0.07
+## vary_Ring[92]                0.15    0.01  0.31  -0.44  -0.06   0.14
+## vary_Ring[93]               -0.25    0.00  0.25  -0.74  -0.42  -0.26
+## vary_Ring[94]                0.28    0.01  0.28  -0.25   0.08   0.26
+## vary_Ring[95]               -0.40    0.01  0.29  -0.99  -0.59  -0.38
+## vary_Ring[96]                0.04    0.00  0.26  -0.47  -0.13   0.04
+## vary_Ring[97]               -0.04    0.00  0.26  -0.54  -0.22  -0.04
+## vary_Ring[98]                0.21    0.00  0.27  -0.31   0.05   0.21
+## vary_Ring[99]                0.08    0.01  0.30  -0.50  -0.11   0.08
+## vary_Ring[100]               0.04    0.00  0.24  -0.42  -0.12   0.04
+## vary_Ring[101]              -0.27    0.00  0.27  -0.83  -0.45  -0.26
+## vary_Ring[102]              -0.17    0.00  0.26  -0.69  -0.34  -0.17
+## vary_Ring[103]              -0.16    0.01  0.30  -0.79  -0.36  -0.15
+## vary_Ring[104]              -0.31    0.01  0.28  -0.91  -0.48  -0.29
+## vary_Ring[105]              -0.12    0.00  0.27  -0.65  -0.30  -0.12
+## vary_Ring[106]               0.18    0.01  0.31  -0.41  -0.03   0.17
+## vary_Ring[107]               0.12    0.00  0.26  -0.38  -0.06   0.12
+## vary_Ring[108]               0.12    0.00  0.26  -0.39  -0.06   0.11
+## vary_Ring[109]               0.35    0.01  0.28  -0.17   0.16   0.34
+## vary_Ring[110]              -0.14    0.01  0.30  -0.74  -0.34  -0.13
+## vary_Ring[111]              -0.21    0.00  0.27  -0.77  -0.38  -0.20
+## vary_Ring[112]              -0.06    0.00  0.24  -0.55  -0.22  -0.06
+## vary_Ring[113]              -0.72    0.01  0.29  -1.31  -0.91  -0.72
+## vary_Ring[114]               0.30    0.00  0.25  -0.18   0.13   0.28
+## vary_Ring[115]               0.04    0.00  0.24  -0.43  -0.12   0.04
+## vary_Ring[116]               0.01    0.00  0.27  -0.50  -0.18   0.01
+## vary_Ring[117]              -0.02    0.00  0.24  -0.49  -0.19  -0.02
+## vary_Ring[118]              -0.08    0.00  0.27  -0.63  -0.25  -0.08
+## vary_Ring[119]              -0.08    0.00  0.25  -0.59  -0.25  -0.08
+## vary_Ring[120]              -0.18    0.00  0.25  -0.70  -0.34  -0.17
+## vary_Ring[121]              -0.08    0.00  0.24  -0.55  -0.24  -0.09
+## vary_Ring[122]               0.09    0.00  0.26  -0.40  -0.07   0.09
+## vary_Ring[123]              -0.06    0.00  0.26  -0.58  -0.23  -0.06
+## vary_Ring[124]               0.13    0.00  0.24  -0.34  -0.04   0.13
+## vary_Ring[125]              -0.06    0.00  0.27  -0.60  -0.23  -0.06
+## vary_Ring[126]              -0.15    0.00  0.27  -0.69  -0.33  -0.15
+## vary_Ring[127]              -0.17    0.00  0.25  -0.68  -0.33  -0.17
+## vary_Ring[128]              -0.12    0.00  0.27  -0.65  -0.29  -0.12
+## vary_Ring[129]               0.13    0.01  0.31  -0.51  -0.08   0.13
+## vary_Ring[130]              -0.59    0.01  0.31  -1.23  -0.79  -0.59
+## vary_Ring[131]              -0.49    0.01  0.28  -1.02  -0.67  -0.48
+## vary_Ring[132]              -0.18    0.01  0.30  -0.81  -0.37  -0.17
+## vary_Ring[133]               0.03    0.00  0.26  -0.47  -0.14   0.03
+## vary_Ring[134]              -0.10    0.01  0.30  -0.72  -0.29  -0.10
+## vary_Ring[135]               0.34    0.01  0.28  -0.20   0.15   0.33
+## vary_Ring[136]               0.02    0.00  0.27  -0.50  -0.15   0.02
+## vary_Ring[137]              -0.51    0.01  0.28  -1.08  -0.69  -0.50
+## vary_Ring[138]              -0.17    0.01  0.30  -0.77  -0.37  -0.17
+## vary_Ring[139]              -0.04    0.00  0.24  -0.52  -0.20  -0.04
+## vary_Ring[140]              -0.08    0.00  0.27  -0.64  -0.25  -0.08
+## vary_Ring[141]              -0.22    0.00  0.27  -0.77  -0.40  -0.22
+## vary_Ring[142]               0.16    0.00  0.25  -0.31  -0.01   0.16
+## vary_Ring[143]              -0.04    0.00  0.27  -0.57  -0.21  -0.04
+## vary_Ring[144]               0.08    0.01  0.30  -0.50  -0.12   0.08
+## vary_Ring[145]               0.05    0.00  0.26  -0.48  -0.12   0.04
+## vary_Ring[146]               0.60    0.02  0.36  -0.07   0.35   0.58
+## vary_Ring[147]               0.01    0.00  0.27  -0.52  -0.18   0.00
+## vary_Ring[148]              -0.01    0.00  0.27  -0.54  -0.18  -0.01
+## vary_Ring[149]              -0.05    0.01  0.29  -0.64  -0.25  -0.05
+## vary_Ring[150]               0.21    0.00  0.27  -0.31   0.02   0.20
+## vary_Ring[151]               0.03    0.00  0.25  -0.45  -0.15   0.02
+## sigma_Ring                   0.34    0.00  0.06   0.20   0.30   0.34
+## dev                        536.82    1.30 23.51 490.10 521.41 536.32
+## lp__                        85.85    1.67 21.81  51.56  71.00  83.22
+##                               75%  97.5% n_eff Rhat
+## Intercept                    3.63   3.76   883 1.00
+## beta_ImplantP               -1.70  -1.51   888 1.00
+## beta_days20                 -1.29  -1.12  1176 1.00
+## beta_daysbefore             -1.57  -1.41  1100 1.00
+## beta_ImplantP_X_days20       1.76   2.01  1145 1.00
+## beta_ImplantP_X_daysbefore   1.84   2.09  1083 1.00
+## sigma                        0.64   0.69   622 1.00
+## vary_Ring[1]                 0.46   0.91  3000 1.00
+## vary_Ring[2]                 0.30   0.68  3000 1.00
+## vary_Ring[3]                 0.09   0.45  3000 1.00
+## vary_Ring[4]                 0.24   0.57  3000 1.00
+## vary_Ring[5]                 0.08   0.39  3000 1.00
+## vary_Ring[6]                 0.11   0.51  3000 1.00
+## vary_Ring[7]                 0.43   0.77  3000 1.00
+## vary_Ring[8]                 0.19   0.55  3000 1.00
+## vary_Ring[9]                 0.10   0.46  3000 1.00
+## vary_Ring[10]                0.37   0.76  3000 1.00
+## vary_Ring[11]                0.42   0.83  3000 1.00
+## vary_Ring[12]                0.07   0.44  3000 1.00
+## vary_Ring[13]                0.08   0.42  3000 1.00
+## vary_Ring[14]                0.23   0.62  3000 1.00
+## vary_Ring[15]                0.22   0.58  3000 1.00
+## vary_Ring[16]                0.10   0.50  3000 1.00
+## vary_Ring[17]                0.26   0.63  3000 1.00
+## vary_Ring[18]                0.41   0.84  3000 1.00
+## vary_Ring[19]                0.05   0.40  3000 1.00
+## vary_Ring[20]                0.10   0.48  3000 1.00
+## vary_Ring[21]                0.35   0.78  3000 1.00
+## vary_Ring[22]                0.22   0.59  3000 1.00
+## vary_Ring[23]                0.25   0.60  3000 1.00
+## vary_Ring[24]                0.22   0.64  3000 1.00
+## vary_Ring[25]                0.39   0.79  3000 1.00
+## vary_Ring[26]                0.33   0.70  3000 1.00
+## vary_Ring[27]                0.42   0.86  3000 1.00
+## vary_Ring[28]                0.27   0.69  3000 1.00
+## vary_Ring[29]                0.19   0.57  3000 1.00
+## vary_Ring[30]               -0.04   0.32  3000 1.00
+## vary_Ring[31]                0.21   0.62  3000 1.00
+## vary_Ring[32]                0.19   0.57  3000 1.00
+## vary_Ring[33]                0.22   0.56  3000 1.00
+## vary_Ring[34]                0.12   0.45  3000 1.00
+## vary_Ring[35]                0.17   0.50  3000 1.00
+## vary_Ring[36]                0.15   0.47  3000 1.00
+## vary_Ring[37]                0.11   0.47  3000 1.00
+## vary_Ring[38]                0.27   0.67  3000 1.00
+## vary_Ring[39]                0.34   0.75  3000 1.00
+## vary_Ring[40]                0.15   0.50  3000 1.00
+## vary_Ring[41]                0.20   0.57  3000 1.00
+## vary_Ring[42]                0.19   0.56  3000 1.00
+## vary_Ring[43]                0.53   0.94  3000 1.00
+## vary_Ring[44]                0.14   0.50  3000 1.00
+## vary_Ring[45]                0.26   0.61  3000 1.00
+## vary_Ring[46]                0.13   0.52  3000 1.00
+## vary_Ring[47]                0.42   0.86  3000 1.00
+## vary_Ring[48]                0.17   0.47  3000 1.00
+## vary_Ring[49]                0.54   0.89  3000 1.00
+## vary_Ring[50]                0.25   0.66  3000 1.00
+## vary_Ring[51]                0.23   0.64  3000 1.00
+## vary_Ring[52]                0.13   0.50  3000 1.00
+## vary_Ring[53]                0.20   0.57  3000 1.00
+## vary_Ring[54]                0.17   0.56  3000 1.00
+## vary_Ring[55]                0.25   0.66  3000 1.00
+## vary_Ring[56]                0.40   0.76  3000 1.00
+## vary_Ring[57]                0.35   0.72  3000 1.00
+## vary_Ring[58]                0.37   0.76  3000 1.00
+## vary_Ring[59]                0.21   0.61  3000 1.00
+## vary_Ring[60]                0.14   0.55  3000 1.00
+## vary_Ring[61]                0.15   0.47  3000 1.00
+## vary_Ring[62]                0.19   0.60  3000 1.00
+## vary_Ring[63]                0.51   0.95  3000 1.00
+## vary_Ring[64]                0.24   0.65  3000 1.00
+## vary_Ring[65]                0.30   0.72  3000 1.00
+## vary_Ring[66]               -0.01   0.33  3000 1.00
+## vary_Ring[67]                0.44   0.82  3000 1.00
+## vary_Ring[68]               -0.08   0.21  3000 1.00
+## vary_Ring[69]                0.24   0.55  3000 1.00
+## vary_Ring[70]                0.27   0.69  3000 1.00
+## vary_Ring[71]                0.51   0.93  3000 1.00
+## vary_Ring[72]                0.43   0.79  3000 1.00
+## vary_Ring[73]                0.26   0.71  3000 1.00
+## vary_Ring[74]                0.27   0.59  3000 1.00
+## vary_Ring[75]               -0.06   0.24  3000 1.00
+## vary_Ring[76]                0.20   0.56  3000 1.00
+## vary_Ring[77]                0.24   0.59  3000 1.00
+## vary_Ring[78]                0.17   0.45  3000 1.00
+## vary_Ring[79]                0.16   0.49  3000 1.00
+## vary_Ring[80]               -0.10   0.22  3000 1.00
+## vary_Ring[81]                0.39   0.76  3000 1.00
+## vary_Ring[82]               -0.22   0.11   793 1.00
+## vary_Ring[83]                0.61   1.02  3000 1.00
+## vary_Ring[84]                0.31   0.64  3000 1.00
+## vary_Ring[85]               -0.03   0.31  3000 1.00
+## vary_Ring[86]                0.00   0.34  3000 1.00
+## vary_Ring[87]               -0.17   0.15  3000 1.00
+## vary_Ring[88]                0.14   0.45  3000 1.00
+## vary_Ring[89]               -0.30   0.03  3000 1.00
+## vary_Ring[90]                0.12   0.44  3000 1.00
+## vary_Ring[91]                0.09   0.39  3000 1.00
+## vary_Ring[92]                0.34   0.78  3000 1.00
+## vary_Ring[93]               -0.08   0.24  3000 1.00
+## vary_Ring[94]                0.47   0.86  3000 1.00
+## vary_Ring[95]               -0.20   0.11  3000 1.00
+## vary_Ring[96]                0.21   0.57  3000 1.00
+## vary_Ring[97]                0.13   0.47  3000 1.00
+## vary_Ring[98]                0.39   0.75  3000 1.00
+## vary_Ring[99]                0.28   0.65  3000 1.00
+## vary_Ring[100]               0.20   0.52  3000 1.00
+## vary_Ring[101]              -0.08   0.23  3000 1.00
+## vary_Ring[102]               0.00   0.30  3000 1.00
+## vary_Ring[103]               0.04   0.41  3000 1.00
+## vary_Ring[104]              -0.13   0.20  3000 1.00
+## vary_Ring[105]               0.06   0.38  3000 1.00
+## vary_Ring[106]               0.38   0.80  3000 1.00
+## vary_Ring[107]               0.29   0.66  3000 1.00
+## vary_Ring[108]               0.29   0.64  3000 1.00
+## vary_Ring[109]               0.54   0.91  3000 1.00
+## vary_Ring[110]               0.07   0.44  3000 1.00
+## vary_Ring[111]              -0.03   0.27  3000 1.00
+## vary_Ring[112]               0.10   0.40  3000 1.00
+## vary_Ring[113]              -0.51  -0.15   489 1.00
+## vary_Ring[114]               0.46   0.80  3000 1.00
+## vary_Ring[115]               0.20   0.53  3000 1.00
+## vary_Ring[116]               0.20   0.53  3000 1.00
+## vary_Ring[117]               0.14   0.47  3000 1.00
+## vary_Ring[118]               0.10   0.42  3000 1.00
+## vary_Ring[119]               0.08   0.39  3000 1.00
+## vary_Ring[120]              -0.02   0.31  3000 1.00
+## vary_Ring[121]               0.08   0.39  3000 1.00
+## vary_Ring[122]               0.26   0.61  3000 1.00
+## vary_Ring[123]               0.12   0.43  3000 1.00
+## vary_Ring[124]               0.28   0.61  3000 1.00
+## vary_Ring[125]               0.11   0.46  3000 1.00
+## vary_Ring[126]               0.03   0.37  3000 1.00
+## vary_Ring[127]               0.00   0.31  3000 1.00
+## vary_Ring[128]               0.06   0.40  3000 1.00
+## vary_Ring[129]               0.33   0.77  3000 1.00
+## vary_Ring[130]              -0.38  -0.01   610 1.00
+## vary_Ring[131]              -0.29   0.02  3000 1.00
+## vary_Ring[132]               0.01   0.37  3000 1.00
+## vary_Ring[133]               0.19   0.53  3000 1.00
+## vary_Ring[134]               0.10   0.47  3000 1.00
+## vary_Ring[135]               0.52   0.91  3000 1.00
+## vary_Ring[136]               0.20   0.57  3000 1.00
+## vary_Ring[137]              -0.31   0.02  3000 1.00
+## vary_Ring[138]               0.02   0.38  3000 1.00
+## vary_Ring[139]               0.12   0.43  3000 1.00
+## vary_Ring[140]               0.10   0.45  3000 1.00
+## vary_Ring[141]              -0.04   0.27  3000 1.00
+## vary_Ring[142]               0.32   0.65  3000 1.00
+## vary_Ring[143]               0.14   0.48  3000 1.00
+## vary_Ring[144]               0.27   0.67  3000 1.00
+## vary_Ring[145]               0.22   0.55  3000 1.00
+## vary_Ring[146]               0.82   1.36   555 1.00
+## vary_Ring[147]               0.18   0.54  3000 1.00
+## vary_Ring[148]               0.17   0.53  3000 1.00
+## vary_Ring[149]               0.14   0.51  3000 1.00
+## vary_Ring[150]               0.39   0.74  3000 1.00
+## vary_Ring[151]               0.20   0.51  3000 1.00
+## sigma_Ring                   0.38   0.46   189 1.01
+## dev                        552.00 583.52   327 1.00
+## lp__                        97.34 137.39   170 1.01
+## 
+## Samples were drawn using NUTS(diag_e) at Thu Jun 08 18:51:05 2017.
+## For each parameter, n_eff is a crude measure of effective sample size,
+## and Rhat is the potential scale reduction factor on split chains (at 
+## convergence, Rhat=1).</pre>
+
+</article></slide><slide class=''><hgroup><h2>STAN output</h2></hgroup><article  id="stan-output-1" class="smaller">
+
+<ul>
+<li>cleaned up STAN output</li>
+</ul>
+
+<pre class = 'prettyprint lang-r'>stanmer(my_stan) </pre>
+
+<pre >## glmer2stan model: totCortlog ~ Implant + days + Implant:days + (1 | Ring) [gaussian]
+## 
+## Level 1 estimates:
+##                       Expectation StdDev  2.5% 97.5%
+## (Intercept)                  3.57   0.10  3.38  3.76
+## ImplantP                    -1.80   0.15 -2.10 -1.51
+## days20                      -1.39   0.14 -1.66 -1.12
+## daysbefore                  -1.65   0.13 -1.90 -1.41
+## ImplantP_X_days20            1.63   0.20  1.24  2.01
+## ImplantP_X_daysbefore        1.72   0.19  1.35  2.09
+## sigma                        0.62   0.04  0.55  0.69
+## 
+## Level 2 estimates:
+## (Std.dev. and correlations)
+## 
+## Group: Ring (151 groups / imbalance: 0.21)
+##   (Intercept)  0.34  (SE 0.06)
+## 
+## DIC: 596   pDIC: 58.8   Deviance: 478
+## 
+## WAIC: 600   pWAIC: 54.6   -2*lppd: 490.9</pre>
+
+</article></slide><slide class=''><hgroup><h2>Graphical output</h2></hgroup><article  id="graphical-output">
+
+<pre class = 'prettyprint lang-r'>plot(my_stan) </pre>
+
+<p><img src="main_files/figure-html/unnamed-chunk-10-1.png" width="720" /></p>
+
+</article></slide><slide class=''><hgroup><h2>Graphical output</h2></hgroup><article  id="graphical-output-1">
+
+<pre class = 'prettyprint lang-r'>rstan::traceplot(my_stan)</pre>
+
+<p><img src="main_files/figure-html/unnamed-chunk-11-1.png" width="720" /></p>
+
+</article></slide><slide class=''><hgroup><h2>Priors? look at the model code</h2></hgroup><article  id="priors-look-at-the-model-code">
+
+<pre class = 'prettyprint lang-r'>sink(&#39;my_stan_code.txt&#39;)
+my_stan@stanmodel</pre>
+
+<pre >## S4 class stanmodel &#39;totCortlog ~ Implant + days + Implant:days + (1 | Ring) [gaussian]&#39; coded as follows:
+## data{
+##     int N;
+##     real totCortlog[N];
+##     real ImplantP[N];
+##     real days20[N];
+##     real daysbefore[N];
+##     int Ring[N];
+##     real ImplantP_X_days20[N];
+##     real ImplantP_X_daysbefore[N];
+##     int N_Ring;
+## }
+## 
+## parameters{
+##     real Intercept;
+##     real beta_ImplantP;
+##     real beta_days20;
+##     real beta_daysbefore;
+##     real beta_ImplantP_X_days20;
+##     real beta_ImplantP_X_daysbefore;
+##     real&lt;lower=0&gt; sigma;
+##     real vary_Ring[N_Ring];
+##     real&lt;lower=0&gt; sigma_Ring;
+## }
+## 
+## model{
+##     real vary[N];
+##     real glm[N];
+##     // Priors
+##     Intercept ~ normal( 0 , 100 );
+##     beta_ImplantP ~ normal( 0 , 100 );
+##     beta_days20 ~ normal( 0 , 100 );
+##     beta_daysbefore ~ normal( 0 , 100 );
+##     beta_ImplantP_X_days20 ~ normal( 0 , 100 );
+##     beta_ImplantP_X_daysbefore ~ normal( 0 , 100 );
+##     sigma_Ring ~ uniform( 0 , 100 );
+##     sigma ~ uniform( 0 , 100 );
+##     // Varying effects
+##     for ( j in 1:N_Ring ) vary_Ring[j] ~ normal( 0 , sigma_Ring );
+##     // Fixed effects
+##     for ( i in 1:N ) {
+##         vary[i] &lt;- vary_Ring[Ring[i]];
+##         glm[i] &lt;- vary[i] + Intercept
+##                 + beta_ImplantP * ImplantP[i]
+##                 + beta_days20 * days20[i]
+##                 + beta_daysbefore * daysbefore[i]
+##                 + beta_ImplantP_X_days20 * ImplantP_X_days20[i]
+##                 + beta_ImplantP_X_daysbefore * ImplantP_X_daysbefore[i];
+##     }
+##     totCortlog ~ normal( glm , sigma );
+## }
+## 
+## generated quantities{
+##     real dev;
+##     real vary[N];
+##     real glm[N];
+##     dev &lt;- 0;
+##     for ( i in 1:N ) {
+##         vary[i] &lt;- vary_Ring[Ring[i]];
+##         glm[i] &lt;- vary[i] + Intercept
+##                 + beta_ImplantP * ImplantP[i]
+##                 + beta_days20 * days20[i]
+##                 + beta_daysbefore * daysbefore[i]
+##                 + beta_ImplantP_X_days20 * ImplantP_X_days20[i]
+##                 + beta_ImplantP_X_daysbefore * ImplantP_X_daysbefore[i];
+##         dev &lt;- dev + (-2) * normal_log( totCortlog[i] , glm[i] , sigma );
+##     }
+## }
+## </pre>
+
+<pre class = 'prettyprint lang-r'>sink()</pre>
+
+</article></slide><slide class=''><hgroup><h2>Two possible choice for priors</h2></hgroup><article  id="two-possible-choice-for-priors">
+
+<pre class = 'prettyprint lang-r'>help(glmer2stan)</pre>
+
+<ul>
+<li><p>glmer2stan defaults to diffuse normal priors Normal(0,100) for all fixed effects</p></li>
+<li><em>flat</em> priors for variance parameters (default)
+
+<ul>
+<li>\(\sigma_u \sim \textrm{Uniform}(0, 100)\)</li>
+<li>\(\sigma \sim \textrm{Uniform}(0, 100)\)</li>
+</ul></li>
+<li><em>weak</em> priors for variance parameters (other choice)
+
+<ul>
+<li>\(\sigma_u \sim \textrm{Gamma}(2, 0.0001)\)</li>
+<li>\(\sigma \sim \textrm{Gamma}(2, 0.0001)\)</li>
+</ul></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Check the model on Shinystan</h2></hgroup><article  id="check-the-model-on-shinystan">
+
+<pre class = 'prettyprint lang-r'>library(shinystan)
+launch_shinystan(my_stan)</pre>
+
+</article></slide><slide class=''><hgroup><h2>Varying intercept ad random slope</h2></hgroup><article  id="varying-intercept-ad-random-slope">
+
+<p>\[
+\begin{align}
+y_{ik} &amp;\sim \textrm N(\mu_{ik},\sigma^2)\\
+\mu_{ik} &amp;= \beta_0 + u_{1k} +(\beta_1 + u_{2k})x_{1ik} + \beta_3x_{2ik}  \\
+\beta_0&amp;\sim \textrm N(0,100)\\
+\beta_1&amp;\sim \textrm N(0,100)\\
+\sigma^2 &amp;\sim \textrm{Uniform}(0,100)\\
+u_{1:2,k} &amp; \sim  \textrm {MVNorm}(0,\Sigma)\\
+\sigma_u^2 &amp;\sim \textrm{Uniform}(0,100)\\
+\end{align}
+\] \(\Sigma\) is a \(2\times 2\) matrix that contains: - the variances of the intercept and the slope - the covariances between the intercept and the slope</p>
+
+</article></slide><slide class=''><hgroup><h2>Varying intercept ad random slope</h2></hgroup><article  id="varying-intercept-ad-random-slope-1" class="smaller">
+
+<pre class = 'prettyprint lang-r'>cortbowl$totCortlog &lt;- log(cortbowl$totCort)
+cortbowl$Ring &lt;- as.integer(as.factor(cortbowl$Ring)) 
+cortbowl$Age_z &lt;- scale(cortbowl$Age)
+
+
+
+my_stan_rs &lt;- myglmer2stan(totCortlog ~ Implant + days + Age_z + Implant:days +  (Age_z|Ring), varpriors = &#39;flat&#39;,
+                    data = cortbowl,
+                    calcWAIC = T,
+                    warmup = 500, 
+                    iter = 1000, 
+                    chains = 2, sample = FALSE) </pre>
+
+<ul>
+<li>It is better to center and scale covariates, especially for mixed models with some complexity
+
+<ul>
+<li>noncentered covariates can lead to a stronger correlation between the estimated parameters, which may cause nonconvergence of the fitting algorithm</li>
+</ul></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Varying intercept and random slope</h2></hgroup><article  id="varying-intercept-and-random-slope" class="smaller">
+
+<pre >## glmer2stan model: totCortlog ~ Implant + days + Age_z + Implant:days + (Age_z |     Ring) [gaussian]
+## 
+## Level 1 estimates:
+##                   Expectation StdDev  2.5% 97.5%
+## (Intercept)              3.66   0.10  3.47  3.86
+## ImplantP                -1.80   0.14 -2.05 -1.52
+## days20                  -1.78   0.17 -2.12 -1.47
+## days0                   -1.59   0.12 -1.84 -1.36
+## Age_z                    0.27   0.07  0.13  0.41
+## ImplantP_X_days20        1.63   0.18  1.25  1.98
+## ImplantP_X_days0         1.76   0.18  1.39  2.13
+## sigma                    0.59   0.03  0.53  0.66
+## 
+## Level 2 estimates:
+## (Std.dev. and correlations)
+## 
+## Group: Ring (151 groups / imbalance: 0.21)
+##                  
+##                     (1)  (2)
+##   (1) (Intercept)  0.32   NA
+##   (2) Age_z       -0.76 0.18
+## 
+## DIC: 575   pDIC: 65.4   Deviance: 443.6
+## 
+## WAIC: 584   pWAIC: 62.3   -2*lppd: 459</pre>
+
+</article></slide><slide class=''><hgroup><h2>Varying intercept and random slope</h2></hgroup><article  id="varying-intercept-and-random-slope-1">
+
+<ul>
+<li>No specify prior at all, in Stan is equivalent to a noninformative uniform prior on the parameter</li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Varying intercept ad random slope</h2></hgroup><article  id="varying-intercept-ad-random-slope-2" class="smaller">
+
+<pre class = 'prettyprint lang-r'>cortbowl$totCortlog &lt;- log(cortbowl$totCort)
+cortbowl$Ring &lt;- as.integer(as.factor(cortbowl$Ring)) 
+cortbowl$Age_z &lt;- scale(cortbowl$Age)
+
+
+
+my_stan_rs &lt;- myglmer2stan(totCortlog ~ Implant + days + Age_z + Implant:days +  (Age_z|Ring), varpriors = &#39;weak&#39;,
+                    data = cortbowl,
+                    calcWAIC = T,
+                    warmup = 500, 
+                    iter = 1000, 
+                    chains = 2, sample = FALSE) 
+show(my_stan_rs)</pre>
+
+</article></slide><slide class=''><hgroup><h2>Varying intercept and random slope</h2></hgroup><article  id="varying-intercept-and-random-slope-2" class="smaller">
+
+<pre >parameters{
+    ...
+    vector[2] vary_Ring[N_Ring];
+    vector&lt;lower=0&gt;[2] sigma_Ring;
+    corr_matrix[2] Rho_Ring;
+}
+
+transformed parameters{
+    cov_matrix[2] Sigma_Ring;
+    Sigma_Ring &lt;- diag_matrix(sigma_Ring) * Rho_Ring * diag_matrix(sigma_Ring);
+}
+
+model{...
+    sigma_Ring ~ gamma( 2 , 1e-4 );
+    Rho_Ring ~ lkj_corr( 1.5 );
+    sigma ~ gamma( 2 , 1e-4 );
+    // Varying effects
+    for ( j in 1:N_Ring ) vary_Ring[j] ~ multi_normal( zeros_Ring , Sigma_Ring );
+    // Fixed effects
+    ...
+}
+</pre>
+
+</article></slide><slide class=''><hgroup><h2>Varying intercept and random slope</h2></hgroup><article  id="varying-intercept-and-random-slope-3" class="smaller">
+
+<p>Covariance matrix \[
+\Sigma_u = 
+  \left[ {\begin{array}{cc}
+   \sigma^2_{u0} &amp; \rho\sigma_{u0}\sigma_{u1} \\
+   \rho\sigma_{u1}\sigma_{u0} &amp; \sigma^2_{u1} \\
+  \end{array} } \right]
+\]</p>
+
+<ul>
+<li>STAN has a built-in implementation of the <strong>lkj-prior</strong>, which is a prior on correlation matrices
+
+<ul>
+<li>it takes a positive scalar value \(\eta\) as its parameter</li>
+<li>\(\eta = 1.5\) indicates nearly-uniform correlation prior with low prior probability for correlations near -1 and +1</li>
+<li>\(eta &gt; 2\) is very concentrated at the identity matrix</li>
+</ul></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>How to change prior?</h2></hgroup><article  id="how-to-change-prior" class="smaller">
+
+<ul>
+<li><p>You can edit the directly the model</p>
+
+<pre >my_priors = &#39;...
+model{
+real vary[N];
+real glm[N];
+// Priors
+Intercept ~ normal( 0 , 100 );
+beta_ImplantP ~ normal( 0 , 100 );
+beta_days20 ~ normal( 0 , 100 );
+beta_daysbefore ~ normal( 0 , 100 );
+beta_Age_z ~ normal( 10 , 2 ); //Hey! Look! An informed prior!
+beta_ImplantP_X_days20 ~ normal( 0 , 100 );
+beta_ImplantP_X_daysbefore ~ normal( 0 , 100 );
+sigma_Ring ~ gamma( 2 , 1e-4 );
+Rho_Ring ~ lkj_corr( 1.5 );
+sigma ~ gamma( 2 , 1e-4 );
+// Varying effects
+for ( j in 1:N_Ring ) vary_Ring[j] ~ multi_normal( zeros_Ring , Sigma_Ring );
+// Fixed effects
+...
+}</pre>
+
+</article></slide><slide class=''><hgroup><h2>My priors</h2></hgroup><article  id="my-priors"></li>
+</ul>
+
+<pre class = 'prettyprint lang-r'>cortbowl$totCortlog &lt;- log(cortbowl$totCort)
+cortbowl$Ring &lt;- as.integer(as.factor(cortbowl$Ring)) 
+cortbowl$Age_z &lt;- scale(cortbowl$Age)
+
+
+
+my_stan_rs_prior &lt;- myglmer2stan(totCortlog ~ Implant + days + Age_z + Implant:days +  (Age_z|Ring), varpriors = &#39;weak&#39;,
+                    data = cortbowl,
+                    calcWAIC = T,
+                    warmup = 500, 
+                    iter = 1000, 
+                    chains = 2, 
+                    mymodel = my_priors
+                    ) </pre>
+
+</article></slide><slide class=''><hgroup><h2>Practical</h2></hgroup><article  id="practical">
+
+<ul>
+<li>Try to run the model in STAN</li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Why use hierarchical model</h2></hgroup><article  id="why-use-hierarchical-model">
+
+<ul>
+<li>Hierarchical models are inherently implied in population-based problems s</li>
+<li>They are widely used in meta-analysis where information from different studies/sources is available</li>
+<li>More generally they describe complex datasets incorporating correlation or including other properties
+
+<ul>
+<li>correlation can be incorporated via a common <em>random effect</em> for all measurements referring to the same individual</li>
+</ul></li>
+<li>Hierarchical model naturally rise when modeling spatio-tempral data in which correlation between time and space can be added by using common random effects on adjacent responses</li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Other advantages and characteristics</h2></hgroup><article  id="other-advantages-and-characteristics">
+
+<ul>
+<li>Each parameter referring to a specific group/unit borrows strength from the corresponding parameters of other groups/units
+
+<ul>
+<li>a shrinkage effect towards the population mean is present</li>
+<li>the size of the shrinkage depends on the variance between the random parameters</li>
+</ul></li>
+<li>The prior is decomposed into two parts:
+
+<ul>
+<li>one referring to structural information</li>
+<li>the other one referring to the actual subjective information of the model parameters</li>
+</ul></li>
+<li>The hierarchical structure simplifies both the interpretation and the computation
+
+<ul>
+<li>the posterior distribution is simplified resulting in conditional distributions of simpler form (Gibbs-based sampling schemes)</li>
+</ul></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Getting the slides</h2></hgroup><article  id="getting-the-slides">
+
+<ul>
+<li>The slides for this course were created with Rmarkdown: <a href='http://rmarkdown.rstudio.com/' title=''>http://rmarkdown.rstudio.com/</a>.</li>
+<li>They are available from <a href='https://github.com/berkeley3/BDA-IZSTO' title=''>https://github.com/berkeley3/BDA-IZSTO</a>.</li>
+<li><p>To re-compile the slides:</p>
+
+<ul>
+<li>Download the directory containing the lectures from Github</li>
+<li>In R open the .Rmd file and set the working directory to the lecture directory</li>
+<li>Click the <em>KnitHTML</em> button on Rstudio or run the following commands:</li>
+</ul></li>
+</ul>
+
+<pre class = 'prettyprint lang-r'>library(rmarkdown) 
+render(&quot;main.Rmd&quot;)</pre></article></slide>
+
+
+  <slide class="backdrop"></slide>
+
+</slides>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "main_files/mathjax-local/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+<!-- map slide visiblity events into shiny -->
+<script>
+  (function() {
+    if (window.jQuery) {
+       window.jQuery(document).on('slideleave', function(e) {
+         window.jQuery(e.target).trigger('hidden');
+      });
+       window.jQuery(document).on('slideenter', function(e) {
+         window.jQuery(e.target).trigger('shown');
+      });
+    }
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,492 @@
+---
+title: "Bayesian Data Analysis for Medical Data"
+subtitle: Hierarchical Modeling
+author      : Paola Berchialla
+job         : Department of Clinical and Biological Sciences, University of Torino
+output:
+  ioslides_presentation:
+    css: assets/css/ioslides.css
+    logo: assets/img/dscb.jpg
+    mathjax: local
+    self_contained: no
+    widescreen: yes
+  beamer_presentation: default
+  slidy_presentation: default
+---
+
+<style>
+  .col2 {
+    columns: 2 200px;         /* number of columns and width in pixels*/
+    -webkit-columns: 2 200px; /* chrome, safari */
+    -moz-columns: 2 200px;    /* firefox */
+  }
+ </style>
+
+
+## Multilevel model
+- Multilevel model are used to analyze non-independent, grouped data
+    - hierarchical models
+    - linear mixed effect models
+    - random models
+
+- see __Gelman & Hill, Data Analysis Using Regression and Multilevel/Hierarchical Modelsing__ (2006) for a discussion on the terminology
+
+
+## Hierarchical model
+- Suppose $K$ groups or units under investigation:
+    - a sample of responses $Y_{ik}$, $i=1,\ldots n_k$ and $k = 1,\ldots, K$
+
+Consider two alternative models:
+
+1. A model that estimates a common mean effect $\mu$ (pooled effect)
+    - when a normal distribution is assume, the model is expressed as
+    $$
+    Y_{ik} \sim N(\mu,\sigma^2) \text{ for } i=1,\ldots n_k \textrm{ and } k = 1,\ldots, K
+    $$
+2. A model that estimates different independent mean effects $\mu_k$ for each group (fixed effects)
+    - when a normal distribution is assume, the model is expressed as
+    $$
+    Y_{ik} \sim N(\mu_k,\sigma^2) \text{ for } i=1,\ldots n_k \textrm{ and } k = 1,\ldots, K
+    $$
+
+
+## Hierarchical model
+    
+$$
+  Y_{ik} \sim N(\mu_{ik},\sigma^2) \text{ for } i=1,\ldots n_k \text{ and } k = 1,\ldots, K
+$$
+
+- It estimates the expected performance of each group/unit
+- Each mean effect $\mu_k$ is estimated independently from the other groups
+    - in a group with small sample size, the posterior uncertainty will be large
+- It is logical to assume all $\mu_k$s are observables from a popolation distribution with mean $\mu$, an overall population average effect
+$$
+\mu_k \sim N(\mu,w^2)
+$$
+- All mean effects allow for _borrowing strengh_ between groups/units
+    - the posterior mean of each $\mu_k$ is a weighted mean of the corresponding sample mean of the $k$-group and the overall mean effect $\mu$
+
+## Hierarchical Regression Model
+
+$$
+  Y_{ik} \sim N(\mu_{ik},\sigma^2) 
+$$
+
+$$
+\mu_{ik} = \beta_0 + \beta_1x_{ik} + u_k
+$$
+$$
+u_k \sim \textrm{N}(0, \sigma^2_u)
+$$
+
+## The effect of partial pooling
+<center>
+<img src="images/Pooling.png" width="800" />
+</center>
+
+
+## Shrinkage in Hierarchical models
+
+
+- Information is exchanged between groups
+    - estimated means for groups with low sample sizes, large variances, and means far away from the population mean are shrunk toward the population mean 
+    - group means that are estimated with a lot of imprecision (low sample size and high variance) are shrunk toward the population mean
+    
+    
+## A simple motivating example
+
+- Stress Hormone Data Of Nestling Barn Owls Which Were Either Treated With A Corticosterone-Implant Or With A Placebo-Implant As Control
+    - Almasi, B., Roulin, A., Jenni-Eiermann, S., Breuner, C.W., Jenni, L., 2009. Regulation of free corticosterone and CBG capacity under different environmental conditions in altricial nestlings. Gen. Comp. Endocr. 164, 117-124
+
+
+## A simple motivating example
+```{r, results='asis', echo=FALSE}
+load('R\\cortbowl.RData')
+
+library(knitr)
+print(kable(head(cortbowl)))
+```
+
+## The model formulation
+
+$$
+\begin{align}
+y_{ik} &\sim \textrm N(\mu_{ik},\sigma^2)\\
+\mu_{ik} &= \beta_0 + \beta_1x_{ik} + u_k\\
+\beta_0&\sim \textrm N(0,100)\\
+\beta_1&\sim \textrm N(0,100)\\
+\sigma^2 &\sim \textrm{Uniform}(0,100)\\
+u_k & \sim  \textrm N(0,\sigma_u^2)\\
+\sigma_u^2 &\sim \textrm{Uniform}(0,100)\\
+\end{align}
+$$
+
+## The classical approach    
+    
+    
+```{r, warning=FALSE, message=FALSE, results='asis'}
+library(lme4)
+
+mod_lmer <- lmer(log(totCort)  ~ Implant + days + Implant:days + (1|Ring),
+data = cortbowl, REML = TRUE)
+```
+
+- REML instead of ML because ML underestimates the variance parameters
+    - ML assumes the fixed parameters are known without uncertainty
+- ML estimates are unbiased for the fixed effects but biased for the random effects
+- REML estimates are biased for the fixed effects but unbiased for the random effects
+- When sample size is large compared to the number of the model parameters, differences
+between ML and REML are negligible
+
+## The classical approach    
+    
+    
+```{r, warning=FALSE, message=FALSE, results='markup', echo=FALSE}
+library(arm)
+display(mod_lmer)
+```
+
+
+
+## The simplest Bayesian model
+
+```{r sim, message = FALSE, warning=FALSE, cache=TRUE}
+library(arm)
+nsim <- 3000
+mod_sim <- sim(mod_lmer, n.sim = nsim)
+
+resout <- round(apply(mod_sim@fixef, 2,quantile, prob=c(0.025,0.5,0.975)),3)
+kable(resout)
+```
+
+
+## The simplest Bayesian model
+
+```{r, dependson='sim'}
+newdata <- expand.grid(
+  implant = factor(c('C', 'P'), levels(cortbowl$Implant)),
+  days = factor(c('2','20','before'),levels(cortbowl$days))
+  )
+
+Xmat <-  model.matrix(~ implant + days + implant:days, 
+                      data = newdata)
+
+fitmat <-  matrix(ncol = nsim, nrow = nrow(newdata))
+
+for(i in 1:nsim) 
+  fitmat[,i] <- Xmat %*% mod_sim@fixef[i,] # fitted values
+newdata$lower <- apply(fitmat, 1, quantile, prob=0.025)
+newdata$upper <- apply(fitmat, 1, quantile, prob=0.975)
+newdata$fit <- Xmat %*% fixef(mod_lmer)
+```
+
+## Predictive distribution
+
+<center>
+<img src="images/fig1.png" width="600" />
+</center>
+
+
+## glmer2stan
+
+```{r, message=FALSE, warning=FALSE}
+library(glmer2stan)
+```
+
+
+_glmer2stan_:
+
+- allows for writing hierarchical (mixed effects) formulas using __lme4__ syntax
+- converts formula and data to STAN friendly formats
+- returns stanmer object
+- computes WAIC (a bayesian model comparison statistics)
+
+## Some annoying fact of Stan
+
+- _Important annoying fact #1: STAN needs data as a list not a dataframe_
+
+- _Important annoying fact #2: STAN doesn't deal with non-numeric variables_
+    - factors must be converted into contrast codes if you use __lmer2stan__ 
+    - otherwise the function __glmer2stan__ in the R folder does that for you
+
+##
+
+```{r mystan, message=FALSE, warning=FALSE, cache=TRUE, eval=FALSE}
+cortbowl$totCortlog <- log(cortbowl$totCort)
+cortbowl$Ring <- as.integer(as.factor(cortbowl$Ring)) 
+source('R\\myglmer2stan.R')
+
+
+my_stan_weak <- myglmer2stan(totCortlog ~ Implant + days + Implant:days +  (1|Ring),
+                    data = cortbowl, varpriors = 'weak',
+                    calcWAIC = T,
+                    warmup = 500, 
+                    iter = 2000, 
+                    chains = 2) 
+```
+
+
+## STAN output
+
+```{r, echo=FALSE}
+load('output\\stan_hierarchical.RData')
+```
+
+
+- standard STAN output
+```{r}
+print(my_stan) 
+```
+## STAN output {.smaller}
+
+- cleaned up STAN output
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(rstan)
+```
+
+```{r, dependson="mystan"}
+stanmer(my_stan) 
+```
+
+## Graphical output
+```{r, warning=FALSE, message=FALSE}
+plot(my_stan) 
+```
+
+
+## Graphical output
+```{r, message=FALSE, warning=FALSE, dependson="mystan"}
+rstan::traceplot(my_stan)
+```
+
+
+## Priors? look at the model code
+```{r, eval=TRUE}
+sink('my_stan_code.txt')
+my_stan@stanmodel
+sink()
+```
+
+## Two possible choice for priors
+
+```{r,eval=FALSE}
+help(glmer2stan)
+```
+
+- glmer2stan defaults to diffuse normal priors Normal(0,100) for all fixed effects 
+
+- _flat_ priors for variance parameters (default)
+    - $\sigma_u \sim \textrm{Uniform}(0, 100)$
+    - $\sigma \sim \textrm{Uniform}(0, 100)$
+- _weak_ priors for variance parameters (other choice)
+    - $\sigma_u \sim \textrm{Gamma}(2, 0.0001)$
+    - $\sigma \sim \textrm{Gamma}(2, 0.0001)$
+
+
+## Check the model on Shinystan
+
+```{r, eval=FALSE, message=FALSE, warning=FALSE}
+library(shinystan)
+launch_shinystan(my_stan)
+```
+
+## Varying intercept ad random slope
+
+$$
+\begin{align}
+y_{ik} &\sim \textrm N(\mu_{ik},\sigma^2)\\
+\mu_{ik} &= \beta_0 + u_{1k} +(\beta_1 + u_{2k})x_{1ik} + \beta_3x_{2ik}  \\
+\beta_0&\sim \textrm N(0,100)\\
+\beta_1&\sim \textrm N(0,100)\\
+\sigma^2 &\sim \textrm{Uniform}(0,100)\\
+u_{1:2,k} & \sim  \textrm {MVNorm}(0,\Sigma)\\
+\sigma_u^2 &\sim \textrm{Uniform}(0,100)\\
+\end{align}
+$$
+$\Sigma$ is a  $2\times 2$ matrix that contains:
+    - the variances of the intercept and the slope
+    - the covariances between the intercept and the slope
+
+## Varying intercept ad random slope{.smaller}
+
+```{r mystan5, message=FALSE, warning=FALSE, cache=TRUE, eval=FALSE}
+cortbowl$totCortlog <- log(cortbowl$totCort)
+cortbowl$Ring <- as.integer(as.factor(cortbowl$Ring)) 
+cortbowl$Age_z <- scale(cortbowl$Age)
+
+
+
+my_stan_rs <- myglmer2stan(totCortlog ~ Implant + days + Age_z + Implant:days +  (Age_z|Ring), varpriors = 'flat',
+                    data = cortbowl,
+                    calcWAIC = T,
+                    warmup = 500, 
+                    iter = 1000, 
+                    chains = 2, sample = FALSE) 
+```
+
+- It is better to center and scale covariates, especially for mixed models with some complexity 
+    - noncentered covariates can lead to a stronger correlation between the estimated parameters, which may cause nonconvergence of the fitting algorithm
+
+## Varying intercept and random slope{.smaller}
+
+```{r, echo=FALSE}
+load('output\\stanrs.RData')
+stanmer(my_stan_rs)
+```
+
+
+## Varying intercept and random slope 
+
+```{r, eval=FALSE, echo=FALSE}
+show(my_stan_rs)
+```
+
+
+- No specify prior at all, in Stan is equivalent to a noninformative uniform prior on the parameter
+
+## Varying intercept ad random slope{.smaller}
+
+```{r mystan4, message=FALSE, warning=FALSE, cache=TRUE, eval=FALSE}
+cortbowl$totCortlog <- log(cortbowl$totCort)
+cortbowl$Ring <- as.integer(as.factor(cortbowl$Ring)) 
+cortbowl$Age_z <- scale(cortbowl$Age)
+
+
+
+my_stan_rs <- myglmer2stan(totCortlog ~ Implant + days + Age_z + Implant:days +  (Age_z|Ring), varpriors = 'weak',
+                    data = cortbowl,
+                    calcWAIC = T,
+                    warmup = 500, 
+                    iter = 1000, 
+                    chains = 2, sample = FALSE) 
+show(my_stan_rs)
+
+```
+## Varying intercept and random slope {.smaller}
+
+```
+parameters{
+    ...
+    vector[2] vary_Ring[N_Ring];
+    vector<lower=0>[2] sigma_Ring;
+    corr_matrix[2] Rho_Ring;
+}
+
+transformed parameters{
+    cov_matrix[2] Sigma_Ring;
+    Sigma_Ring <- diag_matrix(sigma_Ring) * Rho_Ring * diag_matrix(sigma_Ring);
+}
+
+model{...
+    sigma_Ring ~ gamma( 2 , 1e-4 );
+    Rho_Ring ~ lkj_corr( 1.5 );
+    sigma ~ gamma( 2 , 1e-4 );
+    // Varying effects
+    for ( j in 1:N_Ring ) vary_Ring[j] ~ multi_normal( zeros_Ring , Sigma_Ring );
+    // Fixed effects
+    ...
+}
+
+```
+## Varying intercept and random slope{.smaller}
+Covariance matrix
+$$
+\Sigma_u = 
+  \left[ {\begin{array}{cc}
+   \sigma^2_{u0} & \rho\sigma_{u0}\sigma_{u1} \\
+   \rho\sigma_{u1}\sigma_{u0} & \sigma^2_{u1} \\
+  \end{array} } \right]
+$$
+
+- STAN has a built-in implementation of the __lkj-prior__, which is a prior on
+correlation matrices 
+    - it takes a positive scalar value $\eta$ as its parameter
+    - $\eta = 1.5$ indicates nearly-uniform correlation prior with low prior probability for correlations near -1 and +1
+    - $eta > 2$ is very concentrated at the identity matrix
+
+## How to change prior?{.smaller}
+- You can edit the directly the model
+```
+my_priors = '...
+model{
+    real vary[N];
+    real glm[N];
+    // Priors
+    Intercept ~ normal( 0 , 100 );
+    beta_ImplantP ~ normal( 0 , 100 );
+    beta_days20 ~ normal( 0 , 100 );
+    beta_daysbefore ~ normal( 0 , 100 );
+    beta_Age_z ~ normal( 10 , 2 ); //Hey! Look! An informed prior!
+    beta_ImplantP_X_days20 ~ normal( 0 , 100 );
+    beta_ImplantP_X_daysbefore ~ normal( 0 , 100 );
+    sigma_Ring ~ gamma( 2 , 1e-4 );
+    Rho_Ring ~ lkj_corr( 1.5 );
+    sigma ~ gamma( 2 , 1e-4 );
+    // Varying effects
+    for ( j in 1:N_Ring ) vary_Ring[j] ~ multi_normal( zeros_Ring , Sigma_Ring );
+    // Fixed effects
+    ...
+}
+```
+## My priors
+```{r mystan3, message=FALSE, warning=FALSE, cache=TRUE, eval=FALSE}
+cortbowl$totCortlog <- log(cortbowl$totCort)
+cortbowl$Ring <- as.integer(as.factor(cortbowl$Ring)) 
+cortbowl$Age_z <- scale(cortbowl$Age)
+
+
+
+my_stan_rs_prior <- myglmer2stan(totCortlog ~ Implant + days + Age_z + Implant:days +  (Age_z|Ring), varpriors = 'weak',
+                    data = cortbowl,
+                    calcWAIC = T,
+                    warmup = 500, 
+                    iter = 1000, 
+                    chains = 2, 
+                    mymodel = my_priors
+                    ) 
+
+```
+
+
+
+
+
+
+## Practical
+
+- Try to run the model in STAN
+
+## Why use hierarchical model
+
+- Hierarchical models are inherently implied in population-based problems s
+- They are widely used in meta-analysis where information from different studies/sources is available
+- More generally they describe complex datasets incorporating correlation or including other properties
+    - correlation can be incorporated via a common _random effect_ for all measurements referring to the same individual
+- Hierarchical model naturally rise when modeling spatio-tempral data in which correlation between time and space can be added by using common random effects on adjacent responses
+
+## Other advantages and characteristics
+
+- Each parameter referring to a specific group/unit borrows strength from the corresponding parameters of other groups/units
+    - a shrinkage effect towards the population mean is present
+    - the size of the shrinkage depends on the variance between the random parameters
+- The prior is decomposed into two parts:
+    - one referring to structural information
+    - the other one referring to the actual subjective information of the model parameters
+- The hierarchical structure simplifies both the interpretation and the computation 
+    - the posterior distribution is simplified resulting in conditional distributions of simpler form (Gibbs-based sampling schemes)
+
+
+## Getting the slides
+
+* The slides for this course were created with Rmarkdown: [http://rmarkdown.rstudio.com/](http://rmarkdown.rstudio.com/). 
+* They are available from [https://github.com/berkeley3/BDA-IZSTO](https://github.com/berkeley3/BDA-IZSTO).
+* To re-compile the slides:
+
+    + Download the directory containing the lectures from Github
+    + In R open the .Rmd file and set the working directory to the lecture directory
+    + Click the *KnitHTML* button on Rstudio or run the following commands: 
+  
+```{r RmarkdownChunk, eval=FALSE}
+library(rmarkdown) 
+render("main.Rmd")
+```
