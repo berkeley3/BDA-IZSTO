@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bayesian Data Analysis for Medical Data</title>
+
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <meta name="generator" content="pandoc" />
+
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <base target="_blank">
+
+  <script type="text/javascript">
+    var SLIDE_CONFIG = {
+      // Slide settings
+      settings: {
+                title: 'Bayesian Data Analysis for Medical Data',
+                        subtitle: 'Just Another Example of Hierarchical Modeling',
+                useBuilds: true,
+        usePrettify: true,
+        enableSlideAreas: true,
+        enableTouch: true,
+                        favIcon: 'main_files/logo.jpg',
+              },
+
+      // Author information
+      presenters: [
+            {
+        name:  'Paola Berchialla' ,
+        company: '',
+        gplus: '',
+        twitter: '',
+        www: '',
+        github: ''
+      },
+            ]
+    };
+  </script>
+
+  <link href="main_files/ioslides-13.5.1/fonts/fonts.css" rel="stylesheet" />
+  <link href="main_files/ioslides-13.5.1/theme/css/default.css" rel="stylesheet" />
+  <link href="main_files/ioslides-13.5.1/theme/css/phone.css" rel="stylesheet" />
+  <script src="main_files/ioslides-13.5.1/js/modernizr.custom.45394.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/prettify/prettify.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/prettify/lang-r.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/prettify/lang-yaml.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/hammer.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/slide-controller.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/slide-deck.js"></script>
+
+  <style type="text/css">
+
+    b, strong {
+      font-weight: bold;
+    }
+
+    em {
+      font-style: italic;
+    }
+
+    slides > slide {
+      -webkit-transition: all 0.4s ease-in-out;
+      -moz-transition: all 0.4s ease-in-out;
+      -o-transition: all 0.4s ease-in-out;
+      transition: all 0.4s ease-in-out;
+    }
+
+    .auto-fadein {
+      -webkit-transition: opacity 0.6s ease-in;
+      -webkit-transition-delay: 0.4s;
+      -moz-transition: opacity 0.6s ease-in 0.4s;
+      -o-transition: opacity 0.6s ease-in 0.4s;
+      transition: opacity 0.6s ease-in 0.4s;
+      opacity: 0;
+    }
+
+    slides > slide:not(.nobackground):before {
+      font-size: 12pt;
+      content: "";
+      position: absolute;
+      bottom: 20px;
+      left: 60px;
+      background: url(main_files/logo.jpg) no-repeat 0 50%;
+      -webkit-background-size: 30px 30px;
+      -moz-background-size: 30px 30px;
+      -o-background-size: 30px 30px;
+      background-size: 30px 30px;
+      padding-left: 40px;
+      height: 30px;
+      line-height: 1.9;
+    }
+  </style>
+
+  <link rel="stylesheet" href="assets\css\ioslides.css" type="text/css" />
+
+</head>
+
+<body style="opacity: 0">
+
+<slides class="layout-widescreen">
+
+  <slide class="title-slide segue nobackground">
+        <aside class="gdbar"><img src="main_files/logo.jpg"></aside>
+        <!-- The content of this hgroup is replaced programmatically through the slide_config.json. -->
+    <hgroup class="auto-fadein">
+      <h1 data-config-title><!-- populated from slide_config.json --></h1>
+      <h2 data-config-subtitle><!-- populated from slide_config.json --></h2>
+      <p data-config-presenter><!-- populated from slide_config.json --></p>
+          </hgroup>
+  </slide>
+
+<style>
+  .col2 {
+    columns: 2 200px;         /* number of columns and width in pixels*/
+    -webkit-columns: 2 200px; /* chrome, safari */
+    -moz-columns: 2 200px;    /* firefox */
+  }
+ </style>
+
+<slide class=''><hgroup><h2>Do you remember?</h2></hgroup><article  id="do-you-remember">
+
+<p>\[
+\begin{align}
+y_{ik} &amp;\sim \textrm N(\mu_{ik},\sigma^2)\\
+\mu_{ik} &amp;= \beta_0 + u_k + \beta_1x_{ik} \\
+\beta_0&amp;\sim \textrm N(0,100)\\
+\beta_1&amp;\sim \textrm N(0,100)\\
+\sigma^2 &amp;\sim \textrm{Uniform}(0,100)\\
+u_k &amp; \sim  \textrm N(0,\sigma_u^2)\\
+\sigma_u^2 &amp;\sim \textrm{Uniform}(0,100)\\
+\end{align}
+\]</p>
+
+<pre class = 'prettyprint lang-r'>library(lme4)
+
+mod_lmer &lt;- lmer(log(totCort)  ~ Implant + days + Implant:days + (1|Ring),
+data = cortbowl, REML = TRUE)</pre>
+
+</article></slide><slide class=''><hgroup><h2>Accounting for more structure</h2></hgroup><article  id="accounting-for-more-structure">
+
+<ul>
+<li>Random factors can be nested</li>
+</ul>
+
+<table class = 'rmdtable'>
+<tr class="header">
+<th align="left">Brood</th>
+<th align="right">Ring</th>
+<th align="left">Implant</th>
+<th align="right">Age</th>
+<th align="left">days</th>
+<th align="right">totCort</th>
+<th align="right">totCortlog</th>
+<th align="right">Age_z</th>
+</tr>
+<tr class="odd">
+<td align="left">301</td>
+<td align="right">44</td>
+<td align="left">P</td>
+<td align="right">49</td>
+<td align="left">20</td>
+<td align="right">5.761</td>
+<td align="right">1.751111</td>
+<td align="right">1.6825073</td>
+</tr>
+<tr class="even">
+<td align="left">301</td>
+<td align="right">45</td>
+<td align="left">P</td>
+<td align="right">29</td>
+<td align="left">2</td>
+<td align="right">8.418</td>
+<td align="right">2.130372</td>
+<td align="right">-0.3387551</td>
+</tr>
+<tr class="odd">
+<td align="left">301</td>
+<td align="right">45</td>
+<td align="left">P</td>
+<td align="right">47</td>
+<td align="left">20</td>
+<td align="right">8.047</td>
+<td align="right">2.085299</td>
+<td align="right">1.4803810</td>
+</tr>
+<tr class="even">
+<td align="left">301</td>
+<td align="right">46</td>
+<td align="left">C</td>
+<td align="right">25</td>
+<td align="left">2</td>
+<td align="right">25.744</td>
+<td align="right">3.248202</td>
+<td align="right">-0.7430076</td>
+</tr>
+<tr class="odd">
+<td align="left">302</td>
+<td align="right">31</td>
+<td align="left">P</td>
+<td align="right">57</td>
+<td align="left">20</td>
+<td align="right">8.041</td>
+<td align="right">2.084554</td>
+<td align="right">2.4910123</td>
+</tr>
+<tr class="even">
+<td align="left">302</td>
+<td align="right">32</td>
+<td align="left">C</td>
+<td align="right">28</td>
+<td align="left">before</td>
+<td align="right">6.338</td>
+<td align="right">1.846563</td>
+<td align="right">-0.4398183</td>
+</tr>
+</table>
+
+</article></slide><slide class=''><hgroup><h2>Model formulation</h2></hgroup><article  id="model-formulation">
+
+<p>\[
+\begin{align}
+y_{ikj} &amp;\sim \textrm N(\mu_{ikj},\sigma^2)\\
+\mu_{i;k;j} &amp;= \beta_0 + u_k + v_j + \beta_1x_{ik} \\
+\beta_0&amp;\sim \textrm N(0,100)\\
+\beta_1&amp;\sim \textrm N(0,100)\\
+\sigma^2 &amp;\sim \textrm{Uniform}(0,100)\\
+u_k &amp; \sim  \textrm N(0,\sigma_u^2)\\
+v_j &amp; \sim  \textrm N(0,\sigma_v^2)\\
+\sigma_u^2 &amp;\sim \textrm{Uniform}(0,100)\\
+\sigma_v^2 &amp;\sim \textrm{Uniform}(0,100)\\
+\end{align}
+\]</p>
+
+</article></slide><slide class=''><hgroup><h2>The classical approach with lmer</h2></hgroup><article  id="the-classical-approach-with-lmer">
+
+<pre class = 'prettyprint lang-r'>library(lme4)</pre>
+
+<pre >## Loading required package: Matrix</pre>
+
+<pre class = 'prettyprint lang-r'>mod_lmer &lt;- lmer(log(totCort)  ~ Implant + days + Age_z+ Implant:days + (1|Brood/Ring),
+data = cortbowl, REML = TRUE)</pre>
+
+</article></slide><slide class=''><hgroup><h2>&#8230; and Bayesian approach with myglmer2stan</h2></hgroup><article  id="and-bayesian-approach-with-myglmer2stan">
+
+<pre class = 'prettyprint lang-r'>source(&#39;R\\myglmer2stan.R&#39;)
+my_stan_rs_3 &lt;- myglmer2stan(totCortlog ~ Implant + days + Age_z + Implant:days +  (1|Brood/Ring),
+                             data = cortbowl,
+                             calcWAIC = T,
+                             warmup = 100, 
+                             iter = 500, 
+                             chains = 2) </pre>
+
+<p><span style="color:red">
+ Error in [[&lt;-(<code>*</code>tmp<code>*</code>, name, value = &quot;(Intercept)&quot;) : no such index at level 1 </span></p>
+
+</article></slide><slide class=''><hgroup><h2>Write down the model</h2></hgroup><article  id="write-down-the-model">
+
+<pre >data{
+int N;
+real totCortlog[N];
+real ImplantP[N];
+real days20[N];
+real daysbefore[N];
+real Age_z[N];
+int Brood[N];   // look at the new data! 
+int Ring[N];
+real ImplantP_X_days20[N];
+real ImplantP_X_daysbefore[N];
+int N_Brood; // look at the new data!
+int N_Ring;
+}</pre>
+
+</article></slide><slide class=''><hgroup><h2>Write down the model</h2></hgroup><article  id="write-down-the-model-1">
+
+<pre >parameters{
+real Intercept;
+real beta_ImplantP;
+real beta_days20;
+real beta_daysbefore;
+real beta_Age_z;
+real beta_ImplantP_X_days20;
+real beta_ImplantP_X_daysbefore;
+real&lt;lower=0&gt; sigma;
+real vary_Ring[N_Ring];
+real vary_Brood[N_Brood]; // Hey! look at the new parameter!
+real&lt;lower=0&gt; sigma_Ring;
+real&lt;lower=0&gt; sigma_Brood; // Hey! look at the new parameter!
+}</pre>
+
+</article></slide><slide class=''><hgroup><h2>Write down the model</h2></hgroup><article  id="write-down-the-model-2" class="smaller">
+
+<pre >model{
+real vary[N];
+real glm[N];
+// Priors
+Intercept ~ normal( 0 , 100 );
+beta_ImplantP ~ normal( 0 , 100 );
+...
+sigma_Ring ~ uniform( 0 , 100 );
+sigma_Brood ~ uniform( 0 , 100 );    // Hey! look at the new parameter!
+sigma ~ uniform( 0 , 100 );
+// Varying effects
+for ( j in 1:N_Ring ) vary_Ring[j] ~ normal( 0 , sigma_Ring );
+for ( j in 1:N_Brood ) vary_Brood[j] ~ normal( 0 , sigma_Brood ); // Hey! look at the new parameter!
+// Fixed effects
+for ( i in 1:N ) {
+vary[i] &lt;- vary_Ring[Ring[i]] + vary_Brood[Brood[i]]; // Hey! look at the new parameter!
+glm[i] &lt;- vary[i] + Intercept
++ beta_ImplantP * ImplantP[i]
++ beta_days20 * days20[i] + beta_daysbefore * daysbefore[i]
++ beta_Age_z * Age_z[i]
++ beta_ImplantP_X_days20 * ImplantP_X_days20[i]
++ beta_ImplantP_X_daysbefore * ImplantP_X_daysbefore[i];
+}
+totCortlog ~ normal( glm , sigma );
+}</pre>
+
+</article></slide><slide class=''><hgroup><h2>Write down the model</h2></hgroup><article  id="write-down-the-model-3">
+
+<pre >generated quantities{
+real dev;
+real vary[N];
+real glm[N];
+dev &lt;- 0;
+for ( i in 1:N ) {
+vary[i] &lt;- vary_Ring[Ring[i]];
+glm[i] &lt;- vary[i] + Intercept
++ beta_ImplantP * ImplantP[i]
++ beta_days20 * days20[i]
++ beta_daysbefore * daysbefore[i]
++ beta_Age_z * Age_z[i]
++ beta_ImplantP_X_days20 * ImplantP_X_days20[i]
++ beta_ImplantP_X_daysbefore * ImplantP_X_daysbefore[i];
+dev &lt;- dev + (-2) * normal_log( totCortlog[i] , glm[i] , sigma );
+}
+}</pre>
+
+</article></slide><slide class=''><hgroup><h2>Create DSO object and sample</h2></hgroup><article  id="create-dso-object-and-sample">
+
+<ol>
+<li>Create a list with all your data</li>
+</ol>
+
+<pre class = 'prettyprint lang-r'>mod_mat &lt;- as.data.frame(model.matrix(~ Implant + days + Implant:days, data=cortbowl))
+data_list &lt;- list(N = nrow(cortbowl),
+                  totCortlog = cortbowl$totCortlog,
+                  ImplantP = mod_mat$ImplantP,
+                  days20 = mod_mat$days20,
+                  daysbefore = mod_mat$daysbefore,
+                  Age_z = cortbowl$Age_z,
+                  Ring = cortbowl$Ring,
+                  ImplantP_X_days20 = mod_mat$`ImplantP:days20`,
+                  ImplantP_X_daysbefore = mod_mat$`ImplantP:daysbefore`,
+                  N_Ring = 151,
+                  N_Brood = 54,
+                  Brood = as.numeric((cortbowl$Brood))
+)</pre>
+
+</article></slide><slide class=''><hgroup><h2>Create DSO object and sample</h2></hgroup><article  id="create-dso-object-and-sample-1">
+
+<ol>
+<li>put the model in an object string</li>
+<li>Create DSO object</li>
+</ol>
+
+<pre class = 'prettyprint lang-r'>stan_dso &lt;- stan_model(model_code=model_string)</pre>
+
+<ol>
+<li>sample</li>
+</ol>
+
+<pre class = 'prettyprint lang-r'>stanFit &lt;- sampling(object = stan_dso, 
+                    data = data_list, 
+                    chains = 1, iter = 9000, 
+                    warmup = 1000, thin = 1)</pre>
+
+</article></slide><slide class=''><hgroup><h2>Print the output</h2></hgroup><article  id="print-the-output">
+
+<pre class = 'prettyprint lang-r'>stanmer2(stanFit)</pre>
+
+<pre >## glmer2stan model: ae3189e1fc1670b205090cd8c60e6066
+## 
+## Level 1 estimates:
+##                       Expectation StdDev    2.5%   97.5%
+## (Intercept)                3.6710 0.1027  3.4657  3.8739
+## ImplantP                  -1.8138 0.1404 -2.0924 -1.5407
+## days20                    -1.7913 0.1724 -2.1217 -1.4481
+## daysbefore                -1.5872 0.1252 -1.8327 -1.3422
+## Age_z                      0.2736 0.0739  0.1272  0.4181
+## ImplantP_X_days20          1.6398 0.1928  1.2627  2.0174
+## ImplantP_X_daysbefore      1.7338 0.1800  1.3711  2.0939
+## sigma                      0.6207 0.0329  0.5581  0.6868</pre>
+
+<pre >##                       Expectation StdDev    2.5%   97.5%
+## (Intercept)                3.6710 0.1027  3.4657  3.8739
+## ImplantP                  -1.8138 0.1404 -2.0924 -1.5407
+## days20                    -1.7913 0.1724 -2.1217 -1.4481
+## daysbefore                -1.5872 0.1252 -1.8327 -1.3422
+## Age_z                      0.2736 0.0739  0.1272  0.4181
+## ImplantP_X_days20          1.6398 0.1928  1.2627  2.0174
+## ImplantP_X_daysbefore      1.7338 0.1800  1.3711  2.0939
+## sigma                      0.6207 0.0329  0.5581  0.6868</pre>
+
+</article></slide><slide class=''><hgroup><h2>Getting the slides</h2></hgroup><article  id="getting-the-slides">
+
+<ul>
+<li>The slides for this course were created with Rmarkdown: <a href='http://rmarkdown.rstudio.com/' title=''>http://rmarkdown.rstudio.com/</a>.</li>
+<li>They are available from <a href='https://github.com/berkeley3/BDA-IZSTO' title=''>https://github.com/berkeley3/BDA-IZSTO</a>.</li>
+<li><p>To re-compile the slides:</p>
+
+<ul>
+<li>Download the directory containing the lectures from Github</li>
+<li>In R open the .Rmd file and set the working directory to the lecture directory</li>
+<li>Click the <em>KnitHTML</em> button on Rstudio or run the following commands:</li>
+</ul></li>
+</ul>
+
+<pre class = 'prettyprint lang-r'>library(rmarkdown) 
+render(&quot;main.Rmd&quot;)</pre></article></slide>
+
+
+  <slide class="backdrop"></slide>
+
+</slides>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "main_files/mathjax-local/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+<!-- map slide visiblity events into shiny -->
+<script>
+  (function() {
+    if (window.jQuery) {
+       window.jQuery(document).on('slideleave', function(e) {
+         window.jQuery(e.target).trigger('hidden');
+      });
+       window.jQuery(document).on('slideenter', function(e) {
+         window.jQuery(e.target).trigger('shown');
+      });
+    }
+  })();
+</script>
+
+</body>
+</html>

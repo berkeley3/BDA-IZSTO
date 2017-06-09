@@ -1,0 +1,266 @@
+---
+title: "Bayesian Data Analysis for Medical Data"
+subtitle: Just Another Example of Hierarchical Modeling
+author      : Paola Berchialla
+job         : Department of Clinical and Biological Sciences, University of Torino
+output:
+  ioslides_presentation:
+    css: assets/css/ioslides.css
+    logo: assets/img/dscb.jpg
+    mathjax: local
+    self_contained: no
+    widescreen: yes
+  beamer_presentation: default
+  slidy_presentation: default
+---
+
+<style>
+  .col2 {
+    columns: 2 200px;         /* number of columns and width in pixels*/
+    -webkit-columns: 2 200px; /* chrome, safari */
+    -moz-columns: 2 200px;    /* firefox */
+  }
+ </style>
+ 
+
+## Do you remember?
+
+$$
+\begin{align}
+y_{ik} &\sim \textrm N(\mu_{ik},\sigma^2)\\
+\mu_{ik} &= \beta_0 + u_k + \beta_1x_{ik} \\
+\beta_0&\sim \textrm N(0,100)\\
+\beta_1&\sim \textrm N(0,100)\\
+\sigma^2 &\sim \textrm{Uniform}(0,100)\\
+u_k & \sim  \textrm N(0,\sigma_u^2)\\
+\sigma_u^2 &\sim \textrm{Uniform}(0,100)\\
+\end{align}
+$$
+ 
+
+```{r, eval=FALSE}
+library(lme4)
+
+mod_lmer <- lmer(log(totCort)  ~ Implant + days + Implant:days + (1|Ring),
+data = cortbowl, REML = TRUE)
+```
+
+## Accounting for more structure
+
+- Random factors can be nested
+
+
+```{r, echo=FALSE}
+load('R\\cortbowl.RData')
+cortbowl$totCortlog <- log(cortbowl$totCort)
+cortbowl$Ring <- as.integer(as.factor(cortbowl$Ring)) 
+cortbowl$Age_z <- scale(cortbowl$Age)
+
+```
+
+```{r, results='asis', echo=FALSE}
+library(knitr)
+print(kable(head(cortbowl)))
+```
+
+## Model formulation
+
+$$
+\begin{align}
+y_{ikj} &\sim \textrm N(\mu_{ikj},\sigma^2)\\
+\mu_{i;k;j} &= \beta_0 + u_k + v_j + \beta_1x_{ik} \\
+\beta_0&\sim \textrm N(0,100)\\
+\beta_1&\sim \textrm N(0,100)\\
+\sigma^2 &\sim \textrm{Uniform}(0,100)\\
+u_k & \sim  \textrm N(0,\sigma_u^2)\\
+v_j & \sim  \textrm N(0,\sigma_v^2)\\
+\sigma_u^2 &\sim \textrm{Uniform}(0,100)\\
+\sigma_v^2 &\sim \textrm{Uniform}(0,100)\\
+\end{align}
+$$
+
+
+## The classical approach with lmer
+```{r}
+library(lme4)
+
+mod_lmer <- lmer(log(totCort)  ~ Implant + days + Age_z+ Implant:days + (1|Brood/Ring),
+data = cortbowl, REML = TRUE)
+```
+
+## ... and Bayesian approach with myglmer2stan
+
+
+```{r, eval=FALSE}
+source('R\\myglmer2stan.R')
+my_stan_rs_3 <- myglmer2stan(totCortlog ~ Implant + days + Age_z + Implant:days +  (1|Brood/Ring),
+                             data = cortbowl,
+                             calcWAIC = T,
+                             warmup = 100, 
+                             iter = 500, 
+                             chains = 2) 
+```
+<span style="color:red">
+Error in [[<-(`*`tmp`*`, name, value = "(Intercept)") : no such index at level 1
+</span>
+
+## Write down the model
+
+```
+data{
+int N;
+real totCortlog[N];
+real ImplantP[N];
+real days20[N];
+real daysbefore[N];
+real Age_z[N];
+int Brood[N];	// look at the new data! 
+int Ring[N];
+real ImplantP_X_days20[N];
+real ImplantP_X_daysbefore[N];
+int N_Brood; // look at the new data!
+int N_Ring;
+}
+```
+## Write down the model
+```
+parameters{
+real Intercept;
+real beta_ImplantP;
+real beta_days20;
+real beta_daysbefore;
+real beta_Age_z;
+real beta_ImplantP_X_days20;
+real beta_ImplantP_X_daysbefore;
+real<lower=0> sigma;
+real vary_Ring[N_Ring];
+real vary_Brood[N_Brood]; // Hey! look at the new parameter!
+real<lower=0> sigma_Ring;
+real<lower=0> sigma_Brood; // Hey! look at the new parameter!
+}
+```
+
+## Write down the model {.smaller}
+```
+model{
+real vary[N];
+real glm[N];
+// Priors
+Intercept ~ normal( 0 , 100 );
+beta_ImplantP ~ normal( 0 , 100 );
+...
+sigma_Ring ~ uniform( 0 , 100 );
+sigma_Brood ~ uniform( 0 , 100 );    // Hey! look at the new parameter!
+sigma ~ uniform( 0 , 100 );
+// Varying effects
+for ( j in 1:N_Ring ) vary_Ring[j] ~ normal( 0 , sigma_Ring );
+for ( j in 1:N_Brood ) vary_Brood[j] ~ normal( 0 , sigma_Brood ); // Hey! look at the new parameter!
+// Fixed effects
+for ( i in 1:N ) {
+vary[i] <- vary_Ring[Ring[i]] + vary_Brood[Brood[i]]; // Hey! look at the new parameter!
+glm[i] <- vary[i] + Intercept
++ beta_ImplantP * ImplantP[i]
++ beta_days20 * days20[i] + beta_daysbefore * daysbefore[i]
++ beta_Age_z * Age_z[i]
++ beta_ImplantP_X_days20 * ImplantP_X_days20[i]
++ beta_ImplantP_X_daysbefore * ImplantP_X_daysbefore[i];
+}
+totCortlog ~ normal( glm , sigma );
+}
+```
+
+## Write down the model
+```
+generated quantities{
+real dev;
+real vary[N];
+real glm[N];
+dev <- 0;
+for ( i in 1:N ) {
+vary[i] <- vary_Ring[Ring[i]];
+glm[i] <- vary[i] + Intercept
++ beta_ImplantP * ImplantP[i]
++ beta_days20 * days20[i]
++ beta_daysbefore * daysbefore[i]
++ beta_Age_z * Age_z[i]
++ beta_ImplantP_X_days20 * ImplantP_X_days20[i]
++ beta_ImplantP_X_daysbefore * ImplantP_X_daysbefore[i];
+dev <- dev + (-2) * normal_log( totCortlog[i] , glm[i] , sigma );
+}
+}
+```
+
+## Create DSO object and sample
+
+(1) Create a list with all your data
+```{r, eval=FALSE}
+mod_mat <- as.data.frame(model.matrix(~ Implant + days + Implant:days, data=cortbowl))
+data_list <- list(N = nrow(cortbowl),
+                  totCortlog = cortbowl$totCortlog,
+                  ImplantP = mod_mat$ImplantP,
+                  days20 = mod_mat$days20,
+                  daysbefore = mod_mat$daysbefore,
+                  Age_z = cortbowl$Age_z,
+                  Ring = cortbowl$Ring,
+                  ImplantP_X_days20 = mod_mat$`ImplantP:days20`,
+                  ImplantP_X_daysbefore = mod_mat$`ImplantP:daysbefore`,
+                  N_Ring = 151,
+                  N_Brood = 54,
+                  Brood = as.numeric((cortbowl$Brood))
+)
+```
+
+## Create DSO object and sample
+
+(2) put the model in an object string
+(3) Create DSO object
+```{r, eval = FALSE}
+
+stan_dso <- stan_model(model_code=model_string)
+
+```
+
+(4) sample
+
+```{r, eval=FALSE}
+stanFit <- sampling(object = stan_dso, 
+                    data = data_list, 
+                    chains = 1, iter = 9000, 
+                    warmup = 1000, thin = 1)
+```
+
+## Print the output{.smaller}
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+source('R\\stanmer2.R')
+load('output\\stanFit.RData')
+source('R\\myglmer2stan.R')
+library(rstan)
+library(glmer2stan)
+```
+
+```{r}
+stanmer2(stanFit)
+```
+
+## Launch Shinystan
+
+```{r}
+library(shinystan)
+shinystan(stanFit)
+```
+
+
+## Getting the slides
+
+* The slides for this course were created with Rmarkdown: [http://rmarkdown.rstudio.com/](http://rmarkdown.rstudio.com/). 
+* They are available from [https://github.com/berkeley3/BDA-IZSTO](https://github.com/berkeley3/BDA-IZSTO).
+* To re-compile the slides:
+
+    + Download the directory containing the lectures from Github
+    + In R open the .Rmd file and set the working directory to the lecture directory
+    + Click the *KnitHTML* button on Rstudio or run the following commands: 
+  
+```{r RmarkdownChunk, eval=FALSE}
+library(rmarkdown) 
+render("main.Rmd")
