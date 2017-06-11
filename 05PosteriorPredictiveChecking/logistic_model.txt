@@ -1,0 +1,44 @@
+data{
+    int N;
+    int outcome[N];
+    real treatment[N];
+    real condition[N];
+    int bin_total[N];
+}
+
+parameters{
+    real Intercept;
+    real beta_treatment;
+    real beta_condition;
+}
+
+model{
+    real vary[N];
+    real glm[N];
+    // Priors
+    Intercept ~ normal( 0 , 100 );
+    beta_treatment ~ normal( 0 , 100 );
+    beta_condition ~ normal( 0 , 100 );
+    // Fixed effects
+    for ( i in 1:N ) {
+        glm[i] <- Intercept
+                + beta_treatment * treatment[i]
+                + beta_condition * condition[i];
+        glm[i] <- inv_logit( glm[i] );
+    }
+    outcome ~ binomial( bin_total , glm );
+}
+
+generated quantities{
+    real dev;
+    real vary[N];
+    real glm[N];
+    dev <- 0;
+    for ( i in 1:N ) {
+        glm[i] <- Intercept
+                + beta_treatment * treatment[i]
+                + beta_condition * condition[i];
+        dev <- dev + (-2) * binomial_log( outcome[i] , bin_total[i] , inv_logit(glm[i]) );
+    }
+}
+ 

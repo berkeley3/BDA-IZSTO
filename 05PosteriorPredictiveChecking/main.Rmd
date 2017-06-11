@@ -1,0 +1,396 @@
+---
+title: "Bayesian Data Analysis for Medical Data"
+subtitle: Posterior Predictive Model Checking
+author      : Paola Berchialla
+job         : Department of Clinical and Biological Sciences, University of Torino
+output:
+  ioslides_presentation:
+    css: assets/css/ioslides.css
+    logo: assets/img/dscb.jpg
+    mathjax: local
+    self_contained: no
+    widescreen: yes
+  beamer_presentation: default
+  slidy_presentation: default
+---
+
+## Posterior Predictive model checking
+
+- Only if the model describes the data-generating process sufficiently accurately relevant conclusions can be drawn.
+
+- How to assess the data-generating process: 
+    - residual analysis
+    - posterior predictive model checking 
+    - prior sensitivity analysis
+
+- _Posterior predictive model checking_ is the comparison of replicated data generated under the model with the observed data
+
+
+
+## Posterior predictive distribution
+
+- To generate this replicated data the posterior predictive distribution is used
+
+$$
+p(y^\textrm{rep}\vert y) = \int p(y^\textrm{rep}\vert \theta)p(\theta\vert y)
+$$
+where $y$ is the observed data and $\theta$ the parameters in the model
+
+- For each draw of $\theta$ from the posterior $p(\theta\vert)$ $y^\textrm{rep}$ is drawn from the posterior predictive distribution $p(y^\textrm{rep}\vert y)$
+
+- eplicated $\mathbf y^{rep}$ can be easily generated
+    - add a single step within any MCMC sampler using $f\left( y^{rep}\vert \boldsymbol{\theta}^{(t)}\right)$
+        - $\boldsymbol{\theta}^{(t)}$ is the parameter values of the current state of the algorithm
+
+- Graphical displays comparing observed data and replications $y^\textrm{rep}$ 
+
+
+    
+## Predictive data
+
+- The predictive data $\mathbf y^{rep}$ reflects the expected observations after replicating the study:
+    - having already observed $\mathbf y$ 
+    - assuming the model adopted is true
+
+- Comparison can be made using summary functions $D(\mathbf y, \boldsymbol{\theta})$
+    - test statistics for checking the assumptions and measure discrepancies between data and model (Gelman, 1996)
+    
+
+## Bayesian p-values
+
+- The Bayesian __p-value__  (posterior predictive p-values) offers a way for formalized testing
+     - it is defined as the probability the replicated data from the model are more extreme than the observed data, as measured by a surprise statistics
+     
+$$
+P\left(D(\mathbf y^{\text{rep}}, \boldsymbol{\theta}) > D(\mathbf y, \boldsymbol{\theta}) \vert \mathbf y \right)
+$$
+     
+- In case of a perfect fit, the test statistics from the observed data is  in the middle of the ones from the replicated data
+    - around 50% of the test statistics from the replicated data are higher than the one from the observed data 
+- Bayesian __p-values__ close to 0 or close to 1 indicate the aspect of the model measured by the specific test is not well represented by the model 
+
+
+## Beware
+
+- In model checks, data are used twice:
+    - 1st: estimation of the posterior predictive density
+    - 2nd: comparison between the predictive density and the data
+
+- __Violation of the likelihood principle__
+    - not entirely a violation if the posterior predictive checks are used only as measure of discrepancy between the model and the data to identify poorly fitted models and not for model comparison and inference
+
+
+## Model checks
+
+Model checks can be divided into:
+
+- individual checks
+    - based on each $y_i$ and $y^{rep}_i$ separately to trace outliers or surprising observations (under the assumed model)
+- overall predictive diagnostics to check general assumptions of the model: 
+    - normality, goodness-of-fit
+
+## Steps for posterior predictive checks
+
+- Plot and compare the frequency tabulations of $\mathbf y^{\text{rep}}$ and $\mathbf y$ for discrete data
+
+- Plot and compare the cumulative frequencies of $\mathbf y^{\text{rep}}$ and $\mathbf y$ for continuous data
+
+- Plot and compare ordered data $\left(y_{(1)}^{\text{rep}}, \ldots, y_{(n)}^{\text{rep}} \right)$ and $\left(y_{(1)}, \ldots, y_{(n)} \right)$ for continuous data
+
+- Plot estimated posterior predictive ordinate $f(y_i\vert\mathbf y)$ against $y_i$ to trace surprising values
+
+## Steps for posterior predictive checks
+
+- The posterior predictive ordinate
+$$
+PPO_i = f(y_i\vert\mathbf y) = \int f(y_i\vert\boldsymbol{\theta}) f(\boldsymbol{\theta}\vert\mathbf y) d\boldsymbol{\theta}
+$$
+provides the probability of again observing $y_i$ after having observed $\mathbf y$
+    - small values indicate observations originating from the tail
+    - extremely small values indicate potential outliers
+    - a large amount of $y_i$ with small PPO may indicate a poorly fitted model
+    
+## Checking individual observations using residuals
+
+- Residual values can be based on the deviations of the data from the mean of the model or its standardized version
+$$
+r_i = y_i - E(Y_i\vert\boldsymbol\theta)\qquad r_i^2 = \frac{y_i - E(Y_i\vert\boldsymbol\theta)}{\sqrt{\textrm{Var}(Y_i\vert\boldsymbol\theta)}}
+$$
+- The tail area probaility
+$$
+p_i^r = P(r_i^{rep} > r_i\vert y) = P(y_i^{rep} > y_i\vert y)
+$$
+where $r_i^{rep}$ is the residual value based on the predictive/replicated values $y_i^{rep}$
+- The value
+$$
+\min (p_i^r, 1 - p_i^r) = \min \left\{ P(y_i^{rep} > y_i\vert y), 1 - P(y_i^{rep} > y_i\vert y)\right\}
+$$
+can be interpreted as the probability of _getting a more extreme observation_
+
+## Steps for posterior predictive checks
+
+- Use test statistics and bayesian p-values to quantify differences concerning
+    - outliers: individual test statistics on the basis of residual values
+    - structural assumptions of the model: global test statistics, i.e. comparing the skewness and the kurtosis of $\mathbf y^{\text{rep}}$ with the corresponding observed measures
+    - fitness of the model: usual measure such as $\chi^2$
+
+$$
+\chi^2(\mathbf y, \boldsymbol{\theta}) = \sum_{i=1}^n \frac{[y_i - E(Y_i\boldsymbol{\theta})]^2}{\text{Var} E(Y_i\boldsymbol{\theta})}
+$$
+  and deviance
+$$
+Deviance(\mathbf y, \boldsymbol{\theta}) = -2 \sum_{i=1}^n \text{log} f(y_i\vert\boldsymbol{\theta})
+$$
+
+
+    
+
+## Test statistics
+- Posterior predictive check embedded in _shinystan_
+
+<center>
+<img src="images\download1.png" >
+</center>
+
+## Test statistics
+
+- Posterior predictive check embedded in _shinystan_
+
+<center>
+<img src="images\download2.png" >
+</center>
+
+
+
+## A motivating example
+
+```{r, echo=FALSE, results='asis'}
+load('R\\datac.RData')
+library(knitr)
+print(kable(head(datac)))
+```
+
+
+
+## Writing the model
+
+$$
+\begin{align}
+Y_i &\sim \textrm{Bernoulli}(\theta_i)\\
+\textrm{logit}(\theta_i) & = \alpha + \beta_P P_i + \beta_C C_i+ \beta_{PC}C_iP_i\\
+\alpha & \sim\textrm{Normal}(0,10)\\
+\beta_C & \sim\textrm{Normal}(0,10)\\
+\beta_P & \sim\textrm{Normal}(0,10)\\
+\beta_{PC} & \sim\textrm{Normal}(0,10)\\
+\end{align}
+$$
+
+## STAN code
+
+
+```{r, warning=FALSE, message=FALSE, eval=FALSE}
+
+library(glmer2stan)
+source('R\\myglmer2stan.R')
+
+y <- datac$outcome
+
+mod_2<- myglmer2stan(outcome ~ treatment + condition, 
+                    data = datac, family = 'binomial',
+                    Ranef = FALSE,
+                    calcWAIC=T,
+                    warmup=500, 
+                    iter = 1000,
+                    chains=2) 
+```
+
+## Posterior Predictive check
+
+```{r, eval=FALSE}
+
+mod_2<- myglmer2stan(outcome ~ treatment + condition, 
+                    data = datac, family = 'binomial',
+                      Ranef = FALSE,
+                      sample = FALSE,
+                     calcWAIC=T,
+                     warmup=500, 
+                     iter = 1000,
+                     chains=2) 
+```
+
+```{r, eval=FALSE}
+show(mod_2)
+```
+
+## Modify the model to sample replication
+
+```
+generated quantities{
+    real dev;
+    real vary[N];
+    real glm[N];
+    dev <- 0;
+    for ( i in 1:N ) {
+        glm[i] <- Intercept
+                + beta_treatment * treatment[i]
+                + beta_condition * condition[i];
+        dev <- dev + (-2) * binomial_log( outcome[i] , bin_total[i] , inv_logit(glm[i]) );
+    }
+}
+```
+
+## Modify the model to sample replications
+
+
+```
+generated quantities{
+    real dev;
+    real vary[N];
+    real glm[N];
+    vector y_rep[N]; // A new vector!
+    dev <- 0;
+    for ( i in 1:N ) {
+        glm[i] <- Intercept
+                + beta_treatment * treatment[i]
+                + beta_condition * condition[i];
+        y_rep <- bernoulli_rng(invlogit(glm[i]));
+        dev <- dev + (-2) * binomial_log( outcome[i] , bin_total[i] , inv_logit(glm[i]) );
+    }
+}
+```
+## Define the model in an object string
+
+```{r, echo=FALSE}
+my_model <- '
+data{
+    int N;
+    int outcome[N];
+    real treatment[N];
+    real condition[N];
+}
+
+parameters{
+    real Intercept;
+    real beta_treatment;
+    real beta_condition;
+}
+
+model{
+    real glm[N];
+    // Priors
+    Intercept ~ normal( 0 , 100 );
+    beta_treatment ~ normal( 0 , 100 );
+    beta_condition ~ normal( 0 , 100 );
+    // Fixed effects
+    for ( i in 1:N ) {
+        glm[i] <- Intercept
+                + beta_treatment * treatment[i]
+                + beta_condition * condition[i];
+        glm[i] <- inv_logit( glm[i] );
+    }
+    outcome ~ binomial(1 , glm );
+}
+
+generated quantities{
+    real dev;
+    real glm_rep[N];
+    int y_rep[N]; // A new vector!
+    dev <- 0;
+    for ( i in 1:N ) {
+        glm_rep[i] <- Intercept
+                + beta_treatment * treatment[i]
+                + beta_condition * condition[i];
+        y_rep[i] <- bernoulli_rng(inv_logit(Intercept
+                + beta_treatment * treatment[i]
+                + beta_condition * condition[i])); // replication!
+        dev <- dev + (-2) * binomial_log( outcome[i] , 1 , inv_logit(glm_rep[i]) );
+    }
+}
+' 
+```
+
+```{r, eval=FALSE}
+my_model <- '
+data{
+    int N;
+    int outocme[N];
+    real treatment[N];
+    real condition[N];
+}
+
+parameters{
+    real Intercept;
+    real beta_treatment;
+    real beta_condition;
+}
+
+```
+
+## Run the model
+
+
+
+```{r, eval=FALSE}
+datalist <- list(outcome = datac$outcome,
+             treatment = datac$treatment,
+             condition = datac$condition,
+             N = nrow(datac))
+
+mymod<- stan( model_code = my_model,
+              data = datalist) 
+
+
+```
+
+## Launch Shinystan
+
+```{r, echo=FALSE}
+load('output\\workspace.RData')
+```
+
+- Extract replication or launch shynistan
+
+```{r, eval=FALSE}
+samples <- extract(mymod, pars='y_rep')
+
+```
+
+```{r, eval=FALSE, message=FALSE, warning=FALSE}
+library(shinystan)
+launch_shinystan(mymod)
+```
+
+
+
+## Practical
+- Try to assess PP check for the hierarchical model seen previosly
+
+```{r, eval=FALSE}
+my_mod <- myglmer2stan(totCortlog ~ Implant + days + Implant:days +  (1|Ring),
+                       data = cortbowl, 
+                       calcWAIC = T,
+                       warmup = 500,
+                       iter = 2000,
+                       chains = 2) 
+```
+
+
+## References
+
+- Gelman A, Meng XL, Stern H (1996). Posterior predictive assessment of model fitness via realized discrepancies. _Statistica Sinica_ __6__, 733-807
+
+- Meng XL (1994). Posterior predictive p-values. _Annals of Statistics_ __22__, 1142-1160
+
+## Getting the slides
+
+* The slides for this course were created with Rmarkdown: [http://rmarkdown.rstudio.com/](http://rmarkdown.rstudio.com/). 
+* They are available from [https://github.com/berkeley3/BDA-IZSTO](https://github.com/berkeley3/BDA-IZSTO).
+* To re-compile the slides:
+
+    + Download the directory containing the lectures from Github
+    + In R open the .Rmd file and set the working directory to the lecture directory
+    + Click the *KnitHTML* button on Rstudio or run the following commands: 
+  
+```{r RmarkdownChunk, eval=FALSE}
+library(rmarkdown) 
+render("main.Rmd")

@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bayesian Data Analysis for Medical Data</title>
+
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <meta name="generator" content="pandoc" />
+
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <base target="_blank">
+
+  <script type="text/javascript">
+    var SLIDE_CONFIG = {
+      // Slide settings
+      settings: {
+                title: 'Bayesian Data Analysis for Medical Data',
+                        subtitle: 'Posterior Predictive Model Checking',
+                useBuilds: true,
+        usePrettify: true,
+        enableSlideAreas: true,
+        enableTouch: true,
+                        favIcon: 'main_files/logo.jpg',
+              },
+
+      // Author information
+      presenters: [
+            {
+        name:  'Paola Berchialla' ,
+        company: '',
+        gplus: '',
+        twitter: '',
+        www: '',
+        github: ''
+      },
+            ]
+    };
+  </script>
+
+  <link href="main_files/ioslides-13.5.1/fonts/fonts.css" rel="stylesheet" />
+  <link href="main_files/ioslides-13.5.1/theme/css/default.css" rel="stylesheet" />
+  <link href="main_files/ioslides-13.5.1/theme/css/phone.css" rel="stylesheet" />
+  <script src="main_files/ioslides-13.5.1/js/modernizr.custom.45394.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/prettify/prettify.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/prettify/lang-r.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/prettify/lang-yaml.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/hammer.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/slide-controller.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/slide-deck.js"></script>
+
+  <style type="text/css">
+
+    b, strong {
+      font-weight: bold;
+    }
+
+    em {
+      font-style: italic;
+    }
+
+    slides > slide {
+      -webkit-transition: all 0.4s ease-in-out;
+      -moz-transition: all 0.4s ease-in-out;
+      -o-transition: all 0.4s ease-in-out;
+      transition: all 0.4s ease-in-out;
+    }
+
+    .auto-fadein {
+      -webkit-transition: opacity 0.6s ease-in;
+      -webkit-transition-delay: 0.4s;
+      -moz-transition: opacity 0.6s ease-in 0.4s;
+      -o-transition: opacity 0.6s ease-in 0.4s;
+      transition: opacity 0.6s ease-in 0.4s;
+      opacity: 0;
+    }
+
+    slides > slide:not(.nobackground):before {
+      font-size: 12pt;
+      content: "";
+      position: absolute;
+      bottom: 20px;
+      left: 60px;
+      background: url(main_files/logo.jpg) no-repeat 0 50%;
+      -webkit-background-size: 30px 30px;
+      -moz-background-size: 30px 30px;
+      -o-background-size: 30px 30px;
+      background-size: 30px 30px;
+      padding-left: 40px;
+      height: 30px;
+      line-height: 1.9;
+    }
+  </style>
+
+  <link rel="stylesheet" href="assets\css\ioslides.css" type="text/css" />
+
+</head>
+
+<body style="opacity: 0">
+
+<slides class="layout-widescreen">
+
+  <slide class="title-slide segue nobackground">
+        <aside class="gdbar"><img src="main_files/logo.jpg"></aside>
+        <!-- The content of this hgroup is replaced programmatically through the slide_config.json. -->
+    <hgroup class="auto-fadein">
+      <h1 data-config-title><!-- populated from slide_config.json --></h1>
+      <h2 data-config-subtitle><!-- populated from slide_config.json --></h2>
+      <p data-config-presenter><!-- populated from slide_config.json --></p>
+          </hgroup>
+  </slide>
+
+<slide class=''><hgroup><h2>Posterior Predictive model checking</h2></hgroup><article  id="posterior-predictive-model-checking">
+
+<ul>
+<li><p>Only if the model describes the data-generating process sufficiently accurately relevant conclusions can be drawn.</p></li>
+<li>How to assess the data-generating process:
+
+<ul>
+<li>residual analysis</li>
+<li>posterior predictive model checking</li>
+<li>prior sensitivity analysis</li>
+</ul></li>
+<li><p><em>Posterior predictive model checking</em> is the comparison of replicated data generated under the model with the observed data</p></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Posterior predictive distribution</h2></hgroup><article  id="posterior-predictive-distribution">
+
+<ul>
+<li>To generate this replicated data the posterior predictive distribution is used</li>
+</ul>
+
+<p>\[
+p(y^\textrm{rep}\vert y) = \int p(y^\textrm{rep}\vert \theta)p(\theta\vert y)
+\] where \(y\) is the observed data and \(\theta\) the parameters in the model</p>
+
+<ul>
+<li><p>For each draw of \(\theta\) from the posterior \(p(\theta\vert)\) \(y^\textrm{rep}\) is drawn from the posterior predictive distribution \(p(y^\textrm{rep}\vert y)\)</p></li>
+<li>eplicated \(\mathbf y^{rep}\) can be easily generated
+
+<ul>
+<li>add a single step within any MCMC sampler using \(f\left( y^{rep}\vert \boldsymbol{\theta}^{(t)}\right)\)
+
+<ul>
+<li>\(\boldsymbol{\theta}^{(t)}\) is the parameter values of the current state of the algorithm</li>
+</ul></li>
+</ul></li>
+<li><p>Graphical displays comparing observed data and replications \(y^\textrm{rep}\)</p></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Predictive data</h2></hgroup><article  id="predictive-data">
+
+<ul>
+<li>The predictive data \(\mathbf y^{rep}\) reflects the expected observations after replicating the study:
+
+<ul>
+<li>having already observed \(\mathbf y\)</li>
+<li>assuming the model adopted is true</li>
+</ul></li>
+<li>Comparison can be made using summary functions \(D(\mathbf y, \boldsymbol{\theta})\)
+
+<ul>
+<li>test statistics for checking the assumptions and measure discrepancies between data and model (Gelman, 1996)</li>
+</ul></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Bayesian p-values</h2></hgroup><article  id="bayesian-p-values">
+
+<ul>
+<li>The Bayesian <strong>p-value</strong> (posterior predictive p-values) offers a way for formalized testing
+
+<ul>
+<li>it is defined as the probability the replicated data from the model are more extreme than the observed data, as measured by a surprise statistics</li>
+</ul></li>
+</ul>
+
+<p>\[
+P\left(D(\mathbf y^{\text{rep}}, \boldsymbol{\theta}) &gt; D(\mathbf y, \boldsymbol{\theta}) \vert \mathbf y \right)
+\]</p>
+
+<ul>
+<li>In case of a perfect fit, the test statistics from the observed data is in the middle of the ones from the replicated data
+
+<ul>
+<li>around 50% of the test statistics from the replicated data are higher than the one from the observed data</li>
+</ul></li>
+<li>Bayesian <strong>p-values</strong> close to 0 or close to 1 indicate the aspect of the model measured by the specific test is not well represented by the model</li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Beware</h2></hgroup><article  id="beware">
+
+<ul>
+<li>In model checks, data are used twice:
+
+<ul>
+<li>1st: estimation of the posterior predictive density</li>
+<li>2nd: comparison between the predictive density and the data</li>
+</ul></li>
+<li><strong>Violation of the likelihood principle</strong>
+
+<ul>
+<li>not entirely a violation if the posterior predictive checks are used only as measure of discrepancy between the model and the data to identify poorly fitted models and not for model comparison and inference</li>
+</ul></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Model checks</h2></hgroup><article  id="model-checks">
+
+<p>Model checks can be divided into:</p>
+
+<ul>
+<li>individual checks
+
+<ul>
+<li>based on each \(y_i\) and \(y^{rep}_i\) separately to trace outliers or surprising observations (under the assumed model)</li>
+</ul></li>
+<li>overall predictive diagnostics to check general assumptions of the model:
+
+<ul>
+<li>normality, goodness-of-fit</li>
+</ul></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Steps for posterior predictive checks</h2></hgroup><article  id="steps-for-posterior-predictive-checks">
+
+<ul>
+<li><p>Plot and compare the frequency tabulations of \(\mathbf y^{\text{rep}}\) and \(\mathbf y\) for discrete data</p></li>
+<li><p>Plot and compare the cumulative frequencies of \(\mathbf y^{\text{rep}}\) and \(\mathbf y\) for continuous data</p></li>
+<li><p>Plot and compare ordered data \(\left(y_{(1)}^{\text{rep}}, \ldots, y_{(n)}^{\text{rep}} \right)\) and \(\left(y_{(1)}, \ldots, y_{(n)} \right)\) for continuous data</p></li>
+<li><p>Plot estimated posterior predictive ordinate \(f(y_i\vert\mathbf y)\) against \(y_i\) to trace surprising values</p></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Steps for posterior predictive checks</h2></hgroup><article  id="steps-for-posterior-predictive-checks-1">
+
+<ul>
+<li>The posterior predictive ordinate \[
+PPO_i = f(y_i\vert\mathbf y) = \int f(y_i\vert\boldsymbol{\theta}) f(\boldsymbol{\theta}\vert\mathbf y) d\boldsymbol{\theta}
+\] provides the probability of again observing \(y_i\) after having observed \(\mathbf y\)
+
+<ul>
+<li>small values indicate observations originating from the tail</li>
+<li>extremely small values indicate potential outliers</li>
+<li>a large amount of \(y_i\) with small PPO may indicate a poorly fitted model</li>
+</ul></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Checking individual observations using residuals</h2></hgroup><article  id="checking-individual-observations-using-residuals">
+
+<ul>
+<li>Residual values can be based on the deviations of the data from the mean of the model or its standardized version \[
+r_i = y_i - E(Y_i\vert\boldsymbol\theta)\qquad r_i^2 = \frac{y_i - E(Y_i\vert\boldsymbol\theta)}{\sqrt{\textrm{Var}(Y_i\vert\boldsymbol\theta)}}
+\]</li>
+<li>The tail area probaility \[
+p_i^r = P(r_i^{rep} &gt; r_i\vert y) = P(y_i^{rep} &gt; y_i\vert y)
+\] where \(r_i^{rep}\) is the residual value based on the predictive/replicated values \(y_i^{rep}\)</li>
+<li>The value \[
+\min (p_i^r, 1 - p_i^r) = \min \left\{ P(y_i^{rep} &gt; y_i\vert y), 1 - P(y_i^{rep} &gt; y_i\vert y)\right\}
+\] can be interpreted as the probability of <em>getting a more extreme observation</em></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Steps for posterior predictive checks</h2></hgroup><article  id="steps-for-posterior-predictive-checks-2">
+
+<ul>
+<li>Use test statistics and bayesian p-values to quantify differences concerning
+
+<ul>
+<li>outliers: individual test statistics on the basis of residual values</li>
+<li>structural assumptions of the model: global test statistics, i.e. comparing the skewness and the kurtosis of \(\mathbf y^{\text{rep}}\) with the corresponding observed measures</li>
+<li>fitness of the model: usual measure such as \(\chi^2\)</li>
+</ul></li>
+</ul>
+
+<p>\[
+\chi^2(\mathbf y, \boldsymbol{\theta}) = \sum_{i=1}^n \frac{[y_i - E(Y_i\boldsymbol{\theta})]^2}{\text{Var} E(Y_i\boldsymbol{\theta})}
+\] and deviance \[
+Deviance(\mathbf y, \boldsymbol{\theta}) = -2 \sum_{i=1}^n \text{log} f(y_i\vert\boldsymbol{\theta})
+\]</p>
+
+</article></slide><slide class=''><hgroup><h2>Test statistics</h2></hgroup><article  id="test-statistics">
+
+<ul>
+<li>Posterior predictive check embedded in <em>shinystan</em></li>
+</ul>
+
+<center>
+
+<img src="images/download1.png" >
+
+</center>
+
+</article></slide><slide class=''><hgroup><h2>Test statistics</h2></hgroup><article  id="test-statistics-1">
+
+<ul>
+<li>Posterior predictive check embedded in <em>shinystan</em></li>
+</ul>
+
+<center>
+
+<img src="images/download2.png" >
+
+</center>
+
+</article></slide><slide class=''><hgroup><h2>A motivating example</h2></hgroup><article  id="a-motivating-example">
+
+<table class = 'rmdtable'>
+<tr class="header">
+<th align="right">hospital</th>
+<th align="right">id</th>
+<th align="right">condition</th>
+<th align="right">block</th>
+<th align="right">trial</th>
+<th align="right">treatment</th>
+<th align="right">switch</th>
+<th align="right">outcome</th>
+</tr>
+<tr class="odd">
+<td align="right">1</td>
+<td align="right">NA</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">2</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="right">1</td>
+<td align="right">NA</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">4</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td align="right">1</td>
+<td align="right">NA</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">6</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="right">1</td>
+<td align="right">NA</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">8</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="right">1</td>
+<td align="right">NA</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">10</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="right">1</td>
+<td align="right">NA</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">12</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+</tr>
+</table>
+
+</article></slide><slide class=''><hgroup><h2>Writing the model</h2></hgroup><article  id="writing-the-model">
+
+<p>\[
+\begin{align}
+Y_i &amp;\sim \textrm{Bernoulli}(\theta_i)\\
+\textrm{logit}(\theta_i) &amp; = \alpha + \beta_P P_i + \beta_C C_i+ \beta_{PC}C_iP_i\\
+\alpha &amp; \sim\textrm{Normal}(0,10)\\
+\beta_C &amp; \sim\textrm{Normal}(0,10)\\
+\beta_P &amp; \sim\textrm{Normal}(0,10)\\
+\beta_{PC} &amp; \sim\textrm{Normal}(0,10)\\
+\end{align}
+\]</p>
+
+</article></slide><slide class=''><hgroup><h2>STAN code</h2></hgroup><article  id="stan-code">
+
+<pre class = 'prettyprint lang-r'>library(glmer2stan)
+source(&#39;R\\myglmer2stan.R&#39;)
+
+y &lt;- datac$outcome
+
+mod_2&lt;- myglmer2stan(outcome ~ treatment + condition, 
+                    data = datac, family = &#39;binomial&#39;,
+                    Ranef = FALSE,
+                    calcWAIC=T,
+                    warmup=500, 
+                    iter = 1000,
+                    chains=2) </pre>
+
+</article></slide><slide class=''><hgroup><h2>Posterior Predictive check</h2></hgroup><article  id="posterior-predictive-check">
+
+<pre class = 'prettyprint lang-r'>mod_2&lt;- myglmer2stan(outcome ~ treatment + condition, 
+                    data = datac, family = &#39;binomial&#39;,
+                      Ranef = FALSE,
+                      sample = FALSE,
+                     calcWAIC=T,
+                     warmup=500, 
+                     iter = 1000,
+                     chains=2) </pre>
+
+<pre class = 'prettyprint lang-r'>show(mod_2)</pre>
+
+</article></slide><slide class=''><hgroup><h2>Modify the model to sample replication</h2></hgroup><article  id="modify-the-model-to-sample-replication">
+
+<pre >generated quantities{
+    real dev;
+    real vary[N];
+    real glm[N];
+    dev &lt;- 0;
+    for ( i in 1:N ) {
+        glm[i] &lt;- Intercept
+                + beta_treatment * treatment[i]
+                + beta_condition * condition[i];
+        dev &lt;- dev + (-2) * binomial_log( outcome[i] , bin_total[i] , inv_logit(glm[i]) );
+    }
+}</pre>
+
+</article></slide><slide class=''><hgroup><h2>Modify the model to sample replications</h2></hgroup><article  id="modify-the-model-to-sample-replications">
+
+<pre >generated quantities{
+    real dev;
+    real vary[N];
+    real glm[N];
+    vector y_rep[N]; // A new vector!
+    dev &lt;- 0;
+    for ( i in 1:N ) {
+        glm[i] &lt;- Intercept
+                + beta_treatment * treatment[i]
+                + beta_condition * condition[i];
+        y_rep &lt;- bernoulli_rng(invlogit(glm[i]));
+        dev &lt;- dev + (-2) * binomial_log( outcome[i] , bin_total[i] , inv_logit(glm[i]) );
+    }
+}</pre>
+
+</article></slide><slide class=''><hgroup><h2>Define the model in an object string</h2></hgroup><article  id="define-the-model-in-an-object-string">
+
+<pre class = 'prettyprint lang-r'>my_model &lt;- &#39;
+data{
+    int N;
+    int outocme[N];
+    real treatment[N];
+    real condition[N];
+}
+
+parameters{
+    real Intercept;
+    real beta_treatment;
+    real beta_condition;
+}</pre>
+
+</article></slide><slide class=''><hgroup><h2>Run the model</h2></hgroup><article  id="run-the-model">
+
+<pre class = 'prettyprint lang-r'>datalist &lt;- list(outcome = datac$outcome,
+             treatment = datac$treatment,
+             condition = datac$condition,
+             N = nrow(datac))
+
+mymod&lt;- stan( model_code = my_model,
+              data = datalist) </pre>
+
+</article></slide><slide class=''><hgroup><h2>Launch Shinystan</h2></hgroup><article  id="launch-shinystan">
+
+<ul>
+<li>Extract replication or launch shynistan</li>
+</ul>
+
+<pre class = 'prettyprint lang-r'>samples &lt;- extract(mymod, pars=&#39;y_rep&#39;)</pre>
+
+<pre class = 'prettyprint lang-r'>library(shinystan)
+launch_shinystan(mymod)</pre>
+
+</article></slide><slide class=''><hgroup><h2>Practical</h2></hgroup><article  id="practical">
+
+<ul>
+<li>Try to assess PP check for the hierarchical model seen previosly</li>
+</ul>
+
+<pre class = 'prettyprint lang-r'>my_mod &lt;- myglmer2stan(totCortlog ~ Implant + days + Implant:days +  (1|Ring),
+                       data = cortbowl, 
+                       calcWAIC = T,
+                       warmup = 500,
+                       iter = 2000,
+                       chains = 2) </pre>
+
+</article></slide><slide class=''><hgroup><h2>References</h2></hgroup><article  id="references">
+
+<ul>
+<li><p>Gelman A, Meng XL, Stern H (1996). Posterior predictive assessment of model fitness via realized discrepancies. <em>Statistica Sinica</em> <strong>6</strong>, 733-807</p></li>
+<li><p>Meng XL (1994). Posterior predictive p-values. <em>Annals of Statistics</em> <strong>22</strong>, 1142-1160</p></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Getting the slides</h2></hgroup><article  id="getting-the-slides">
+
+<ul>
+<li>The slides for this course were created with Rmarkdown: <a href='http://rmarkdown.rstudio.com/' title=''>http://rmarkdown.rstudio.com/</a>.</li>
+<li>They are available from <a href='https://github.com/berkeley3/BDA-IZSTO' title=''>https://github.com/berkeley3/BDA-IZSTO</a>.</li>
+<li><p>To re-compile the slides:</p>
+
+<ul>
+<li>Download the directory containing the lectures from Github</li>
+<li>In R open the .Rmd file and set the working directory to the lecture directory</li>
+<li>Click the <em>KnitHTML</em> button on Rstudio or run the following commands:</li>
+</ul></li>
+</ul>
+
+<pre class = 'prettyprint lang-r'>library(rmarkdown) 
+render(&quot;main.Rmd&quot;)</pre></article></slide>
+
+
+  <slide class="backdrop"></slide>
+
+</slides>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "main_files/mathjax-local/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+<!-- map slide visiblity events into shiny -->
+<script>
+  (function() {
+    if (window.jQuery) {
+       window.jQuery(document).on('slideleave', function(e) {
+         window.jQuery(e.target).trigger('hidden');
+      });
+       window.jQuery(document).on('slideenter', function(e) {
+         window.jQuery(e.target).trigger('shown');
+      });
+    }
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bayesian Data Analysis for Medical Data</title>
+
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <meta name="generator" content="pandoc" />
+
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <link rel="stylesheet" media="all" href="main_files/ioslides-13.5.1/fonts/fonts.css">
+
+  <link rel="stylesheet" media="all" href="main_files/ioslides-13.5.1/theme/css/default.css">
+  <link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="main_files/ioslides-13.5.1/theme/css/phone.css">
+
+  <base target="_blank">
+
+  <script type="text/javascript">
+    var SLIDE_CONFIG = {
+      // Slide settings
+      settings: {
+                title: 'Bayesian Data Analysis for Medical Data',
+                        subtitle: 'Markov Chain Monte Carlo',
+                useBuilds: true,
+        usePrettify: true,
+        enableSlideAreas: true,
+        enableTouch: true,
+                        favIcon: 'main_files/logo.jpg',
+              },
+
+      // Author information
+      presenters: [
+            {
+        name:  'Paola Berchialla' ,
+        company: '',
+        gplus: '',
+        twitter: '',
+        www: '',
+        github: ''
+      },
+            ]
+    };
+  </script>
+
+  <style type="text/css">
+
+    b, strong {
+      font-weight: bold;
+    }
+
+    em {
+      font-style: italic;
+    }
+
+    slides > slide {
+      -webkit-transition: all 0.4s ease-in-out;
+      -moz-transition: all 0.4s ease-in-out;
+      -o-transition: all 0.4s ease-in-out;
+      transition: all 0.4s ease-in-out;
+    }
+
+    .auto-fadein {
+      -webkit-transition: opacity 0.6s ease-in;
+      -webkit-transition-delay: 0.4s;
+      -moz-transition: opacity 0.6s ease-in 0.4s;
+      -o-transition: opacity 0.6s ease-in 0.4s;
+      transition: opacity 0.6s ease-in 0.4s;
+      opacity: 0;
+    }
+
+    slides > slide:not(.nobackground):before {
+      font-size: 12pt;
+      content: "";
+      position: absolute;
+      bottom: 20px;
+      left: 60px;
+      background: url(main_files/logo.jpg) no-repeat 0 50%;
+      -webkit-background-size: 30px 30px;
+      -moz-background-size: 30px 30px;
+      -o-background-size: 30px 30px;
+      background-size: 30px 30px;
+      padding-left: 40px;
+      height: 30px;
+      line-height: 1.9;
+    }
+  </style>
+
+  <link rel="stylesheet" href="assets\css\ioslides.css" type="text/css" />
+
+
+</head>
+
+<body style="opacity: 0">
+
+<slides class="layout-widescreen">
+
+  <slide class="title-slide segue nobackground">
+        <aside class="gdbar"><img src="main_files/logo.jpg"></aside>
+        <!-- The content of this hgroup is replaced programmatically through the slide_config.json. -->
+    <hgroup class="auto-fadein">
+      <h1 data-config-title><!-- populated from slide_config.json --></h1>
+      <h2 data-config-subtitle><!-- populated from slide_config.json --></h2>
+      <p data-config-presenter><!-- populated from slide_config.json --></p>
+          </hgroup>
+  </slide>
+
+<style>
+  .col2 {
+    columns: 2 200px;         /* number of columns and width in pixels*/
+    -webkit-columns: 2 200px; /* chrome, safari */
+    -moz-columns: 2 200px;    /* firefox */
+  }
+</style>
+
+<slide class=''><hgroup><h2>The Metropolis Arcipelago</h2></hgroup><article  id="the-metropolis-arcipelago">
+
+<center>
+
+<img src="images/MetropolisArcipelago.png" width="500px" height="400px" />
+
+</center>
+
+<ul>
+<li>visiting each island in proportion to its population size</li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>The Metropolis Arcipelago</h2></hgroup><article  id="the-metropolis-arcipelago-1">
+
+<ul>
+<li>choose a starting point</li>
+</ul>
+
+<center>
+
+<img src="images/MetropolisArcipelago_1.png" width="500px" height="400px" />
+
+</center>
+
+</article></slide><slide class=''><hgroup><h2>The Metropolis Arcipelago</h2></hgroup><article  id="the-metropolis-arcipelago-2">
+
+<ul>
+<li>flip a coin to choose island on left or right: the <strong>proposal island</strong></li>
+</ul>
+
+<center>
+
+<img src="images/MetropolisArcipelago_2.png" width="500px" height="400px" />
+
+</center>
+
+</article></slide><slide class=''><hgroup><h2>The Metropolis Arcipelago</h2></hgroup><article  id="the-metropolis-arcipelago-3">
+
+<ul>
+<li>Flip a coin to choose island on left or right: the <strong>proposal island</strong></li>
+</ul>
+
+<center>
+
+<img src="images/MetropolisArcipelago_3.png" width="500px" height="400px" />
+
+</center>
+
+</article></slide><slide class=''><hgroup><h2>The Metropolis Arcipelago</h2></hgroup><article  id="the-metropolis-arcipelago-4">
+
+<ul>
+<li>Find the population of the <strong>proposal island</strong></li>
+</ul>
+
+<center>
+
+<img src="images/MetropolisArcipelago_4.png" width="500px" height="400px" />
+
+</center>
+
+</article></slide><slide class=''><hgroup><h2>The Metropolis Arcipelago</h2></hgroup><article  id="the-metropolis-arcipelago-5">
+
+<ul>
+<li>Find the population of the <strong>current island</strong></li>
+</ul>
+
+<center>
+
+<img src="images/MetropolisArcipelago_5.png" width="500px" height="400px" />
+
+</center>
+
+</article></slide><slide class=''><hgroup><h2>The Metropolis Arcipelago</h2></hgroup><article  id="the-metropolis-arcipelago-6">
+
+<ul>
+<li>Move to <strong>proposal</strong> with probability \(p_8/p_9\)</li>
+</ul>
+
+<center>
+
+<img src="images/MetropolisArcipelago_5.png" width="500px" height="400px" />
+
+</center>
+
+</article></slide><slide class=''><hgroup><h2>The Metropolis Arcipelago</h2></hgroup><article  id="the-metropolis-arcipelago-7">
+
+<div class="col2">
+<ol>
+<li>Flip a coin to choose island on left or right: the <strong>proposal island</strong></li>
+<li>Find the population of the <strong>proposal island</strong></li>
+<li>Find the population of the <strong>current island</strong></li>
+<li>Move to <strong>proposal</strong> with probability \(p_8/p_9\)</li>
+<li>Repeat from 1</li>
+</ol>
+
+<p><br></br></p>
+
+<p><img src="images/MetropolisArcipelago_5.png" width="450px" height="400px" /></p></div>
+
+<p>This procedure ensures visiting each island in proportion to its population in the <em>long run</em></p>
+
+</article></slide><slide class=''><hgroup><h2>Metropolis and MCMC</h2></hgroup><article  id="metropolis-and-mcmc">
+
+<ul>
+<li>Usual use is to draw samples from a posterior distribution</li>
+<li><em>Islands:</em> parameter values</li>
+<li><em>Population size:</em> proportional to posterior probability</li>
+<li>Works for any number of dimensions (parameters)</li>
+<li>Works for continuous as well as discrete parameters</li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>R code</h2></hgroup><article  id="r-code">
+
+<pre class = 'prettyprint lang-r'>iterations &lt;- 1000
+positions &lt;- rep(0, iterations)
+
+for (i in 1:iterations){
+  # record current position
+  positions[i] &lt;- current
+
+  # flip a coin to generate proposal
+  proposal &lt;- current + sample(c(-1,1), size=1)
+  
+  # make sure you are not outside the parameter region
+  if(proposal&lt;1) proposal &lt;- 10
+  if(proposal&gt;10) proposal &lt;- 1
+  
+  # make decision about moving
+  prob.move &lt;- proposal/current
+  current &lt;- ifelse(runif(1) &lt; prob.move, proposal, current)
+  }</pre>
+
+</article></slide><slide class=''><hgroup><h2>Markov&#39;s chain of visits</h2></hgroup><article  id="markovs-chain-of-visits">
+
+<p><img src="main_files/figure-html/unnamed-chunk-2-1.png" width="720" style="display: block; margin: auto;" /></p>
+
+</article></slide><slide class=''><hgroup><h2>Markov&#39;s chain of visits</h2></hgroup><article  id="markovs-chain-of-visits-1">
+
+<p><img src="main_files/figure-html/mcmc-1.png" width="720" style="display: block; margin: auto;" /></p>
+
+</article></slide><slide class=''><hgroup><h2>The Metropolis Algorithm</h2></hgroup><article  id="the-metropolis-algorithm">
+
+<center>
+
+<img src="metropolis_ex/animation.gif" width="500px" height="400px" />
+
+</center>
+
+<ul>
+<li>Metropolis algorithm requires symmetrical proposals</li>
+<li><strong>Metropolis-Hastings (MH)</strong> does not</li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Metropolis-Hastings Sampling (Metropolis et al. 1953; Hastings 1970)</h2></hgroup><article  id="metropolis-hastings-sampling-metropolis-et-al.-1953-hastings-1970">
+
+<ul>
+<li>Proposes new poin by changing all parameters randomly</li>
+<li>Computes accept probability of new point based on ratio of new to old log probability (and proposal density)</li>
+<li>Only requires evaluation of \(p(\theta\vert y)\)</li>
+<li>Requires good proposal mechanism to be effective</li>
+<li>Acceptance requires small changes in log probability</li>
+<li>But small step size lead to random walks and slow convergence and mixing</li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Metropolis and MCMC</h2></hgroup><article  id="metropolis-and-mcmc-1">
+
+<ul>
+<li>Metropolis: Simple version of Markov chain Monte Carlo (MCMC)</li>
+<li>Metropolis, Rosenbluth, Rosenbluth, Teller, and Teller (1953)</li>
+</ul>
+
+<center>
+
+<img src="images/Teller.png" width="800px" height="350px" />
+
+</center>
+
+</article></slide><slide class=''><hgroup><h2>MANIAC</h2></hgroup><article  id="maniac">
+
+<ul>
+<li><em>Mathematical Analyzer, Numerical Integrator, and Computer</em></li>
+</ul>
+
+<div class="col2">
+<p><img src="images/maniac.png" width="300px" height="400px" /></p>
+
+<ul>
+<li><strong>MANIAC</strong>
+
+<ul>
+<li>450 kg</li>
+<li>5 kilobytes of memory</li>
+<li>70k multiplications/sec</li>
+</ul></li>
+<li><strong>my laptop</strong>
+
+<ul>
+<li>1.2 kg</li>
+<li>16 million kilobytes</li>
+<li>Billions of multiplications/sec</li>
+</ul></li>
+</ul></div>
+
+</article></slide><slide class=''><hgroup><h2>Metropolis and MCMC</h2></hgroup><article  id="metropolis-and-mcmc-2">
+
+<div class="col2">
+<ul>
+<li>Metropolis: Simple version of Markov chain Monte Carlo (MCMC)</li>
+<li>Chain: Sequence of draws from distribution</li>
+<li>Markov chain: History doesn&#39;t matter, just where you are now</li>
+<li>Monte Carlo: Random simulation</li>
+</ul>
+
+<p><br></br> <br></br></p>
+
+<p><img src="images/markov.png" width="300px" height="400px" /></p></div>
+
+</article></slide><slide class=''><hgroup><h2>Why MCMC</h2></hgroup><article  id="why-mcmc">
+
+<ul>
+<li>Real value of MCMC seen when an integrated likelihood function cannot be written</li>
+<li>Many kinds of problems are like this:
+
+<ul>
+<li>Many multilevel models</li>
+<li>Networks/phylogenies</li>
+<li>Some spatial models</li>
+</ul></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Monte Carlo Methods (Metropolis and Ulam 1949)</h2></hgroup><article  id="monte-carlo-methods-metropolis-and-ulam-1949">
+
+<ul>
+<li>For integrals that are impossible to solve analytically
+
+<ul>
+<li>but for which sampling and evaluation is tractable</li>
+</ul></li>
+<li>Compute plu-in estimates of statistics based on randomly generated variates
+
+<ul>
+<li>e.g means, variances, quantiles/intervals, comparisons</li>
+</ul></li>
+<li>Accuracy with \(M\) independent samples proportional to \[
+\frac{1}{\sqrt M}
+\]
+
+<ul>
+<li>100 times more samples per decimal place</li>
+</ul></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Monte Carlo Example</h2></hgroup><article  id="monte-carlo-example">
+
+<ul>
+<li><p>Posterior expectation of \(\theta\) \[
+E[\theta\vert y] = \int \theta p(\theta\vert y)d\theta 
+\]</p></li>
+<li><p>Bayesian estimate minimizing expected square error \[
+\hat\theta = \text{arg min}_{\theta^{&#39;}} E[(\theta - \theta^{&#39;})^2\vert y] = E[\theta\vert y] 
+\]</p></li>
+<li><p>Generate samples \(\theta^{(1)}, \theta^{(2)},\ldots ,\theta^{(M)}\) drawn from \(p(\theta\vert y)\)</p></li>
+<li><p>Monte Carlo Estimator plugs in average for expectation: \[
+E[\theta\vert y] \approx \frac{1}{M}\sum_{m=1}^M \theta^{(m)}
+\]</p></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Monte Carlo Example II</h2></hgroup><article  id="monte-carlo-example-ii">
+
+<ul>
+<li>Bayesian alternative to frequentist hypothesis testing</li>
+<li>Use probability to summarize results</li>
+<li><p>Bayesian comparison: probability \(\theta_1 &gt; \theta_2\) given data \(y\): \[
+\begin{eqnarray}
+P(\theta_1 &gt; \theta_2\vert y) &amp;=&amp; \int \int I(\theta_1 &gt; \theta_2)p(\theta_1\vert y)p(\theta_2\vert y)d\theta_1 d\theta_2\\
+ &amp;\approx &amp; \frac{1}{M}\sum_{m=1}^M  I(\theta_1^{(m)} &gt; \theta_2^{(m)})
+ \end{eqnarray}
+\]</p></li>
+<li><p>Bayesian hierarchical model <strong>adjust</strong> for multiple comparisons</p></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Markov Chain Monte Carlo</h2></hgroup><article  id="markov-chain-monte-carlo">
+
+<ul>
+<li>When sampling independently fom \(p(\theta\vert y)\) impossible</li>
+<li>\(\theta^{(m)}\) drawn via a Markov chain \(p(\theta^{(m)} \vert y, \theta^{(m-1)})\)</li>
+<li>Require MCMC marginal \(p(\theta^{(m)}\vert y)\) equal to true posterior marginal</li>
+<li>Leads to auto-correlation in samples \(\theta^{(1)}, \theta^{(2)},\ldots ,\theta^{(M)}\)</li>
+<li>Effective sample size \(N_{eff}\) divides out autocorrelation (must be estimated)</li>
+<li>Estimation accuracy proportional to \(1/\sqrt{N_{eff}}\)</li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>MCMC Strategies</h2></hgroup><article  id="mcmc-strategies">
+
+<div class="col2">
+<ul>
+<li><strong>Metropolis:</strong> Granddaddy of all MCMC algorithms</li>
+<li><strong>Metropolis-Hastings (MH):</strong> More general</li>
+<li><strong>Gibbs sampling (GS):</strong> Efficient version of MH</li>
+<li><strong>Hamiltonian Monte Carlo (HMC)</strong></li>
+<li>All remain useful</li>
+<li>New methods being developed</li>
+</ul>
+
+<p><br></br> <br></br> <br></br></p>
+
+<p><img src="images/mcmcHandbook.png" width="350px" height="500px" /></p></div>
+
+</article></slide><slide class=''><hgroup><h2>Gibbs sampling</h2></hgroup><article  id="gibbs-sampling">
+
+<ul>
+<li>Version of <strong>MH</strong> with very clever proposals
+
+<ul>
+<li>requires choosing certain kinds of priors, conjugate</li>
+<li>Basis of BUGS, JAGS</li>
+</ul></li>
+</ul>
+
+<center>
+
+<img src="images/gibbs.png" width="750px" height="350px" />
+
+</center>
+
+</article></slide><slide class=''><hgroup><h2>Gibbs sampling</h2></hgroup><article  id="gibbs-sampling-1">
+
+<ul>
+<li>Samples a parameter given data and other parameters</li>
+<li>Require conditional posterior \(p(\theta_n\vert y\theta_{-n})\)</li>
+<li>Conditional posterior easy in directed graphical model</li>
+<li>Requires general unidimensional sampler for non-conjugacy
+
+<ul>
+<li>JAGS uses slice sampler</li>
+<li>BUGS uses adaptive rejection sampler</li>
+</ul></li>
+<li>Conditional sampling and general unidimensional sampler can both lead to slow convergence and mixing</li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Hamiltonian Monte Carlo</h2></hgroup><article  id="hamiltonian-monte-carlo">
+
+<div class="col2">
+<ul>
+<li>Problem with Gibbs sampling (GS)
+
+<ul>
+<li>Models with many parameters usually have lots of highly correlated parameters</li>
+<li>GS gets stuck, degenerates towards random walk</li>
+<li>At best, inefficient because re-explores regions</li>
+</ul></li>
+<li>Hamiltonian dynamics to the rescue
+
+<ul>
+<li>it represents parameter state as particle in \(n\)-dimensional space</li>
+<li>flick it around frictionless log-posterior</li>
+<li>record positions</li>
+</ul></li>
+</ul>
+
+<center>
+
+<img src="images/hamilton.png" width="400px" height="400px" />
+
+</center></div>
+
+</article></slide><slide class=''><hgroup><h2>King Monty&#39;s Kingdom</h2></hgroup><article  id="king-montys-kingdom">
+
+<center>
+
+<img src="images/h8.png" width="600px" height="400px" />
+
+</center>
+
+</article></slide><slide class=''><hgroup><h2>King Monty&#39;s Kingdom</h2></hgroup><article  id="king-montys-kingdom-1">
+
+<center>
+
+<img src="images/h7.png" width="600px" height="400px" />
+
+</center>
+
+</article></slide><slide class=''><hgroup><h2>King Monty&#39;s Kingdom</h2></hgroup><article  id="king-montys-kingdom-2">
+
+<center>
+
+<img src="images/h6.png" width="600px" height="400px" />
+
+</center>
+
+</article></slide><slide class=''><hgroup><h2>King Monty&#39;s Kingdom</h2></hgroup><article  id="king-montys-kingdom-3">
+
+<center>
+
+<img src="images/h5.png" width="600px" height="400px" />
+
+</center>
+
+</article></slide><slide class=''><hgroup><h2>King Monty&#39;s Kingdom</h2></hgroup><article  id="king-montys-kingdom-4">
+
+<center>
+
+<img src="images/h4.png" width="600px" height="400px" />
+
+</center>
+
+</article></slide><slide class=''><hgroup><h2>King Monty&#39;s Kingdom</h2></hgroup><article  id="king-montys-kingdom-5">
+
+<center>
+
+<img src="images/h3.png" width="600px" height="400px" />
+
+</center>
+
+</article></slide><slide class=''><hgroup><h2>King Monty&#39;s Kingdom</h2></hgroup><article  id="king-montys-kingdom-6">
+
+<center>
+
+<img src="images/h2.png" width="600px" height="400px" />
+
+</center>
+
+</article></slide><slide class=''><hgroup><h2>King Monty&#39;s Kingdom</h2></hgroup><article  id="king-montys-kingdom-7">
+
+<center>
+
+<img src="images/H1.png" width="600px" height="400px" />
+
+</center>
+
+</article></slide><slide class=''><hgroup><h2>Hmiltonian Monte Carlo</h2></hgroup><article  id="hmiltonian-monte-carlo">
+
+<center>
+
+<img src="images/hamiltonian.png" width="700px" height="200px" />
+
+</center>
+
+<ul>
+<li>Population density curve: log-posterior</li>
+<li>Position of car: parameter vector</li>
+<li>Speed of car: momentum of parameter values
+
+<ul>
+<li>Go fast when high</li>
+<li>Go slow when low</li>
+<li>Samples of position through time comprise samples from posterior distribution</li>
+</ul></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Gibbs vs Hamiltonian MCMC</h2></hgroup><article  id="gibbs-vs-hamiltonian-mcmc">
+
+<center>
+
+<img src="images/gibbsHamilton.png" width="700px" height="500px" />
+
+</center>
+
+</article></slide><slide class=''><hgroup><h2>Gibbs vs Hamiltonian MCMC</h2></hgroup><article  id="gibbs-vs-hamiltonian-mcmc-1">
+
+<center>
+
+<img src="images/gibbsHamilton2.png" width="700px" height="500px" />
+
+</center>
+
+</article></slide><slide class=''><hgroup><h2>Stan</h2></hgroup><article  id="stan">
+
+<div class="col2">
+<p><img src="images/stanUlam.png" width="200px" height="300px" /></p>
+
+<p><br></br> <br></br> <br></br> <br></br> <br></br></p>
+
+<p><img src="images/stan.png" width="400px" height="600px" /></p></div>
+
+</article></slide><slide class=''><hgroup><h2>Stan is NUTS</h2></hgroup><article  id="stan-is-nuts">
+
+<ul>
+<li>No U-Turn Sampler (NUTS): Adaptive Hamiltonian Monte Carlo</li>
+<li>Implemented in Stan (rstan: mc-stan.org)</li>
+</ul>
+
+<center>
+
+<img src="images/nuts.png" width="700px" height="200px" />
+
+</center>
+
+<center>
+
+<img src="images/noUTurn.png" width="350px" height="150px" />
+
+</center>
+
+</article></slide><slide class=''><hgroup><h2>HMC Estimates</h2></hgroup><article  id="hmc-estimates">
+
+<pre class = 'prettyprint lang-r'>library(rstanarm)
+
+post2 &lt;- stan_lmer(oed ~ period + treatment + oedbase+ (1|patient), data=data)
+posterior_interval(post2, prob=0.95)</pre>
+
+<center>
+
+<table border="0">
+
+<tr>
+
+<th>
+
+</th>
+
+<th>
+
+2.5%
+
+</th>
+
+<th>
+
+97.5%
+
+</th>
+
+</tr>
+
+<tr>
+
+<td align="right">
+
+(Intercept)
+
+</td>
+
+<td align="right">
+
+-3.03
+
+</td>
+
+<td align="right">
+
+2.77
+
+</td>
+
+</tr>
+
+<tr>
+
+<td align="right">
+
+period
+
+</td>
+
+<td align="right">
+
+-0.48
+
+</td>
+
+<td align="right">
+
+0.00
+
+</td>
+
+</tr>
+
+<tr>
+
+<td align="right">
+
+treatment
+
+</td>
+
+<td align="right">
+
+-0.55
+
+</td>
+
+<td align="right">
+
+-0.06
+
+</td>
+
+</tr>
+
+<tr>
+
+<td align="right">
+
+oedbase
+
+</td>
+
+<td align="right">
+
+0.93
+
+</td>
+
+<td align="right">
+
+1.04
+
+</td>
+
+</tr>
+
+<tr>
+
+<td align="right">
+
+sigma
+
+</td>
+
+<td align="right">
+
+0.63
+
+</td>
+
+<td align="right">
+
+0.89
+
+</td>
+
+</tr>
+
+</table>
+
+</center>
+
+<ul>
+<li>\(\sigma \sim \text{dcauchy}\)</li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>HMC Estimates</h2></hgroup><article  id="hmc-estimates-1">
+
+<div class="col2">
+<p>One of many things named after Augustin-Louis Cauchy (KO-shee)</p>
+
+<ul>
+<li>Ratio of two Gaussian samples</li>
+<li>Useful distribution with thick tails</li>
+<li>Parameters: location of mode, scale</li>
+<li>Mean and variance undefined</li>
+<li>Related to Lévy flights</li>
+</ul>
+
+<p><br></br> <br></br> <br></br></p>
+
+<p><img src="images/cauchy.png" width="300px" height="500px" /></p></div>
+
+</article></slide><slide class=''><hgroup><h2>HMC estimates</h2></hgroup><article  id="hmc-estimates-2">
+
+<center>
+
+<img src="images/freak.png" width="800px" height="300px" />
+
+</center>
+
+<ul>
+<li>If it happens during wamup (adaptation), it is normal</li>
+<li>If it happens a lot after warmup, start worrying</li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Check the chains</h2></hgroup><article  id="check-the-chains">
+
+<ul>
+<li>First and most important check: trace plot</li>
+</ul>
+
+<pre class = 'prettyprint lang-r'>plot(post2, &quot;trace&quot;, regex_pars = &#39;treatment&#39;)</pre>
+
+<center>
+
+<img src="images/trace.png" width="700px" height="300px" />
+
+</center>
+
+</article></slide><slide class=''><hgroup><h2>Warmup</h2></hgroup><article  id="warmup">
+
+<center>
+
+<img src="images/warmup.png" width="700px" height="300px" />
+
+</center>
+
+<ul>
+<li><em>Warmup</em> is adaptation to posterior for efficient sampling</li>
+<li>Samples during wamup NOT from posterior</li>
+<li>Automatically discarded by precis/summary and other functions</li>
+<li><em>Warmup</em> is <em>not</em> <strong>burn in</strong>
+
+<ul>
+<li><strong>burn in</strong> is front part of Markov chain using Gibbs or Metropolis</li>
+</ul></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>How to not get chained</h2></hgroup><article  id="how-to-not-get-chained">
+
+<center>
+
+<img src="images/chained.png" width="700px" height="300px" />
+
+</center>
+
+</article></slide><slide class=''><hgroup><h2>Convergence diagnostics</h2></hgroup><article  id="convergence-diagnostics">
+
+<pre class = 'prettyprint lang-r'>summary(post2)</pre>
+
+<table class = 'rmdtable'>
+<tr class="header">
+<th align="left"></th>
+<th align="left">mcse</th>
+<th align="left">Rhat</th>
+<th align="left">n_eff</th>
+</tr>
+<tr class="odd">
+<td align="left">Treatment</td>
+<td align="left">0.0</td>
+<td align="left">1.0</td>
+<td align="left">4000</td>
+</tr>
+<tr class="even">
+<td align="left">oedbase</td>
+<td align="left">0.0</td>
+<td align="left">1.0</td>
+<td align="left">588</td>
+</tr>
+</table>
+
+</article></slide><slide class=''><hgroup><h2>How many samples?</h2></hgroup><article  id="how-many-samples">
+
+<ul>
+<li>Use <strong>warmup</strong> and <strong>iter</strong> to control number of samples</li>
+<li>First run to get relaxed
+
+<ul>
+<li>\(warmup = 1000\) and \(iter = 2000\)</li>
+</ul></li>
+<li>Advices
+
+<ul>
+<li>Enough warmup so mixing good, sampling efficient</li>
+<li>Enough sampling for our purpose (n_eff)</li>
+<li><em>Means</em>: 200 usually enough</li>
+<li><em>99th percentile</em>: 20-thousan or more</li>
+<li>Poorly mixing chains always require more samples</li>
+</ul></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>How many chains?</h2></hgroup><article  id="how-many-chains">
+
+<ul>
+<li>Use <em>chains</em> to control number of chains</li>
+<li>First run: one chain to get relaxed</li>
+<li>Tune: multiple chains, to check convergence/stationary</li>
+<li>Final run: one chains is fine, more is processors to spare</li>
+<li>Good heuristic:
+
+<ul>
+<li>1 short</li>
+<li>4 medium</li>
+<li>2 long</li>
+</ul></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Getting the slides</h2></hgroup><article  id="getting-the-slides">
+
+<ul>
+<li>The slides for this course were created with Rmarkdown: <a href='http://rmarkdown.rstudio.com/' title=''>http://rmarkdown.rstudio.com/</a>.</li>
+<li>They are available from <a href='https://github.com/berkeley3/BDA' title=''>https://github.com/berkeley3/BDA</a>.</li>
+<li><p>To re-compile the slides:</p>
+
+<ul>
+<li>Download the directory containing the lectures from Github</li>
+<li>In R open the .Rmd file and set the working directory to the lecture directory</li>
+<li>Click the <em>KnitHTML</em> button on Rstudio or run the following commands:</li>
+</ul></li>
+</ul>
+
+<pre class = 'prettyprint lang-r'>library(rmarkdown) 
+render(&quot;main.Rmd&quot;)</pre></article></slide>
+
+
+  <slide class="backdrop"></slide>
+
+</slides>
+
+<script src="main_files/ioslides-13.5.1/js/modernizr.custom.45394.js"></script>
+<script src="main_files/ioslides-13.5.1/js/prettify/prettify.js"></script>
+<script src="main_files/ioslides-13.5.1/js/prettify/lang-r.js"></script>
+<script src="main_files/ioslides-13.5.1/js/prettify/lang-yaml.js"></script>
+<script src="main_files/ioslides-13.5.1/js/hammer.js"></script>
+<script src="main_files/ioslides-13.5.1/js/slide-controller.js"></script>
+<script src="main_files/ioslides-13.5.1/js/slide-deck.js"></script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "main_files/mathjax-local/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+<!-- map slide visiblity events into shiny -->
+<script>
+  (function() {
+    if (window.jQuery) {
+       window.jQuery(document).on('slideleave', function(e) {
+         window.jQuery(e.target).trigger('hidden');
+      });
+       window.jQuery(document).on('slideenter', function(e) {
+         window.jQuery(e.target).trigger('shown');
+      });
+    }
+  })();
+</script>
+
+</body>
+</html>
