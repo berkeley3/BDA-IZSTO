@@ -60,6 +60,10 @@ $$
 
 - Simulation shows accuraty depends on amount of data
 
+
+- Statistics is about quantify uncertainty
+- Bayesian statistics is about using uncertainty in inference
+
 ## Example Interval Calculation
 
 - P% _confidence interval:_ interval in which P% of the estimates are expected to fall
@@ -87,7 +91,7 @@ cat('The 95% confidence interval is: (',q[1],',', q[2],')')
 
 - _Bias:_ expected difference of estimate from true value
 
-- continuous previous examples
+- continuing previous examples
 
 ```{r, eval=FALSE}
 
@@ -95,7 +99,7 @@ sims <- rbinom(10000, 1000, 0.2)/1000
 quantile(sims, probs = 0.5))
 ```
 
-```{r, results='asis'}
+```{r, results='asis', echo=FALSE}
 
 sims <- rbinom(10000, 1000, 0.2)/1000
 quantile(sims, probs = 0.5)
@@ -105,7 +109,7 @@ quantile(sims, probs = 0.5)
 
 ## Simple Point Estimation
 
-- _Central Limit Theorem:_ __expected__ error in $\theta^{*}$ goes down as 
+- _Central Limit Theorem:_ __expected__ error in $\hat\theta$ goes down as 
 $$
 \frac{1}{\sqrt{N}}
 $$ 
@@ -212,7 +216,7 @@ cat(output[1:5],'\n','\n', output[6:10],'\n','\n', output[11:15],'\n',
 - Statistical modelling assumes even though $\mathbf y$ is observed, the values could have been different
 - John Stuart Mill first characterized this _conterfactual_ nature of statistical modelling
     - A System of Logic, Rationative and Inductive (1843)
-- In modern (Kolmogorov) language, $\mathbf y$ is a _random variable_
+- In modern (Kolmogorov-ian) language, $\mathbf y$ is a _random variable_
 
 ## Likelihood functions
 
@@ -230,9 +234,9 @@ where $\theta$ is a vector of __parameters__
 
 - The statistical inference problem is to estimate parameters $\theta$ given observations $y$
 
-- Maximum Likelihood Estimation (MLE) chooses the estimate $\theta^*$ that meximizes the likelihood function
+- Maximum Likelihood Estimation (MLE) chooses the estimate $\hat\theta$ that meximizes the likelihood function
 $$
-\theta^* = \text{arg max}_\theta L(\theta) = \text{arg max}_\theta p(y\vert\theta, x)
+\hat\theta = \text{arg max}_\theta L(\theta) = \text{arg max}_\theta p(y\vert\theta, x)
 $$
 - this function of $L$ and $y$ (and $x$) is called __estimator__
 
@@ -241,7 +245,7 @@ $$
 
 - The frequency-based estimate
 $$
-\theta^* = \frac{1}{N}\sum_{i=1}^N y_i
+\hat\theta = \frac{1}{N}\sum_{i=1}^N y_i
 $$
 is the observed rate of _success_ (outcome 1) observations
 
@@ -249,7 +253,7 @@ is the observed rate of _success_ (outcome 1) observations
 $$
 p(y\vert\theta) = \prod_{i=1}^N p(y_i\vert\theta) = \prod_{i=1}^N \text{Bernoulli}(y_i\vert\theta)
 $$
-where for $u\in\{0,1\}$
+where for $y_i\in\{0,1\}$
 $$
 \text{Bernoulli}(y_i\vert\theta) =\left\{ \begin{array}{ll}
 \theta & \text{if } u=1\\
@@ -336,17 +340,17 @@ $$
 - __Posterior Predictive:__ $p(\tilde y\vert y)$
 
 ## Bayes's Rule for Posterior
-\begin{equation}
+$$
 \begin{array}{rcl}
-p(\theta\vert y) &=& \frac{p(y, \theta)}{p(y)} \\
+p(\theta\vert y) &= \frac{p(y, \theta)}{p(y)} & \textrm{[def of conditional]} \\
 \\
- & = & \frac{p(y\vert\theta)p(\theta)}{p(y)} \\
+ & =  \frac{p(y\vert\theta)p(\theta)}{p(y)}  & \textrm{[chain rule]}\\
 \\
-& = & \frac{p(y\vert\theta)p(\theta)}{\int_\Theta p(y\vert\theta)d\theta}\\
+& =  \frac{p(y\vert\theta)p(\theta)}{\int_\Theta p(y\vert\theta)d\theta}  & \textrm{[law of total prob]}\\
 \\
-& = & \frac{p(y\vert\theta)p(\theta)}{\int_\Theta p(y \vert\theta)p(\theta)d\theta}
+& = \frac{p(y\vert\theta)p(\theta)}{\int_\Theta p(y \vert\theta)p(\theta)d\theta} & \textrm{[chain rule]}
 \end{array}
-\end{equation}
+$$
 
 - _Inversion:_ Final result depends only on sampling distribution (likelihood) $p(y\vert\theta)$ and prior $p(\theta)$
 
@@ -363,7 +367,7 @@ p(\theta\vert y ) & = & \frac{p(y\vert\theta)p(\theta)}{p(y)} \\
 \end{array}
 $$
 
-- Posterior proportional to likelihood times prior
+- Posterior proportional to likelihood $\times$ prior
 - Equivalently, posterior proportional to joint
 
 ## Posterior Predictive Distribution
@@ -390,10 +394,12 @@ $$
 f(\theta) = \begin{cases} 1 & \mbox{if } \theta \in A \\ 
 0 & \mbox{if } \theta \notin A  \end{cases}
 $$
+
 - e.g. $f(\theta) = \theta_1 > \theta_2$ for $Pr(\theta_1 > \theta_2\vert y)$
+
 - Bayesian event probabilities compute posterior mass
 $$
-P(A) = \int_\Theta f(\theta)p(\theta\vert y)d\theta
+Pr(A) = \int_\Theta f(\theta)p(\theta\vert y)d\theta
 $$
 - Not frequentist, because involves parameter probabilities
 
@@ -417,7 +423,7 @@ What is the birth rate of boys vs. girls?
 
 - Bayes formulated the basic binomial model 
 
-<!-- Laplace solved the integral (Bayes couldn't) -->
+- Laplace solved the integral 
 
 ## Binomial Distribution
 - Binomial distribution is number of successes $y$ in $N$ i.i.d. Bernoulli trials with chance of success $\theta$
@@ -509,7 +515,7 @@ pippo(prior,data)
 $$
 p(\theta\vert y, N)=\frac{Binomial(y\vert N,\theta)Uniform(\theta\vert 0,1)}{\int_\Theta Binomial(y\vert N,\theta')p(\theta')d\theta'}
 $$
-- Using Euler's Beta function to normalize the posterior with final solution
+- Using Euler's Beta function to normalize the posterior with final solution (Laplace)
 $$
 p(\theta\vert y, N)= Beta(\theta\vert y+1, N-y+1)
 $$
@@ -559,11 +565,11 @@ _B_     | 4$(y_2)$   |44         | 48$(N_2)$
 - Assume likelihoods $Binomial(y_k\vert N_k, \theta_k)$, uniform priors
 - Is Drug B better than A?
 $$
-\begin{array}{rcl}
-Pr[\theta_1 > \theta_2 \vert y, N] &=&
+\begin{align}
+Pr[\theta_1 > \theta_2 \vert y, N] &=
 \int_0^1 \int_0^1 p(\theta_1\vert y_1, N_1)p(\theta_2\vert y_2, N_2)d\theta_1d\theta_2\\
- &\approx & 0.91
- \end{array}
+ &\approx  0.91
+ \end{align}
 $$
 
 - Directly interpretable result; _not_ frequentist procedure
@@ -571,7 +577,7 @@ $$
 ## Visualizing Posterior Difference
 - Plot of posterior difference $p(\theta_2 -\theta_1 \vert y N)$ (B-A)
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.align='center'}
 library(LearnBayes)
 
 suppressWarnings(library(LearnBayes))
@@ -775,15 +781,15 @@ Posterior &  & \end{tabular}
 \vspace{-1cm}
 $$
 \begin{array}{rcl}
-p(\theta\vert y, N, \alpha,\beta) &\approx& p(\theta\vert\alpha,\beta)p(y\vert N,\theta)\\
+p(\theta\vert y, N, \alpha,\beta) &\propto& p(\theta\vert\alpha,\beta)p(y\vert N,\theta)\\
 \\
 &=& Beta(\theta\vert\alpha,\beta)Binomial(y\vert N,\theta)\\
 \\
 &=& \frac{1}{B(\alpha, \beta)}\theta^{\alpha-1}(1-\theta)^{\beta-1}{{N}\choose{y}}\theta^y(1-\theta)^{N-y}\\
 \\
-&\approx&\theta^{y+\alpha-1}(1-\theta)^{N-y+\beta-1}\\
+&\propto&\theta^{y+\alpha-1}(1-\theta)^{N-y+\beta-1}\\
 \\
-&\approx&Beta(\theta\vert \alpha + y, \beta +(N-y))
+&\propto&Beta(\theta\vert \alpha + y, \beta +(N-y))
 \end{array}
 $$
 
@@ -810,7 +816,7 @@ $$
 - For a Bayesian model $p(y,\theta) = p(y\vert\theta)p(\theta)$, the max a posteriori (MAP) estimate maximizes the posterior
 $$
   \begin{array}{rcl}
-\theta^* & = & arg max_\theta p(\theta\vert y)\\
+\hat\theta & = & arg max_\theta p(\theta\vert y)\\
 \\
 & = & arg max_\theta \frac{p(y\vert \theta)p(\theta)}{p(y)}\\
 \\
@@ -830,7 +836,7 @@ $$
     because
   $$
     \begin{array}{rcl}
-  \theta^* & = & arg max_\theta p(y\vert \theta)p(\theta)\\
+  \hat\theta^ & = & arg max_\theta p(y\vert \theta)p(\theta)\\
   \\
   & = & arg max_\theta p(y\vert \theta)c\\
   \\
@@ -840,7 +846,7 @@ $$
   
 
 ## Penalized Maximum Likelihood
-  - The MAP can be made palatable to frequentists via philosophical sleight of hand
+  - The MAP can be made palatable to frequentists 
   - Treat the negative log prior $-\log p(\theta)$ as a _penalty_
   - e.g. a $Normal(\theta\vert\mu,\sigma)$ prior becomes a penalty function
   $$
@@ -851,7 +857,7 @@ $$
     
 $$
   \begin{array}{rcl}
-  \theta^* & = & arg max_\theta \log p(y\vert \theta, x) - \lambda_{\theta,\mu,\sigma}\\
+  \hat\theta & = & arg max_\theta \log p(y\vert \theta, x) - \lambda_{\theta,\mu,\sigma}\\
     \\
   & = & arg max_\theta \log p(y\vert \theta, x) + \log p(\theta\vert\mu,\sigma)
   \end{array}

@@ -141,21 +141,21 @@
 
 <pre class = 'prettyprint lang-r'>rbinom(10, N, 0.2)/N</pre>
 
-<p>10 trials: (0% to 30% success rate)</p>
+<p>10 trials: (10% to 60% success rate)</p>
 
-<p>3 0 2 1 3 2 1 1 3 2</p>
+<p>1 1 1 5 3 3 1 6 1 2</p>
 
-<p>100 trials: (17% to 24% success rate)</p>
+<p>100 trials: (17% to 23% success rate)</p>
 
-<p>22 17 18 21 19 20 18 24 22 18</p>
+<p>22 23 20 22 23 23 21 23 17 22</p>
 
-<p>100 trials: (19.2% to 22.9% success rate)</p>
+<p>100 trials: (18.2% to 20.7% success rate)</p>
 
-<p>229 206 201 196 198 192 198 203 219 199</p>
+<p>198 204 184 182 189 204 207 191 189 199</p>
 
-<p>100 trials: (19.6% to 20.7% success rate)</p>
+<p>100 trials: (19.4% to 20.8% success rate)</p>
 
-<p>1958 2071 1992 1999 1996 1984 1983 2034 2041 2007</p>
+<p>1969 2002 2021 1937 2032 2079 1960 2019 2038 2063</p>
 
 </article></slide><slide class=''><hgroup><h2>Simple point estimation</h2></hgroup><article  id="simple-point-estimation">
 
@@ -164,6 +164,8 @@
 \theta^* = \frac{\text{successes}}{\text{trials}}
 \]</p></li>
 <li><p>Simulation shows accuraty depends on amount of data</p></li>
+<li>Statistics is about quantify uncertainty</li>
+<li><p>Bayesian statistics is about using uncertainty in inference</p></li>
 </ul>
 
 </article></slide><slide class=''><hgroup><h2>Example Interval Calculation</h2></hgroup><article  id="example-interval-calculation">
@@ -183,20 +185,17 @@
 <pre class = 'prettyprint lang-r'>sims &lt;- rbinom(10000, 1000, 0.2)/1000
 quantile(sims, probs = c(0.025, 0.975))</pre>
 
-<p>The 95% confidence interval is: ( 0.176 , 0.226 )</p>
+<p>The 95% confidence interval is: ( 0.175 , 0.225 )</p>
 
 </article></slide><slide class=''><hgroup><h2>Estimator Bias</h2></hgroup><article  id="estimator-bias">
 
 <ul>
 <li><p><em>Bias:</em> expected difference of estimate from true value</p></li>
-<li><p>continuous previous examples</p></li>
+<li><p>continuing previous examples</p></li>
 </ul>
 
 <pre class = 'prettyprint lang-r'>sims &lt;- rbinom(10000, 1000, 0.2)/1000
 quantile(sims, probs = 0.5))</pre>
-
-<pre class = 'prettyprint lang-r'>sims &lt;- rbinom(10000, 1000, 0.2)/1000
-quantile(sims, probs = 0.5)</pre>
 
 <p>50% 0.2</p>
 
@@ -207,7 +206,7 @@ quantile(sims, probs = 0.5)</pre>
 </article></slide><slide class=''><hgroup><h2>Simple Point Estimation</h2></hgroup><article  id="simple-point-estimation-1">
 
 <ul>
-<li><em>Central Limit Theorem:</em> <strong>expected</strong> error in \(\theta^{*}\) goes down as \[
+<li><em>Central Limit Theorem:</em> <strong>expected</strong> error in \(\hat\theta\) goes down as \[
 \frac{1}{\sqrt{N}}
 \]</li>
 <li>a decimal place of accuracy requires \(100\times\) more samples</li>
@@ -228,17 +227,17 @@ quantile(sims, probs = 0.5)</pre>
 <li>Mix simulation of repeated i.i.d trials with 20% of success and sort</li>
 </ul>
 
-<pre >## 0/10 0/10 0/10 0/10 1/10 
+<pre >## 0/10 0/10 1/10 1/10 1/10 
 ##  
-##  1/10 14/100 15/100 16/100 186/1000 
+##  14/100 17/100 175/1000 179/1000 19/100 
 ##  
-##  19/100 190/1000 192/1000 196/1000 2/10 
+##  19/100 191/1000 193/1000 196/1000 199/1000 
 ##  
-##  2/10 20/100 201/1000 202/1000 204/1000 
+##  2/10 2/10 200/1000 200/1000 204/1000 
 ##  
-##  206/1000 21/100 21/100 21/100 210/1000 
+##  21/100 22/100 22/100 223/1000 23/100 
 ##  
-##  224/1000 24/100 25/100 3/10 3/10</pre>
+##  25/100 28/100 3/10 4/10 5/10</pre>
 
 <ul class = 'build'>
 <li>More variation in observed rates with smaller sample sizes</li>
@@ -258,7 +257,7 @@ quantile(sims, probs = 0.5)</pre>
 <ul>
 <li>A System of Logic, Rationative and Inductive (1843)</li>
 </ul></li>
-<li>In modern (Kolmogorov) language, \(\mathbf y\) is a <em>random variable</em></li>
+<li>In modern (Kolmogorov-ian) language, \(\mathbf y\) is a <em>random variable</em></li>
 </ul>
 
 </article></slide><slide class=''><hgroup><h2>Likelihood functions</h2></hgroup><article  id="likelihood-functions">
@@ -283,8 +282,8 @@ p(y\vert\theta , x)
 
 <ul>
 <li><p>The statistical inference problem is to estimate parameters \(\theta\) given observations \(y\)</p></li>
-<li>Maximum Likelihood Estimation (MLE) chooses the estimate \(\theta^*\) that meximizes the likelihood function \[
-\theta^* = \text{arg max}_\theta L(\theta) = \text{arg max}_\theta p(y\vert\theta, x)
+<li>Maximum Likelihood Estimation (MLE) chooses the estimate \(\hat\theta\) that meximizes the likelihood function \[
+\hat\theta = \text{arg max}_\theta L(\theta) = \text{arg max}_\theta p(y\vert\theta, x)
 \]</li>
 <li><p>this function of \(L\) and \(y\) (and \(x\)) is called <strong>estimator</strong></p></li>
 </ul>
@@ -293,11 +292,11 @@ p(y\vert\theta , x)
 
 <ul>
 <li><p>The frequency-based estimate \[
-\theta^* = \frac{1}{N}\sum_{i=1}^N y_i
+\hat\theta = \frac{1}{N}\sum_{i=1}^N y_i
 \] is the observed rate of <em>success</em> (outcome 1) observations</p></li>
 <li><p>The MLE for the model \[
 p(y\vert\theta) = \prod_{i=1}^N p(y_i\vert\theta) = \prod_{i=1}^N \text{Bernoulli}(y_i\vert\theta)
-\] where for \(u\in\{0,1\}\) \[
+\] where for \(y_i\in\{0,1\}\) \[
 \text{Bernoulli}(y_i\vert\theta) =\left\{ \begin{array}{ll}
 \theta &amp; \text{if } u=1\\
 1-\theta &amp; \text{if } u=0\\
@@ -415,7 +414,17 @@ p(y_i\vert\theta) = \text{Bernoulli}(y_i\vert\theta)
 
 </article></slide><slide class=''><hgroup><h2>Bayes&#39;s Rule for Posterior</h2></hgroup><article  id="bayess-rule-for-posterior">
 
-
+<p>\[
+\begin{array}{rcl}
+p(\theta\vert y) &amp;= \frac{p(y, \theta)}{p(y)} &amp; \textrm{[def of conditional]} \\
+\\
+ &amp; =  \frac{p(y\vert\theta)p(\theta)}{p(y)}  &amp; \textrm{[chain rule]}\\
+\\
+&amp; =  \frac{p(y\vert\theta)p(\theta)}{\int_\Theta p(y\vert\theta)d\theta}  &amp; \textrm{[law of total prob]}\\
+\\
+&amp; = \frac{p(y\vert\theta)p(\theta)}{\int_\Theta p(y \vert\theta)p(\theta)d\theta} &amp; \textrm{[chain rule]}
+\end{array}
+\]</p>
 
 <ul>
 <li><em>Inversion:</em> Final result depends only on sampling distribution (likelihood) \(p(y\vert\theta)\) and prior \(p(\theta)\)</li>
@@ -433,7 +442,7 @@ p(\theta\vert y ) &amp; = &amp; \frac{p(y\vert\theta)p(\theta)}{p(y)} \\
 &amp; = &amp; p(y,\theta)
 \end{array}
 \]</p></li>
-<li>Posterior proportional to likelihood times prior</li>
+<li>Posterior proportional to likelihood \(\times\) prior</li>
 <li><p>Equivalently, posterior proportional to joint</p></li>
 </ul>
 
@@ -455,15 +464,15 @@ p(\tilde y \vert y)=\sum_{\theta \in \Theta} p(\tilde y \vert \theta)p(\theta\ve
 
 <ul>
 <li>Recall that an event A is a collection of outcomes</li>
-<li>Suppose event \(A\) is determined by indicator on parameters \[
+<li><p>Suppose event \(A\) is determined by indicator on parameters \[
 f(\theta) = \begin{cases} 1 &amp; \mbox{if } \theta \in A \\ 
 0 &amp; \mbox{if } \theta \notin A  \end{cases}
-\]</li>
-<li>e.g. \(f(\theta) = \theta_1 &gt; \theta_2\) for \(Pr(\theta_1 &gt; \theta_2\vert y)\)</li>
+\]</p></li>
+<li><p>e.g. \(f(\theta) = \theta_1 &gt; \theta_2\) for \(Pr(\theta_1 &gt; \theta_2\vert y)\)</p></li>
 <li>Bayesian event probabilities compute posterior mass \[
-P(A) = \int_\Theta f(\theta)p(\theta\vert y)d\theta
+Pr(A) = \int_\Theta f(\theta)p(\theta\vert y)d\theta
 \]</li>
-<li>Not frequentist, because involves parameter probabilities</li>
+<li><p>Not frequentist, because involves parameter probabilities</p></li>
 </ul>
 
 </article></slide><slide class=''><hgroup><h2>Laplace&#39;s Data and Problems</h2></hgroup><article  id="laplaces-data-and-problems">
@@ -491,9 +500,8 @@ P(A) = \int_\Theta f(\theta)p(\theta\vert y)d\theta
 <li><p>Question 1 (Event Probability) Is a boy more likely to be born than a girl?</p></li>
 <li><p>Question 2 (Estimate) What is the birth rate of boys vs. girls?</p></li>
 <li><p>Bayes formulated the basic binomial model</p></li>
+<li><p>Laplace solved the integral</p></li>
 </ul>
-
-<!-- Laplace solved the integral (Bayes couldn't) -->
 
 </article></slide><slide class=''><hgroup><h2>Binomial Distribution</h2></hgroup><article  id="binomial-distribution">
 
@@ -552,7 +560,7 @@ Beta(\theta\vert \alpha, \beta) = \int_0^1 u^{\alpha-1}(1-u)^{\beta-1}du = \frac
 <li>Given Baye&#39;s general formula for the posterior \[
 p(\theta\vert y, N)=\frac{Binomial(y\vert N,\theta)Uniform(\theta\vert 0,1)}{\int_\Theta Binomial(y\vert N,\theta&#39;)p(\theta&#39;)d\theta&#39;}
 \]</li>
-<li>Using Euler&#39;s Beta function to normalize the posterior with final solution \[
+<li>Using Euler&#39;s Beta function to normalize the posterior with final solution (Laplace) \[
 p(\theta\vert y, N)= Beta(\theta\vert y+1, N-y+1)
 \]</li>
 </ul>
@@ -618,11 +626,11 @@ Pr[\theta&gt;0.5] &amp; = &amp; \int_\Theta I[\theta&gt;0.5]p(\theta\vert y,N)d\
 <ul>
 <li>Assume likelihoods \(Binomial(y_k\vert N_k, \theta_k)\), uniform priors</li>
 <li><p>Is Drug B better than A? \[
-\begin{array}{rcl}
-Pr[\theta_1 &gt; \theta_2 \vert y, N] &amp;=&amp;
+\begin{align}
+Pr[\theta_1 &gt; \theta_2 \vert y, N] &amp;=
 \int_0^1 \int_0^1 p(\theta_1\vert y_1, N_1)p(\theta_2\vert y_2, N_2)d\theta_1d\theta_2\\
- &amp;\approx &amp; 0.91
- \end{array}
+ &amp;\approx  0.91
+ \end{align}
 \]</p></li>
 <li><p>Directly interpretable result; <em>not</em> frequentist procedure</p></li>
 </ul>
@@ -633,7 +641,7 @@ Pr[\theta_1 &gt; \theta_2 \vert y, N] &amp;=&amp;
 <li>Plot of posterior difference \(p(\theta_2 -\theta_1 \vert y N)\) (B-A)</li>
 </ul>
 
-<p><img src="main_files/figure-html/unnamed-chunk-9-1.png" width="720" /></p>
+<p><img src="main_files/figure-html/unnamed-chunk-9-1.png" width="720" style="display: block; margin: auto;" /></p>
 
 </article></slide><slide class=''><hgroup><h2>Visualizing Posterior Difference</h2></hgroup><article  id="visualizing-posterior-difference-1">
 
@@ -750,15 +758,15 @@ thetas_post &lt;- samples[[&#39;theta&#39;]]</pre>
 
 <p>\[
 \begin{array}{rcl}
-p(\theta\vert y, N, \alpha,\beta) &amp;\approx&amp; p(\theta\vert\alpha,\beta)p(y\vert N,\theta)\\
+p(\theta\vert y, N, \alpha,\beta) &amp;\propto&amp; p(\theta\vert\alpha,\beta)p(y\vert N,\theta)\\
 \\
 &amp;=&amp; Beta(\theta\vert\alpha,\beta)Binomial(y\vert N,\theta)\\
 \\
 &amp;=&amp; \frac{1}{B(\alpha, \beta)}\theta^{\alpha-1}(1-\theta)^{\beta-1}{{N}\choose{y}}\theta^y(1-\theta)^{N-y}\\
 \\
-&amp;\approx&amp;\theta^{y+\alpha-1}(1-\theta)^{N-y+\beta-1}\\
+&amp;\propto&amp;\theta^{y+\alpha-1}(1-\theta)^{N-y+\beta-1}\\
 \\
-&amp;\approx&amp;Beta(\theta\vert \alpha + y, \beta +(N-y))
+&amp;\propto&amp;Beta(\theta\vert \alpha + y, \beta +(N-y))
 \end{array}
 \]</p>
 
@@ -784,7 +792,7 @@ Beta(y_1+\ldots +y_K, N_1 +\ldots N_K)
 <ul>
 <li>For a Bayesian model \(p(y,\theta) = p(y\vert\theta)p(\theta)\), the max a posteriori (MAP) estimate maximizes the posterior \[
   \begin{array}{rcl}
-\theta^* &amp; = &amp; arg max_\theta p(\theta\vert y)\\
+\hat\theta &amp; = &amp; arg max_\theta p(\theta\vert y)\\
 \\
 &amp; = &amp; arg max_\theta \frac{p(y\vert \theta)p(\theta)}{p(y)}\\
 \\
@@ -804,7 +812,7 @@ Beta(y_1+\ldots +y_K, N_1 +\ldots N_K)
   p(\theta) = c
   \] because \[
 \begin{array}{rcl}
-  \theta^* &amp; = &amp; arg max_\theta p(y\vert \theta)p(\theta)\\
+  \hat\theta^ &amp; = &amp; arg max_\theta p(y\vert \theta)p(\theta)\\
   \\
   &amp; = &amp; arg max_\theta p(y\vert \theta)c\\
   \\
@@ -816,7 +824,7 @@ Beta(y_1+\ldots +y_K, N_1 +\ldots N_K)
 </article></slide><slide class=''><hgroup><h2>Penalized Maximum Likelihood</h2></hgroup><article  id="penalized-maximum-likelihood">
 
 <ul>
-<li>The MAP can be made palatable to frequentists via philosophical sleight of hand</li>
+<li>The MAP can be made palatable to frequentists</li>
 <li>Treat the negative log prior \(-\log p(\theta)\) as a <em>penalty</em></li>
 <li>e.g. a \(Normal(\theta\vert\mu,\sigma)\) prior becomes a penalty function \[
 \lambda_{\theta,\mu,\sigma} = - \left(
@@ -830,7 +838,7 @@ Beta(y_1+\ldots +y_K, N_1 +\ldots N_K)
 
 <p>\[
   \begin{array}{rcl}
-  \theta^* &amp; = &amp; arg max_\theta \log p(y\vert \theta, x) - \lambda_{\theta,\mu,\sigma}\\
+  \hat\theta &amp; = &amp; arg max_\theta \log p(y\vert \theta, x) - \lambda_{\theta,\mu,\sigma}\\
     \\
   &amp; = &amp; arg max_\theta \log p(y\vert \theta, x) + \log p(\theta\vert\mu,\sigma)
   \end{array}
