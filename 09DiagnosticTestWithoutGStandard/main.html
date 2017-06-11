@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bayesian Data Analysis for Medical Data</title>
+
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <meta name="generator" content="pandoc" />
+
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <base target="_blank">
+
+  <script type="text/javascript">
+    var SLIDE_CONFIG = {
+      // Slide settings
+      settings: {
+                title: 'Bayesian Data Analysis for Medical Data',
+                        subtitle: 'Latent class Analysis',
+                useBuilds: true,
+        usePrettify: true,
+        enableSlideAreas: true,
+        enableTouch: true,
+                        favIcon: 'main_files/logo.jpg',
+              },
+
+      // Author information
+      presenters: [
+            {
+        name:  'Paola Berchialla' ,
+        company: '',
+        gplus: '',
+        twitter: '',
+        www: '',
+        github: ''
+      },
+            ]
+    };
+  </script>
+
+  <link href="main_files/ioslides-13.5.1/fonts/fonts.css" rel="stylesheet" />
+  <link href="main_files/ioslides-13.5.1/theme/css/default.css" rel="stylesheet" />
+  <link href="main_files/ioslides-13.5.1/theme/css/phone.css" rel="stylesheet" />
+  <script src="main_files/ioslides-13.5.1/js/modernizr.custom.45394.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/prettify/prettify.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/prettify/lang-r.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/prettify/lang-yaml.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/hammer.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/slide-controller.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/slide-deck.js"></script>
+
+  <style type="text/css">
+
+    b, strong {
+      font-weight: bold;
+    }
+
+    em {
+      font-style: italic;
+    }
+
+    slides > slide {
+      -webkit-transition: all 0.4s ease-in-out;
+      -moz-transition: all 0.4s ease-in-out;
+      -o-transition: all 0.4s ease-in-out;
+      transition: all 0.4s ease-in-out;
+    }
+
+    .auto-fadein {
+      -webkit-transition: opacity 0.6s ease-in;
+      -webkit-transition-delay: 0.4s;
+      -moz-transition: opacity 0.6s ease-in 0.4s;
+      -o-transition: opacity 0.6s ease-in 0.4s;
+      transition: opacity 0.6s ease-in 0.4s;
+      opacity: 0;
+    }
+
+    slides > slide:not(.nobackground):before {
+      font-size: 12pt;
+      content: "";
+      position: absolute;
+      bottom: 20px;
+      left: 60px;
+      background: url(main_files/logo.jpg) no-repeat 0 50%;
+      -webkit-background-size: 30px 30px;
+      -moz-background-size: 30px 30px;
+      -o-background-size: 30px 30px;
+      background-size: 30px 30px;
+      padding-left: 40px;
+      height: 30px;
+      line-height: 1.9;
+    }
+  </style>
+
+  <link rel="stylesheet" href="assets\css\ioslides.css" type="text/css" />
+
+</head>
+
+<body style="opacity: 0">
+
+<slides class="layout-widescreen">
+
+  <slide class="title-slide segue nobackground">
+        <aside class="gdbar"><img src="main_files/logo.jpg"></aside>
+        <!-- The content of this hgroup is replaced programmatically through the slide_config.json. -->
+    <hgroup class="auto-fadein">
+      <h1 data-config-title><!-- populated from slide_config.json --></h1>
+      <h2 data-config-subtitle><!-- populated from slide_config.json --></h2>
+      <p data-config-presenter><!-- populated from slide_config.json --></p>
+          </hgroup>
+  </slide>
+
+<slide class=''><hgroup><h2>A motivating example: paratuberculosis</h2></hgroup><article  id="a-motivating-example-paratuberculosis">
+
+<ul>
+<li>Caused by <strong>Mycobacterium avium</strong> subspecies <strong>paratuberculosis</strong></li>
+<li>Granulomatous enteritis - malabsorption - diarrhoea - weight loss - death</li>
+<li>Disease seen worldwide in ruminants</li>
+<li>No effective treatment</li>
+<li>In deer, highest clinical incidence is in yearlings</li>
+</ul>
+
+<center>
+
+<img src="images/White-tailed_deer.jpg" width="300">
+
+</center>
+
+</article></slide><slide class=''><hgroup><h2>The problem</h2></hgroup><article  id="the-problem">
+
+<ul>
+<li><p><em>Aim</em>: estimate sensitivity and specificity of individual faecal culture (IFC) and a serum ELISA test for paratuberculosis in deer</p></li>
+<li><p>There is no <strong>gold standard</strong> test in the live animal</p></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Latent class amalysis</h2></hgroup><article  id="latent-class-amalysis">
+
+<ul>
+<li><p>True disease/infection status of individual is accepted as unknown (latent)</p></li>
+<li><p>Test accuracy is derived mathematically from test results using maximum likelihood methods or Bayesian inference</p></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Advantage of latent class amalysis</h2></hgroup><article  id="advantage-of-latent-class-amalysis">
+
+<ul>
+<li>New test for evaluation may be more sensitive than the existing gold standard</li>
+<li>Avoids selection of panel of <em>true positives</em> biased to those positive to a gold standard</li>
+<li>If Bayesian methods are used to fit the model, smaller sample size needed</li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Two test-two population method</h2></hgroup><article  id="two-test-two-population-method">
+
+<ul>
+<li>S.L.Hui, S.D. Walter, Biometrics 36, 167-171 (1980)
+
+<ul>
+<li>consider two tests applied simultaneously to the same individuals from two populations with different disease prevalences</li>
+<li>assume conditional independence of the errors of the two tests</li>
+<li><em>then</em>: the error rates of both tests and the true prevalences in both populations can be estimated by a maximum likelihood procedure</li>
+</ul></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Two test-two population method assumption</h2></hgroup><article  id="two-test-two-population-method-assumption">
+
+<ul>
+<li>Test sensitivity and specificity are constant across populations</li>
+<li>The disease prevalences of the two populations are distinct</li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Bayes Theorem in test diagnostic</h2></hgroup><article  id="bayes-theorem-in-test-diagnostic">
+
+<ul>
+<li><em>Prior information</em>: test operative characteristics and prevalence</li>
+<li><em>Data</em>: the test results</li>
+<li><em>Aim</em>: to derive the posterior probability for each parameter</li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Informative Priors</h2></hgroup><article  id="informative-priors">
+
+<ul>
+<li>Elicit most plausible value (e.g specificity of test A is 90%)</li>
+<li>Elicit value that you are 95% sure the value exceeds certain threshold
+
+<ul>
+<li>e.g. 95% certain that specificity is greater than 70%</li>
+</ul></li>
+<li>Translate these into a beta distribution</li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Priors&#8230;.</h2></hgroup><article  id="priors....">
+
+<p>Different ways to build prior distribution \(Beta(\alpha,\beta)\) for \(\pi\):</p>
+
+<ul>
+<li>Building priors solely on the prior parameters and interpreting \(\alpha + \beta\) as the total number of subjects (Gelman):
+
+<ul>
+<li>\(\alpha\) successes and \(\beta\) failures</li>
+</ul></li>
+<li>Using 90th percent probability interval \(W_{90} = (5th, 95th)\)-percentiles and elicit information from investigators or past studies through the percentile approach</li>
+</ul>
+
+<p>Informative and non-informative priors</p>
+
+<ul>
+<li><strong>Informative priors</strong> are narrow and reflect the knowledge of strong prior information</li>
+<li><strong>Non-informative priors</strong> are flat and reflect little prior information</li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Prior elicitation</h2></hgroup><article  id="prior-elicitation">
+
+<p>Two steps for eliciting a-priori distribution</p>
+
+<ol>
+<li>eliciting the center value by asking the clinician &quot;what is the most likely response reate you expect to occur?&quot;
+
+<ul>
+<li>finding out whether the response is the mean, median or the mode</li>
+</ul></li>
+<li>assessing the uncertainty in the &quot;most likely response rate&quot;
+
+<ul>
+<li>elicitation of \(W_{90}\) is easy for clinicians who think in terms of percentiles</li>
+<li>\(W_{90}\) can be elicited by asking clinicians how uncertain they are regarding their center value</li>
+<li>for mode answer, the question can be posed as &quot;prior sample size&quot; (increasing or decreasing \(\alpha + \beta\))</li>
+</ul></li>
+</ol>
+
+</article></slide><slide class=''><hgroup><h2>How to build priors</h2></hgroup><article  id="how-to-build-priors">
+
+<ol>
+<li><p><strong>mode (non-informative):</strong></p>
+
+<ul>
+<li>it has prior parameters \(\alpha = \pi_{prior}+1\) and \(\beta = 1-\pi_{prior}+1\)</li>
+<li>it has the interpretation of a mode and a prior sample size of \(\alpha+\beta=3\)</li>
+</ul></li>
+<li><p><strong>mode (informative):</strong></p>
+
+<ul>
+<li>it has prior parameters \(\alpha = \pi_{prior}+1+n_{prior}\pi_{prior}\) and \(\beta = 1-\pi_{prior}+1+n_{prior}(1-\pi_{prior})\)</li>
+<li>it has the interpretation of a mode and a prior sample size of \(\alpha+\beta=n_{prior}+3\)</li>
+</ul></li>
+</ol>
+
+</article></slide><slide class=''><hgroup><h2>How to build priors</h2></hgroup><article  id="how-to-build-priors-1">
+
+<ol>
+<li><p><strong>median (informative):</strong></p>
+
+<ul>
+<li>we elicit \(\pi_{prior}\) assuming it is the <em>median</em> and we elicit also \(W_{90}\)</li>
+<li>this requires solving the system:</li>
+</ul></li>
+</ol>
+
+<p>\[
+F(\pi_{prior}\vert\alpha\beta) =0.5 \\
+F^{-1}(0.95\vert\alpha\beta) -F^{-1}(0.05\vert\alpha\beta) = W_{90} 
+\]</p>
+
+<ol>
+<li><p><strong>mean (informative):</strong></p>
+
+<ul>
+<li>we elicit \(\pi_{prior}\) assuming it is the <em>mean</em> and we elicit also \(W_{90}\)</li>
+<li>this requires solving the system:</li>
+</ul></li>
+</ol>
+
+<p>\[
+E(y)=\pi_{prior} \\
+F^{-1}(0.95\vert\alpha\beta) -F^{-1}(0.05\vert\alpha\beta) = W_{90} 
+\]</p>
+
+</article></slide><slide class=''><hgroup><h2>\(alpha\) and \(beta\) parameters calculation</h2></hgroup><article  id="alpha-and-beta-parameters-calculation">
+
+<pre class = 'prettyprint lang-r'>source(&#39;R\\informativePriors.R&#39;)</pre>
+
+<ul>
+<li>Parameters calculation using the <strong>informative median</strong> prior:</li>
+</ul>
+
+<pre class = 'prettyprint lang-r'>pparameter(pi=0.2, w90=0.3, prior.method=&#39;median-informative&#39;)</pre>
+
+<pre >## $alpha
+## [1] 3.913553
+## 
+## $beta
+## [1] 14.67658</pre>
+
+</article></slide><slide class=''><hgroup><h2>\(alpha\) and \(beta\) parameters calculation</h2></hgroup><article  id="alpha-and-beta-parameters-calculation-1">
+
+<ul>
+<li>Parameters calculation using the <strong>informative mean</strong> prior:</li>
+</ul>
+
+<pre class = 'prettyprint lang-r'>pparameter(pi=0.2, w90=0.3, prior.method=&#39;mean-informative&#39;)</pre>
+
+<pre >## $alpha
+## [1] 3.556891
+## 
+## $beta
+## [1] 14.22756</pre>
+
+</article></slide><slide class=''><hgroup><h2>\(alpha\) and \(beta\) parameters calculation</h2></hgroup><article  id="alpha-and-beta-parameters-calculation-2">
+
+<ul>
+<li>Parameters calculation using the <strong>informative mode</strong> prior:</li>
+</ul>
+
+<pre class = 'prettyprint lang-r'>pparameter(pi=0.2, w90=0.3, prior.method=&#39;mode-informative&#39;)</pre>
+
+<pre >## $alpha
+## [1] 3.2
+## 
+## $beta
+## [1] 9.8</pre>
+
+</article></slide><slide class=''><hgroup><h2>Two tests two population method</h2></hgroup><article  id="two-tests-two-population-method">
+
+<center>
+
+<img src="images/twoTP.png" width="700">
+
+</center>
+
+</article></slide><slide class=''><hgroup><h2>Latent class analysis</h2></hgroup><article  id="latent-class-analysis">
+
+<ul>
+<li>For each cell, the <em>likelihood</em> is computed</li>
+</ul>
+
+<center>
+
+<img src="images/twoTP2.png" width="200">
+
+</center>
+
+<ul>
+<li>Test result (a) (animal positive on both test) occurs if the animale is a <em>true positive \((T^+)\)</em> or a <em>false positive \((F^+)\)</em></li>
+</ul>
+
+<p>\[
+\textrm P(\textrm T^+) = \textrm P(\textrm T_1^+ \cap \textrm T_2^+) =  \textrm P(\textrm T_1^+\vert \textrm M)\times \textrm P(\textrm T_2^+\vert \textrm M) \times \textrm P(\textrm M) 
+\] \[
+\textrm P(\textrm F^+) = \textrm P(\textrm T_1^+ \cap \textrm T_2^+) =  \textrm P(\textrm T_1^+\vert \textrm S)\times \textrm P(\textrm T_2^+\vert \textrm S) \times \textrm P(\textrm S) 
+\]</p>
+
+</article></slide><slide class=''><hgroup><h2>Latent class analysis</h2></hgroup><article  id="latent-class-analysis-1">
+
+<ul>
+<li>For cell (a), the likelihood is the sum of these probabilities</li>
+</ul>
+
+<p>\[
+\textrm P(\textrm A= \textrm a) = \underbrace{\textrm {prevalence} \times \textrm{SE}_1\times \textrm{SE}_2}_{\textrm P(\textrm T^+)} + \underbrace{
+(1- \textrm {prevalence} )\times (1- \textrm {SP}_1 ) \times (1- \textrm {SP}_2 )}_{\textrm P(\textrm F^+)}
+\] - Likelihoods for remaining cells are constructed similarly</p>
+
+</article></slide><slide class=''><hgroup><h2>Latent class analysis</h2></hgroup><article  id="latent-class-analysis-2">
+
+<ul>
+<li>Population 1 \[
+\begin{align}
+\textrm{Cell a: } &amp; p_1SE_1SE_2 + (1-p_1)(1-SP_1)(1-SP_2)\\
+\textrm{Cell b: } &amp; p_1SE_1(1-SE_2) + (1-p_1)(1-SP_1)SP_2\\
+\textrm{Cell c: } &amp; p_1(1-SE_1)SE_2 + (1-p_1)SP_1(1-SP_2)\\
+\textrm{Cell d: } &amp; p_1(1-SE_1)(1-SE_2) + (1-p_1)SP_1SP_2\\
+\end{align}
+\]</li>
+<li>Population 2 \[
+\begin{align}
+\textrm{Cell e: } &amp; p_2SE_1SE_2 + (1-p_2)(1-SP_1)(1-SP_2)\\
+\textrm{Cell f: } &amp; p_2SE_1(1-SE_2) + (1-p_2)(1-SP_1)SP_2\\
+\textrm{Cell g: } &amp; p_2(1-SE_1)SE_2 + (1-p_2)SP_1(1-SP_2)\\
+\textrm{Cell h: } &amp; p_2(1-SE_1)(1-SE_2) + (1-p_2)SP_1SP_2\\
+\end{align}
+\]</li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Latent class analysis</h2></hgroup><article  id="latent-class-analysis-3">
+
+<ul>
+<li>Six parameters can be estimated from the observed data
+
+<ul>
+<li>prevalence in population 1 \((p_1)\) and in population 2 \((p_2)\)</li>
+<li>sensitivity of test 1 (ELISA) and test 2 (IFC)</li>
+<li>specificity of test 1 (ELISA) and test 2 (IFC)</li>
+</ul></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Objective</h2></hgroup><article  id="objective">
+
+<ul>
+<li>Estimate the sensitivity and specificity of ELISA and IFC to:
+
+<ul>
+<li>identify clinically normal yearling deer infected</li>
+<li>for the purpose of herd classification</li>
+</ul></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Study design (2 districts in NZ)</h2></hgroup><article  id="study-design-2-districts-in-nz">
+
+<ul>
+<li>Prevalence of MAP infection in farmed deer different in North (29%) and South Island (51%) of New Zealand - two populations</li>
+<li>20 clinically normal yearling deer sampled (faeces and blood) in 20 herds SI, 18 NI</li>
+</ul>
+
+<center>
+
+<img src="images/NZ.png" width="300">
+
+</center>
+
+</article></slide><slide class=''><hgroup><h2>Statistical considerations</h2></hgroup><article  id="statistical-considerations">
+
+<ul>
+<li>Samples not independent observations, clustered in herds</li>
+<li>Variation in within-herd prevalence expected</li>
+<li>Possibility of non-infected herds</li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Statistical considerations</h2></hgroup><article  id="statistical-considerations-1">
+
+<ul>
+<li>Variation in within-herd prevalence modelled as a random effect</li>
+<li>Zero-inflation effect incorporated
+
+<ul>
+<li>include in the model the probability of herd being non-infected</li>
+</ul></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Write down the model in STAN</h2></hgroup><article  id="write-down-the-model-in-stan">
+
+<ul>
+<li>stan.R</li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Get the data</h2></hgroup><article  id="get-the-data">
+
+<table class = 'rmdtable'>
+<tr class="header">
+<th align="right">a</th>
+<th align="right">b</th>
+<th align="right">c</th>
+<th align="right">d</th>
+</tr>
+<tr class="odd">
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+<td align="right">18</td>
+</tr>
+<tr class="even">
+<td align="right">0</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">17</td>
+</tr>
+<tr class="odd">
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+<td align="right">18</td>
+</tr>
+<tr class="even">
+<td align="right">0</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">17</td>
+</tr>
+<tr class="odd">
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">19</td>
+</tr>
+<tr class="even">
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+<td align="right">18</td>
+</tr>
+</table>
+
+</article></slide><slide class=''><hgroup><h2>Run STAN</h2></hgroup><article  id="run-stan">
+
+<pre class = 'prettyprint lang-r'>library(rstan)
+
+stan_dso &lt;- stan_model(model_code = model_string)
+dataList &lt;- list(y1 = as.matrix(dat), N1 = 18)
+stanFit &lt;- sampling(object = stan_dso, 
+                    data = dataList, 
+                    chains = 1, iter = 9000, 
+                    warmup = 1000, thin = 1)</pre>
+
+</article></slide><slide class=''><hgroup><h2>Results</h2></hgroup><article  id="results">
+
+<pre class = 'prettyprint lang-r'>print(stanFit, pars = c(&#39;SeELISA&#39;,&#39;SpELISA&#39;,&#39;Seifc&#39;,&#39;Spifc&#39;,&#39;phi1&#39;))</pre>
+
+<pre >## Inference for Stan model: 039858cf78b5bc75ae9c46ce5fe1cea1.
+## 1 chains, each with iter=9000; warmup=1000; thin=1; 
+## post-warmup draws per chain=8000, total post-warmup draws=8000.
+## 
+##         mean se_mean   sd 2.5%  25%  50%  75% 97.5% n_eff Rhat
+## SeELISA 0.88       0 0.08 0.71 0.84 0.90 0.94  0.99  8000    1
+## SpELISA 0.95       0 0.01 0.93 0.95 0.95 0.96  0.97  8000    1
+## Seifc   0.88       0 0.08 0.70 0.84 0.90 0.94  0.98  8000    1
+## Spifc   0.99       0 0.01 0.98 0.99 0.99 1.00  1.00  8000    1
+## phi1    0.23       0 0.04 0.16 0.20 0.23 0.26  0.31  8000    1
+## 
+## Samples were drawn using NUTS(diag_e) at Mon Jun 12 00:03:50 2017.
+## For each parameter, n_eff is a crude measure of effective sample size,
+## and Rhat is the potential scale reduction factor on split chains (at 
+## convergence, Rhat=1).</pre>
+
+</article></slide><slide class=''><hgroup><h2>Practical</h2></hgroup><article  id="practical">
+
+<ul>
+<li>Run the model for the two populations</li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Getting the slides</h2></hgroup><article  id="getting-the-slides">
+
+<ul>
+<li>The slides for this course were created with Rmarkdown: <a href='http://rmarkdown.rstudio.com/' title=''>http://rmarkdown.rstudio.com/</a>.</li>
+<li>They are available from <a href='https://github.com/berkeley3/BDA-IZSTO' title=''>https://github.com/berkeley3/BDA-IZSTO</a>.</li>
+<li><p>To re-compile the slides:</p>
+
+<ul>
+<li>Download the directory containing the lectures from Github</li>
+<li>In R open the .Rmd file and set the working directory to the lecture directory</li>
+<li>Click the <em>KnitHTML</em> button on Rstudio or run the following commands:</li>
+</ul></li>
+</ul>
+
+<pre class = 'prettyprint lang-r'>library(rmarkdown) 
+render(&quot;main.Rmd&quot;)</pre></article></slide>
+
+
+  <slide class="backdrop"></slide>
+
+</slides>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "main_files/mathjax-local/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+<!-- map slide visiblity events into shiny -->
+<script>
+  (function() {
+    if (window.jQuery) {
+       window.jQuery(document).on('slideleave', function(e) {
+         window.jQuery(e.target).trigger('hidden');
+      });
+       window.jQuery(document).on('slideenter', function(e) {
+         window.jQuery(e.target).trigger('shown');
+      });
+    }
+  })();
+</script>
+
+</body>
+</html>

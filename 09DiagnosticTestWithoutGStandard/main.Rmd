@@ -1,0 +1,314 @@
+---
+title: "Bayesian Data Analysis for Medical Data"
+subtitle: Latent class Analysis
+author      : Paola Berchialla
+job         : Department of Clinical and Biological Sciences, University of Torino
+output:
+  ioslides_presentation:
+    css: assets/css/ioslides.css
+    logo: assets/img/dscb.jpg
+    mathjax: local
+    self_contained: no
+    widescreen: yes
+  beamer_presentation: default
+  slidy_presentation: default
+---
+
+
+
+## A motivating example: paratuberculosis
+- Caused by __Mycobacterium avium__ subspecies __paratuberculosis__
+- Granulomatous enteritis - malabsorption - diarrhoea - weight loss - death
+- Disease seen worldwide in ruminants
+- No effective treatment
+- In deer, highest clinical incidence is in yearlings
+
+<center>
+<img src="images\White-tailed_deer.jpg" width="300">
+</center>
+
+## The problem
+
+- _Aim_: estimate sensitivity and specificity of individual faecal culture (IFC) and a serum ELISA test for paratuberculosis in deer
+
+- There is no __gold standard__ test in the live animal
+
+## Latent class amalysis
+
+- True disease/infection status of individual is accepted as unknown (latent)
+
+- Test accuracy is derived mathematically from test results using maximum likelihood methods or Bayesian inference
+
+## Advantage of latent class amalysis
+
+- New test for evaluation may be more sensitive than the existing gold standard
+- Avoids selection of panel of _true positives_ biased to those positive to a gold standard
+- If Bayesian methods are used to fit the model, smaller sample size needed
+
+## Two test-two population method
+
+- S.L.Hui, S.D. Walter, Biometrics 36, 167-171 (1980)
+    - consider two tests  applied simultaneously to the same individuals from two populations with different disease prevalences
+    - assume conditional independence of the errors of the two tests
+    - _then_: the error rates of both tests and the true prevalences in both populations can be estimated by a maximum likelihood procedure
+
+## Two test-two population method assumption
+
+- Test sensitivity and specificity are constant across populations
+- The disease prevalences of the two populations are distinct
+
+
+## Bayes Theorem in test diagnostic
+
+- _Prior information_: test operative characteristics and prevalence 
+- _Data_: the test results 
+- _Aim_: to derive the posterior probability for each parameter
+
+## Informative Priors
+
+- Elicit most plausible value (e.g specificity of test A is 90%) 
+- Elicit value that you are 95% sure the value exceeds certain threshold 
+    - e.g. 95% certain that specificity is greater than 70%
+- Translate these into a beta distribution
+
+## Priors....
+
+Different ways to build prior distribution $Beta(\alpha,\beta)$ for $\pi$:
+
+- Building priors solely on the prior parameters and interpreting $\alpha + \beta$ as the total number of subjects (Gelman):
+    - $\alpha$ successes and $\beta$ failures
+
+- Using 90th percent probability interval $W_{90} = (5th, 95th)$-percentiles and elicit information from investigators or past studies through the percentile approach
+
+
+Informative and non-informative priors
+
+- __Informative priors__ are narrow and reflect the knowledge of strong prior information
+- __Non-informative priors__ are flat and reflect little prior information
+
+
+## Prior elicitation
+Two steps for eliciting a-priori distribution
+
+1. eliciting the center value by asking the clinician "what is the most likely response reate you expect to occur?"
+    - finding out whether the response is the mean, median or the mode
+2. assessing the uncertainty in the "most likely response rate" 
+    - elicitation of $W_{90}$ is easy for clinicians who think in terms of percentiles
+    - $W_{90}$ can be elicited by asking clinicians how uncertain they are regarding their center value
+    - for mode answer, the question can be posed as "prior sample size" (increasing or decreasing $\alpha + \beta$)
+
+
+## How to build priors
+
+1. __mode (non-informative):__ 
+
+	+ it has prior parameters $\alpha = \pi_{prior}+1$ and $\beta = 1-\pi_{prior}+1$
+	+ it has the interpretation of a mode and a prior sample size of $\alpha+\beta=3$
+				
+2. 	__mode (informative):__ 
+
+	+ it has prior parameters $\alpha = \pi_{prior}+1+n_{prior}\pi_{prior}$ and $\beta = 1-\pi_{prior}+1+n_{prior}(1-\pi_{prior})$
+	+ it has the interpretation of a mode and a prior sample size of $\alpha+\beta=n_{prior}+3$
+
+
+## How to build priors
+
+3. 	__median (informative):__ 
+
+	+  we elicit $\pi_{prior}$ assuming it is the _median_ and we elicit also $W_{90}$
+	+ this requires solving the system:
+	
+$$
+F(\pi_{prior}\vert\alpha\beta) =0.5 \\
+F^{-1}(0.95\vert\alpha\beta) -F^{-1}(0.05\vert\alpha\beta) = W_{90} 
+$$
+
+
+4. __mean (informative):__ 
+
+	+  we elicit $\pi_{prior}$ assuming it is the _mean_ and we elicit also $W_{90}$
+	+ this requires solving the system:
+	
+$$
+E(y)=\pi_{prior} \\
+F^{-1}(0.95\vert\alpha\beta) -F^{-1}(0.05\vert\alpha\beta) = W_{90} 
+$$
+
+
+## $alpha$ and $beta$ parameters calculation
+
+```{r}
+source('R\\informativePriors.R')
+```
+
+- Parameters calculation using the __informative median__ prior:
+ 
+```{r, message=FALSE, warning=FALSE}
+pparameter(pi=0.2, w90=0.3, prior.method='median-informative')
+```
+
+## $alpha$ and $beta$ parameters calculation
+
+- Parameters calculation using the __informative mean__ prior:
+ 
+ 
+```{r, message=FALSE, warning=FALSE}
+pparameter(pi=0.2, w90=0.3, prior.method='mean-informative')
+
+```
+
+## $alpha$ and $beta$ parameters calculation
+
+- Parameters calculation using the __informative mode__ prior:
+
+```{r, message=FALSE, warning=FALSE}
+pparameter(pi=0.2, w90=0.3, prior.method='mode-informative')
+```
+
+## Two tests two population method
+
+<center>
+<img src="images\twoTP.png" width="700">
+</center>
+
+## Latent class analysis
+
+- For each cell, the _likelihood_ is computed
+
+<center>
+<img src="images\twoTP2.png" width="200">
+</center>
+
+- Test result (a) (animal positive on both test) occurs if the animale is a _true positive $(T^+)$_ or a _false positive $(F^+)$_
+
+$$
+\textrm P(\textrm T^+) = \textrm P(\textrm T_1^+ \cap \textrm T_2^+) =  \textrm P(\textrm T_1^+\vert \textrm M)\times \textrm P(\textrm T_2^+\vert \textrm M) \times \textrm P(\textrm M) 
+$$
+$$
+\textrm P(\textrm F^+) = \textrm P(\textrm T_1^+ \cap \textrm T_2^+) =  \textrm P(\textrm T_1^+\vert \textrm S)\times \textrm P(\textrm T_2^+\vert \textrm S) \times \textrm P(\textrm S) 
+$$
+
+## Latent class analysis
+
+- For cell (a), the likelihood is the sum of these probabilities
+
+$$
+\textrm P(\textrm A= \textrm a) = \underbrace{\textrm {prevalence} \times \textrm{SE}_1\times \textrm{SE}_2}_{\textrm P(\textrm T^+)} + \underbrace{
+(1- \textrm {prevalence} )\times (1- \textrm {SP}_1 ) \times (1- \textrm {SP}_2 )}_{\textrm P(\textrm F^+)}
+$$
+- Likelihoods for remaining cells are constructed similarly
+
+## Latent class analysis
+
+- Population 1
+$$
+\begin{align}
+\textrm{Cell a: } & p_1SE_1SE_2 + (1-p_1)(1-SP_1)(1-SP_2)\\
+\textrm{Cell b: } & p_1SE_1(1-SE_2) + (1-p_1)(1-SP_1)SP_2\\
+\textrm{Cell c: } & p_1(1-SE_1)SE_2 + (1-p_1)SP_1(1-SP_2)\\
+\textrm{Cell d: } & p_1(1-SE_1)(1-SE_2) + (1-p_1)SP_1SP_2\\
+\end{align}
+$$
+- Population 2
+$$
+\begin{align}
+\textrm{Cell e: } & p_2SE_1SE_2 + (1-p_2)(1-SP_1)(1-SP_2)\\
+\textrm{Cell f: } & p_2SE_1(1-SE_2) + (1-p_2)(1-SP_1)SP_2\\
+\textrm{Cell g: } & p_2(1-SE_1)SE_2 + (1-p_2)SP_1(1-SP_2)\\
+\textrm{Cell h: } & p_2(1-SE_1)(1-SE_2) + (1-p_2)SP_1SP_2\\
+\end{align}
+$$
+
+## Latent class analysis
+
+- Six parameters can be estimated from the observed data
+    - prevalence in population 1 $(p_1)$ and in population 2 $(p_2)$
+    - sensitivity of test 1 (ELISA) and test 2 (IFC)
+    - specificity of test 1 (ELISA) and test 2 (IFC)
+
+
+## Objective
+
+- Estimate the sensitivity and specificity of ELISA and IFC to:
+    - identify clinically normal yearling deer infected
+    - for the purpose of herd classification
+    
+
+## Study design (2 districts in NZ)
+
+- Prevalence of MAP infection in farmed deer different in North (29%) and South Island (51%) of New Zealand - two populations
+- 20 clinically normal yearling deer sampled (faeces and blood) in 20 herds SI, 18 NI
+
+<center>
+<img src="images\NZ.png" width="300">
+</center>
+
+
+## Statistical considerations
+
+- Samples not independent observations, clustered in herds
+- Variation in within-herd prevalence expected
+- Possibility of non-infected herds
+
+## Statistical considerations
+
+- Variation in within-herd prevalence modelled as a random effect
+- Zero-inflation effect incorporated 
+    - include in the model the probability of herd being non-infected
+
+## Write down the model in STAN
+- stan.R
+
+## Get the data
+
+```{r, echo=FALSE}
+load('output\\datNZ.RData')
+```
+
+```{r, echo=FALSE}
+library(knitr)
+kable(head(dat))
+```
+
+## Run STAN
+
+```{r, eval=FALSE}
+
+library(rstan)
+
+stan_dso <- stan_model(model_code = model_string)
+dataList <- list(y1 = as.matrix(dat), N1 = 18)
+stanFit <- sampling(object = stan_dso, 
+                    data = dataList, 
+                    chains = 1, iter = 9000, 
+                    warmup = 1000, thin = 1)
+```
+
+
+## Results
+
+```{r, echo=FALSE}
+load('output\\blca.RData')
+```
+
+```{r}
+print(stanFit, pars = c('SeELISA','SpELISA','Seifc','Spifc','phi1'))
+```
+
+## Practical
+- Run the model for the two populations
+
+## Getting the slides
+
+* The slides for this course were created with Rmarkdown: [http://rmarkdown.rstudio.com/](http://rmarkdown.rstudio.com/). 
+* They are available from [https://github.com/berkeley3/BDA-IZSTO](https://github.com/berkeley3/BDA-IZSTO).
+* To re-compile the slides:
+
+    + Download the directory containing the lectures from Github
+    + In R open the .Rmd file and set the working directory to the lecture directory
+    + Click the *KnitHTML* button on Rstudio or run the following commands: 
+  
+```{r RmarkdownChunk, eval=FALSE}
+library(rmarkdown) 
+render("main.Rmd")
+```
