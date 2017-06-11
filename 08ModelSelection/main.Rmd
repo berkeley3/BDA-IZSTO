@@ -1,0 +1,523 @@
+---
+title: "Bayesian Data Analysis for Medical Data"
+subtitle: Model selection
+author      : Paola Berchialla
+job         : Department of Clinical and Biological Sciences, University of Torino
+output:
+  ioslides_presentation:
+    css: assets/css/ioslides.css
+    logo: assets/img/dscb.jpg
+    mathjax: local
+    self_contained: no
+    widescreen: yes
+  beamer_presentation: default
+  slidy_presentation: default
+---
+
+## Out-of-sample predictive performance
+- A model's fit to new data can be summarized numerically by 
+    - the _MSE_
+    - the $\log$ predictive density (log-likelihood)
+        - it is proportional to the mean squared error if the model is normal with constant variance
+
+- The ideal measure of a model's fit is the _out-of-sample_ predictive performance for new data produced from the true data-generating process
+$$
+\log p_{post}(\tilde y_i) = \log \textrm E_{post}(p(\tilde y_i\vert\theta)) = \log \int p(\tilde y_i \vert\theta)p_{post}(\theta)d\theta
+$$
+
+
+## Estimating out-of-sample pointwise predictive accuracy 
+Let's $y_1, \ldots ,y_n$ and consider the posterior predictive distribution
+$$
+p(\tilde y\vert y) = \int p(\tilde y_i \vert\theta)p(\theta\vert y)d\theta
+$$
+
+- To get comparability with the given dataset and easier interpretation of the differences in scale of effective numbers of parameter, consider
+$$
+\begin{align}
+\textrm{elppd} & = \textrm{expected log pointwise predictive density for a new dataset} \\
+ & = \sum_{i=1}^n E_{f_i}(\log p(\tilde y\vert y))
+\end{align}
+$$
+$f_i$ being the distribution representing the true data-generating process 
+
+
+## Log pointwise predictive density
+
+
+$$
+\begin{align}
+\textrm{lppd} & = \textrm{log pointwise predictive density} \\
+ & = \sum_{i=1}^n \log p(\tilde y\vert y) = \sum_{i=1}^n \log \int p(y_i\vert\theta)p(\theta\vert y)d\theta
+\end{align}
+$$
+- To compute lppd in practice, expectation can be computed by drawing from $p(\theta\vert y)$
+
+$$
+\begin{align}
+\hat{\textrm{lpd}} & = \textrm{computed log pointwise predictive density} \\
+  & = \sum_{i=1}^n \log \left(\frac{1}{S} \sum_{s=1}^S p(y_i\vert\theta^s)\right)\\
+\end{align}
+$$
+    
+
+## Estimating out-of-sample accuracy
+
+Several methods are available to estimate the expected predictive accuracy without waiting for out-of-sample data (by computing lppd)
+
+- _within-sample predictive accuracy:_  naive estimate of the expected log predictive density for new data baed on the log predictive density for existing data
+
+- _adjusted within-sample predictive accuracy:_ lppd is a biased estimate of elppd
+    - AIC, DIC, and WAIC give approximately unbiased estimates of elppd by  subtracting to lppd a correction for the number of parameters being fit
+
+- _crossvalidation:_  fitting the model to training data and then evaluating this predictive accuracy on a holdout set
+    
+    
+    
+## AIC and DIC
+
+$$
+\hat{\textrm{elpd}}_{AIC} = \log p(y\vert\hat\theta_{MLE}) - k
+$$
+$$
+\hat{\textrm{elpd}}_{DIC} = \log p(y\vert\hat\theta_{Bayes}) - p_{DIC}
+$$
+
+where $\hat\theta_{Bayes}$ is the posterior mean $(\hat\theta_{Bayes} = \textrm E(\theta\vert y))$
+
+- $p_{DIC}$ is the effective number of parameters defined as
+$$
+p_{DIC} = 2\left(\log p(y\vert\hat\theta_{Bayes}) - \textrm E(\log p(y\vert\theta))\right)
+$$
+
+## WAIC (Watanabe_Akaike IC or widely applicable IC)
+
+- WAIC is a more fully approach  for estimating the out-of-sample expectation
+
+- It is based on 
+$$
+\hat{\textrm{elppd}}_{WAIC} = \hat{\textrm{lppd}} - \hat{p}_{WAIC}
+$$
+that is
+$$
+\sum_{i=1}^n \left(\log \left(\frac{1}{S} \sum_{s=1}^S p(y_i\vert\theta^s)\right)- \frac{1}{S} \sum_{s=1}^S \log p(y_i\vert\theta^s)\right)
+$$
+
+## WAIC
+
+- If one wishes to use the deviance scale so as to be comparable to AIC and DIC:
+
+$$
+\textrm{WAIC} = - 2 \hat{\textrm{elppd}}_{\textrm{waic}}
+$$
+
+- It can be interpreted as a computationally convenient approximation to
+cross-validation
+
+## AIC, DIC, WAIC
+
+- Compared to AIC and DIC, WAIC has the property of averaging over the posterior distribution rather than conditioning on a point estimate
+
+## Leave-one-out (Loo) crossvalidation
+
+- In Bayesian cross-validation, the data are repeatedly partitioned into a training set $y_{train}$ and a holdout set $y_{holdout}$, and then the model is fit to $y_{train}$
+    - getting a posterior distribution $p(\theta\vert y_{train})$ 
+    
+- This fit is evaluated using an estimate of the log predictive density of the holdout data
+
+$$
+\log p(y_{holdout}\vert y_{train}) = \log \int p(y_{holdout}\vert\theta)p(\theta\vert y_{train})
+$$
+- Assuming the posterior distribution $p(\theta\vert y_{train})$ is summarized by $S$ simulation draws $\theta^s$, log predictive density is
+$$
+\log \left(\frac{1}{S} \sum_{s=1}^S p(y_{holdout}\vert\theta^s)\right)
+$$
+
+## Leave-one-out (Loo) crossvalidation
+- Performing the analysis for each of the $n$ data points yields $n$ different inferences $p_{\textrm{post}(-i)}$ 
+- Each of them is summarized by $S$ posterior simulations $\theta^{is}$
+
+- The Bayesian LOO-CV estimate of out-of-sample predictive fit is
+$$
+\textrm{lppd}_{loo} = \sum_{i=1}^n \log p_{\textrm{post}(-i)}(y_i)
+$$
+computed as
+
+$$
+\sum_{i=1}^n \log \left(\frac{1}{S} \sum_{s=1}^S p(y_i\vert\theta^{is})\right)
+$$
+## DIC: computational note {.smaller}
+
+For a hierarchical model with the structure
+$$
+\begin{array}{rl}
+Y_i \vert u_i &\sim& f(y_i\vert u_i, \boldsymbol\theta)\\
+u_i &\sim& f(u_i\vert \boldsymbol\theta_u)\\
+\end{array}
+$$
+DIC is computed using deviance measure
+$$
+D_c(\mathbf u, \boldsymbol \theta) = -2\log f(\mathbf y\vert \mathbf u, \boldsymbol \theta)
+$$
+based on the conditional likelihood
+$$
+f(\mathbf y\vert \mathbf u, \boldsymbol \theta) = \prod_{i=1}^n
+ f(y_i\vert u_i,\boldsymbol \theta)
+$$
+
+DIC is given by
+$$
+\text{DIC} = 2\overline{D_c(\mathbf u, \boldsymbol \theta)}-D_c(\bar{\mathbf u}, \bar{\boldsymbol \theta})
+$$
+
+## DIC: computational note
+
+When model is fitted directly
+$$
+Y_i \sim f(y_i\vert \boldsymbol \theta, \boldsymbol \theta_u)
+$$
+based on the marginal distribution
+$$
+f(Y_i\vert \boldsymbol \theta, \boldsymbol \theta_u) = \int f(Y_i\vert\boldsymbol \theta, u_i) f(u_i\vert\boldsymbol \theta_u)du_i
+$$
+the DIC is given by
+$$
+\text{DIC} = 2\overline{D(\boldsymbol \theta, \boldsymbol \theta_u)}-D(\bar{\boldsymbol\theta}, \bar{\boldsymbol \theta}_u)
+$$
+with
+$$
+D(\boldsymbol\theta, \boldsymbol \theta_u) = -2\sum_{i=1}^n \log f(Y_i\vert\boldsymbol\theta, \boldsymbol \theta_u)
+$$    
+
+
+## LOO in STAN {.smaller}
+
+```{r}
+'data {
+int P;                           // Number of regression predictors
+int N_t;                         // (Training) number of data points
+int<lower=0,upper=1> y_t[N_t];   // (Training) binary data
+matrix[N_t,P] X_t;               // (Training) predictors
+int N_h;                         // (Holdout)
+int y_h[N_h];                    // (Holdout)
+matrix[N_h,P] X_h;               // (Holdout)
+real a;
+}
+parameters {
+vector[P] b;
+}
+model {
+y_t ~ bernoulli_logit(X_t*b);
+}
+generated quantities {
+vector[N_t] log_lik_t;
+vector[N_h] log_lik_h;
+for (n in 1:N_t)
+log_lik_t[n] = bernoulli_logit_lpmf(y_t[n] | X_t[n]*b);
+for (n in 1:N_h)
+log_lik_h[n] = bernoulli_logit_lpmf(y_h[n] | X_h[n]*b);
+}'
+```
+
+## loo package in R
+
+- loo package contrain the function _extract_log_lik_
+```{r}
+'generated quantities {
+vector[N] log_lik;
+for (n in 1:N) log_lik[n] = normal_lpdf(y[n] | X[n] * beta, sigma)
+}'
+```
+
+```{r, eval=FALSE}
+log_lik <- extract_log_lik(stanfit1) 
+loo(log_lik1)
+```
+
+
+# Just Another Example
+
+## A simple crossover trial
+- __Crossover trial:__ different treatments are given with different sequences in groups of patients
+
+<center><img src="images/Crossover.png" width="800px" height="400px"/></center>
+    
+
+## Brown&Prescott (Applied Mixed Models in Medicine, 2006){.smaller}
+    
+- Comparison of two diuretics in the treatment of mild and moderate heart failure
+- Baseline observation were taken before the first treatment period
+- The duration of each treatment period was 5 days without any washout period
+    - to avoid carryover effects, measurement of the first 2 days were ignored
+- Two endpoint analyzed:
+    - edema status (OED)
+        - the sum of left and right ankle diameters
+    - diastolic blood preassure (DBP)
+        - the sum of 3 DBP readings
+-  __Aim: compare the effectiveness of the two treatments__    
+
+## Brown&Prescott (Applied Mixed Models in Medicine, 2006)
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+crossover <- read.csv('R\\crossover.base.csv')
+crossover$period <- factor(crossover$period)
+crossover$treatment <- as.numeric(factor(crossover$treatment))
+library(knitr)
+kable(crossover[1:11,])
+
+```
+
+## Brown&Prescott (Applied Mixed Models in Medicine, 2006)
+
+Four models were fitted for each response (OED and DBP) and compared using DIC and WAIC:
+
+- treatment and period effect were included in the analysis as fixed effects
+- patient effect was included as either fixed or random effect
+- baseline measures were introduced in two models to assess their importance
+- an additional model with interaction effect between the period and the treatment to account for possible _carryover_ effects
+
+
+
+
+## Models formulation
+
+$$
+\begin{align}
+Y_i & \sim  \textrm N(\mu_i, \sigma^2)\\
+\mu_i & =  \beta_1 + \beta_2\textrm{period}_i + \beta_3 T_i + \gamma_1 a^{\textrm{random}}_{P_i} + (1-\gamma_1) a^{\textrm{fixed}}_{P_i} + \gamma_2 \beta_4 B_i \\
+a^{\textrm{random}}_{k} & \sim  \textrm N(0,\sigma^2_{\textrm{patients}})\\
+a^{\textrm{fixed}}_{k} & \sim  \textrm N(0,10^{-3})\\
+\end{align}
+$$
+
+## Model 1: fixed effects + no baseline {.smaller}
+
+```{r mod1, eval = FALSE, cache=T}
+library(rstan)
+library(glmer2stan)
+source('R\\myglmer2stan.R')
+mod_1 <- myglmer2stan(oed ~ period + treatment + patient,
+                      data = crossover, 
+                      calcWAIC = T, calcDIC = T,
+                      Ranef = F)
+```
+
+
+
+## Model 2: random effects + no baseline {.smaller}
+
+
+```{r mod2, eval = FALSE, cache=T}
+library(rstan)
+library(glmer2stan)
+source('R\\myglmer2stan.R')
+mod_2 <- myglmer2stan(oed ~ period + treatment + (1|patient),
+                      data = crossover, 
+                      calcWAIC = T, calcDIC = T,
+                      Ranef = T)
+```
+
+## Model 3: fixed effects + baseline {.smaller}
+
+```{r mod3, eval = FALSE, cache=T}
+library(rstan)
+library(glmer2stan)
+source('R\\myglmer2stan.R')
+mod_3 <- myglmer2stan(oed ~ period + treatment + oedbase + patient,
+                      data = crossover, 
+                      calcWAIC = T, calcDIC = T,
+                      Ranef = F)
+```
+
+## Model 4: random effects + baseline {.smaller}
+
+```{r mod4, eval = FALSE, cache=T}
+library(rstan)
+library(glmer2stan)
+source('R\\myglmer2stan.R')
+mod_4 <- myglmer2stan(oed ~ period + treatment + oedbase + (1|patient),
+                      data = crossover, 
+                      calcWAIC = T, calcDIC = T,
+                      Ranef = T)
+```
+
+
+## Extract within-patient and between-patient variance
+
+```{r, echo=FALSE}
+load('output\\mod_4.RData')
+```
+
+
+```{r}
+library(rstan)
+s_pat <- unlist(extract(mod_4,'sigma_patient'))
+s <- unlist(extract(mod_4,'sigma'))
+
+```
+
+## Compute the correlation within-patient (ICC)
+
+```{r}
+cor <- s_pat^2/(s^2+s_pat^2)
+quantile(cor, probs = c(0.025, 0.5, .975))
+```
+
+
+## Choose the model
+
+
+
+
+## Predictive accuracy
+- After fitting a Bayesian model, how to measure its predictive accuracy?
+
+- _WAIC_ (the Watanabe-Akaike or widely applicable information criterion) is
+an improvement on the deviance information criterion (_DIC_) 
+    - DIC is based on a point estimate (no fully Bayesian)
+    - DIC can produce negative estimates of the effective number of parameters in a model 
+    
+- WAIC is fully Bayesian and closely approximates Bayesian cross-validation
+    - Unlike DIC, WAIC is invariant to parametrization 
+    
+
+## WAIC to choose models 
+
+- WAIC and DIC
+
+```{r, echo=FALSE}
+resout <- data.frame(Model = paste('Model', 1:4),
+                     WAIC = c(461.58, 461.62, 460.75, 456 ),
+                     pWAIC = c(66.54, 66.88, 66.72, 63.9),
+                     DIC = c(470.59, 469.87, 469.14, 461),
+                     pDIC = c(96.56, 96.12, 96.09, 88.7),
+                     lppd = c(-164.2, -163.93, -360.63, -163.95),
+                     dev = c(277.47, 277.63, 723.92, 283.6))
+kable(resout)
+```
+
+- To check for deviations from the normality assumption, the log-normal distribution can be used (higher DIC values)
+
+## Log-normal distribution
+
+
+```{r}
+'generated quantities{
+    real dev;
+    real vary[N];
+    real glm[N];
+vector[N] log_lik;
+    dev <- 0;
+    for ( i in 1:N ) {
+        vary[i] <- vary_patient[patient[i]];
+        glm[i] <- vary[i] + Intercept
+                + beta_period2 * period2[i]
+                + beta_treatment * treatment[i]
+                + beta_oedbase * oedbase[i];
+log_lik[i] = normal_lpdf(oed[i] | glm[i], sigma);
+        dev <- dev + (-2) * normal_log( oed[i] , glm[i] , sigma );
+    }
+}
+'
+```
+
+
+
+## Final Model
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+load('output\\mod_4.RData')
+library(glmer2stan)
+```
+
+```{r}
+stanmer(mod_4)
+```
+
+ 
+
+    
+## Give a try to rstanarm
+
+```{r, eval=FALSE}
+library(rstanarm)
+
+post2 <- stan_lmer(oed ~ period + treatment + oedbase+ (1|patient), data=data)
+
+```
+
+
+## Stan
+```{r, eval=FALSE}
+pp_check(post1)
+
+```
+
+ <center><img src="images/pp_check.png" width="600px" height="400px" /></center>
+
+
+## Stan
+```{r, eval=FALSE}
+
+library(ggplot2)
+
+base <- ggplot(data, aes(x = treatment, y = oed)) +
+  geom_point(size=1, position=position_jitter(height = 0.05, width = 0.1)) +
+  scale_x_continuous(breaks = c(1,2), labels = c('A', 'B')) 
+
+draws <- as.data.frame(post2)[,1:3]
+draws <- na.omit(draws)
+colnames(draws)[1] ='intercept'
+base + 
+  geom_abline(data = draws, aes(intercept = intercept +mean(data$oedbase), slope = treatment),
+              color = 'skyblue', size = 0.2, alpha = 0.25) +
+  geom_abline(intercept = fixef(post2)[1] + mean(data$oedbase), slope = fixef(post2)[3],
+              color = 'skyblue4', size = 1)
+```
+
+
+## Stan
+
+<center><img src="images/stan1.png" width="600px" height="400px" /></center>
+
+
+## Stan: relationship with baseline
+
+```{r, eval=FALSE}
+draws <- as.data.frame(as.matrix(post2))
+colnames(draws)[1] <- "intercept"
+ggplot(data, aes(x = oedbase, y = oed)) + 
+  geom_point(size = 1) +
+  geom_abline(data = draws, aes(intercept = intercept, slope = oedbase), 
+              color = "skyblue", size = 0.2, alpha = 0.25) + 
+  geom_abline(intercept = fixef(post2)[1], slope = fixef(post2)[4], 
+              color = "skyblue4", size = 1)
+```
+
+
+## Stan: relationship with baseline
+
+<center><img src="images/stan2.png" width="600px" height="400px" /></center>
+
+## The carry-over effect?
+
+- Try to add an interaction term between the period and the treatment
+
+- It is worth modeling the carry-over effect?
+
+
+## Getting the slides
+
+* The slides for this course were created with Rmarkdown: [http://rmarkdown.rstudio.com/](http://rmarkdown.rstudio.com/). 
+* They are available from [https://github.com/berkeley3/BDA-IZSTO](https://github.com/berkeley3/BDA-IZSTO).
+* To re-compile the slides:
+
+    + Download the directory containing the lectures from Github
+    + In R open the .Rmd file and set the working directory to the lecture directory
+    + Click the *KnitHTML* button on Rstudio or run the following commands: 
+  
+```{r RmarkdownChunk, eval=FALSE}
+library(rmarkdown) 
+render("main.Rmd")
+```
