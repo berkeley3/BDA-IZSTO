@@ -1,0 +1,183 @@
+---
+title: "Bayesian Data Analysis for Medical Data"
+subtitle: Prior Sensitivity Analysis
+author      : Paola Berchialla
+job         : Department of Clinical and Biological Sciences, University of Torino
+output:
+  ioslides_presentation:
+    css: assets/css/ioslides.css
+    logo: assets/img/dscb.jpg
+    mathjax: local
+    self_contained: no
+    widescreen: yes
+  beamer_presentation: default
+  slidy_presentation: default
+---
+
+<style>
+  .col2 {
+    columns: 2 200px;         /* number of columns and width in pixels*/
+    -webkit-columns: 2 200px; /* chrome, safari */
+    -moz-columns: 2 200px;    /* firefox */
+  }
+ </style>
+ 
+ 
+## Prior distributions
+
+- The prior distribution is an inherent part of the model
+    - as are the error distribution and the link function
+- Prior distributions povide the chance to include previous knowledge
+
+## 5 levels of priors
+  * _Flat_ prior;
+  * _Super-vague_ but proper prior:  Normal(0, 1000000);
+  * _Weakly informative_ prior, very weak:  Normal(0, 10);
+  * _Generic weakly informative_ prior:  Normal(0, 1);
+  * _Specific informative_ prior:  Normal(0.4, 0.2) or whatever
+      - sometimes this can be expressed as a scaling followed by a generic prior:  $\theta = 0.4 + 0.2\times z;\quad z \sim \textrm{Normal}(0, 1)$
+
+## Flat priors
+
+- Flat priors produce results that are mostly equal to results one would obtain using frequentist methods
+    - all information in the results stems from the data
+
+- An improper prior $p\propto 1$ says that values close to 0 are equally likely as very large values
+
+- A seemingly noninformative prior becomes highly informative
+when the parameter is transformed
+  - when a link function is applied
+
+## Flat priors are not so un-informative
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.align='center'}
+library(ggplot2)
+require(gridExtra)
+theta <- rnorm(1e5, mean = 0, sd = 500)
+d <- data.frame(theta, y = dnorm(theta, mean = 0, sd = 500), clr = abs(theta) > 250)
+
+plot1 <- ggplot(d, aes(x = theta, y = y)) + 
+  geom_line(show.legend = FALSE) + 
+  scale_y_continuous(name = "Density",  expand = c(0,0)) + 
+  scale_x_continuous(name = expression(theta), limits=c(-200,200))+
+#  ggtitle(expression(Normal(0, 500^2))) + 
+  theme(plot.title = element_text(size=10, hjust = 0.5))
+
+plot2 <- ggplot(d, aes(x = theta, fill = clr)) + 
+  geom_histogram(binwidth = 5, show.legend = FALSE) + 
+  scale_y_continuous(name = "", labels = NULL, expand = c(0,0)) + 
+  scale_x_continuous(name = expression(theta), breaks = c(-1000, -250, 250, 1000))
+
+grid.arrange(plot1, plot2, ncol=2, top = expression(Normal(0, 500^2)))
+```
+
+$$
+\textrm N(0, 500^2)
+$$
+
+
+## Weakly informative priors
+- Weakly informative prior distributions are  constructed based
+on the range of reasonable parameter values
+- In a logistic regression with a z-transformed numeric predictor, a slope of 10 would mean that the probability changes from $\textrm{logit}(-5) = .007$ to $\textrm{logit}(5) = .993$
+ when Z is increased by 1 standard deviation
+    - huge  unrealistic effect in most situations 
+    - better use a Norm(0,5) distribution, which assigns most of its mass to slope values from -10 to +10.
+    - effect can be something between a huge negative and a huge positive effect but implausible parameter values (<10 or >10) have very low probabilities 
+    - in contrast, a flat prior, such as Norm(0,100), would give similar probabilities to both implausible and plausible parameter values
+
+
+## Sensitivity to prior specification
+
+- To measure the influence of the choice of $\textrm{Normal}(0, 5)$ for the slope parameter
+$$
+\begin{align}
+y_i &\sim \textrm{Normal}(\mu,\sigma)\\
+\mu & = \beta_0 + \beta_1X_1\\
+\beta_1 & \sim \textrm{Normal}(0, 5)\\
+\sigma & \sim \textrm{Cauchy}(0,5)[0,]
+\end{align}
+$$
+Fit 20 different models using priors from 
+
+- very strongly informative $\textrm{Normal}(0, .01)$ to vague $\textrm{Normal}(0, .01)$
+
+## Model code {.smaller}
+
+```{r, eval=FALSE}
+data {
+int<lower=0> n;
+vector[n] y;
+vector[n] x;
+vector[20] sdprior;
+}
+parameters {
+vector[20] beta0;
+vector[20] beta1;
+real<lower=0> sigma[20];
+}
+model {
+beta0 ~ normal(0,5); //priors
+sigma ~ cauchy(0,5);
+for(k in 1:20){
+beta1[k] w normal(0,sdprior[k]);
+y ~ normal(beta0[k] þ beta1[k] * x, sigma[k]);// likelihood
+}
+}
+
+```
+
+
+
+## Sensitivity to prior specification
+
+<center>
+<img src="images\sensitivity.png" width=600>
+</center>
+
+
+## Sensitivity to variance parameter
+
+- Which prior for $\sigma$ in the linear mode or a between-group variance in a mixed model?
+- Commonly priors are long-tailed IG or Uniform distributions over a range of positive values
+- Uniform distribution often preferred since IG can result in improper posterior distributions
+- Uniform priors tend to overestimate the variance parameter when the sample size is small
+- A more natural prior is the half-Cauchy 
+    - large mass in a range of likely values with an upper tail
+that gradually becomes smaller and approaches zero for large values
+
+## General advices
+
+- _Informative_ priors are chosen to keep the posterior distribution
+within a range of reasonable values and to stabilize MCMC algorithms
+
+- Write down what you think the prior should be, then spread it out
+
+- _Weakly informative_ is better than _fully informative_  
+    - the loss in precision is less serious than the gain in robustness by including parts of parameter space that might be relevant
+
+- Don't use uniform priors, or hard constraints more generally, unless the bounds represent true constraints
+    - If you want to be _vague_, no specify prior at all 
+    - in Stan it is equivalent to a noninformative uniform prior 
+
+## References
+
+- Penalising Model Component Complexity: A Principled, Practical Approach to Constructing Priors __Statistical Sciences, 32(1):1-28, 2017__ 
+- Stan: A probabilistic programming language for Bayesian inference and
+optimization. __Journal of Educational and Behavioral Statistics, 40(5), 2015__
+- Beyond subjective and objective in statistics. __JR Statistical Society  A, 180(4):1-31, 2017__
+
+
+## Getting the slides
+
+* The slides for this course were created with Rmarkdown: [http://rmarkdown.rstudio.com/](http://rmarkdown.rstudio.com/). 
+* They are available from [https://github.com/berkeley3/BDA-IZSTO](https://github.com/berkeley3/BDA-IZSTO).
+* To re-compile the slides:
+
+    + Download the directory containing the lectures from Github
+    + In R open the .Rmd file and set the working directory to the lecture directory
+    + Click the *KnitHTML* button on Rstudio or run the following commands: 
+  
+```{r RmarkdownChunk, eval=FALSE}
+library(rmarkdown) 
+render("main.Rmd")

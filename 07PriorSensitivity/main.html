@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bayesian Data Analysis for Medical Data</title>
+
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <meta name="generator" content="pandoc" />
+
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <base target="_blank">
+
+  <script type="text/javascript">
+    var SLIDE_CONFIG = {
+      // Slide settings
+      settings: {
+                title: 'Bayesian Data Analysis for Medical Data',
+                        subtitle: 'Prior Sensitivity Analysis',
+                useBuilds: true,
+        usePrettify: true,
+        enableSlideAreas: true,
+        enableTouch: true,
+                        favIcon: 'main_files/logo.jpg',
+              },
+
+      // Author information
+      presenters: [
+            {
+        name:  'Paola Berchialla' ,
+        company: '',
+        gplus: '',
+        twitter: '',
+        www: '',
+        github: ''
+      },
+            ]
+    };
+  </script>
+
+  <link href="main_files/ioslides-13.5.1/fonts/fonts.css" rel="stylesheet" />
+  <link href="main_files/ioslides-13.5.1/theme/css/default.css" rel="stylesheet" />
+  <link href="main_files/ioslides-13.5.1/theme/css/phone.css" rel="stylesheet" />
+  <script src="main_files/ioslides-13.5.1/js/modernizr.custom.45394.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/prettify/prettify.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/prettify/lang-r.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/prettify/lang-yaml.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/hammer.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/slide-controller.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/slide-deck.js"></script>
+
+  <style type="text/css">
+
+    b, strong {
+      font-weight: bold;
+    }
+
+    em {
+      font-style: italic;
+    }
+
+    slides > slide {
+      -webkit-transition: all 0.4s ease-in-out;
+      -moz-transition: all 0.4s ease-in-out;
+      -o-transition: all 0.4s ease-in-out;
+      transition: all 0.4s ease-in-out;
+    }
+
+    .auto-fadein {
+      -webkit-transition: opacity 0.6s ease-in;
+      -webkit-transition-delay: 0.4s;
+      -moz-transition: opacity 0.6s ease-in 0.4s;
+      -o-transition: opacity 0.6s ease-in 0.4s;
+      transition: opacity 0.6s ease-in 0.4s;
+      opacity: 0;
+    }
+
+    slides > slide:not(.nobackground):before {
+      font-size: 12pt;
+      content: "";
+      position: absolute;
+      bottom: 20px;
+      left: 60px;
+      background: url(main_files/logo.jpg) no-repeat 0 50%;
+      -webkit-background-size: 30px 30px;
+      -moz-background-size: 30px 30px;
+      -o-background-size: 30px 30px;
+      background-size: 30px 30px;
+      padding-left: 40px;
+      height: 30px;
+      line-height: 1.9;
+    }
+  </style>
+
+  <link rel="stylesheet" href="assets\css\ioslides.css" type="text/css" />
+
+</head>
+
+<body style="opacity: 0">
+
+<slides class="layout-widescreen">
+
+  <slide class="title-slide segue nobackground">
+        <aside class="gdbar"><img src="main_files/logo.jpg"></aside>
+        <!-- The content of this hgroup is replaced programmatically through the slide_config.json. -->
+    <hgroup class="auto-fadein">
+      <h1 data-config-title><!-- populated from slide_config.json --></h1>
+      <h2 data-config-subtitle><!-- populated from slide_config.json --></h2>
+      <p data-config-presenter><!-- populated from slide_config.json --></p>
+          </hgroup>
+  </slide>
+
+<style>
+  .col2 {
+    columns: 2 200px;         /* number of columns and width in pixels*/
+    -webkit-columns: 2 200px; /* chrome, safari */
+    -moz-columns: 2 200px;    /* firefox */
+  }
+ </style>
+
+<slide class=''><hgroup><h2>Prior distributions</h2></hgroup><article  id="prior-distributions">
+
+<ul>
+<li>The prior distribution is an inherent part of the model
+
+<ul>
+<li>as are the error distribution and the link function</li>
+</ul></li>
+<li>Prior distributions povide the chance to include previous knowledge</li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>5 levels of priors</h2></hgroup><article  id="levels-of-priors">
+
+<ul>
+<li><em>Flat</em> prior;</li>
+<li><em>Super-vague</em> but proper prior: Normal(0, 1000000);</li>
+<li><em>Weakly informative</em> prior, very weak: Normal(0, 10);</li>
+<li><em>Generic weakly informative</em> prior: Normal(0, 1);</li>
+<li><em>Specific informative</em> prior: Normal(0.4, 0.2) or whatever
+
+<ul>
+<li>sometimes this can be expressed as a scaling followed by a generic prior: \(\theta = 0.4 + 0.2\times z;\quad z \sim \textrm{Normal}(0, 1)\)</li>
+</ul></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Flat priors</h2></hgroup><article  id="flat-priors">
+
+<ul>
+<li>Flat priors produce results that are mostly equal to results one would obtain using frequentist methods
+
+<ul>
+<li>all information in the results stems from the data</li>
+</ul></li>
+<li><p>An improper prior \(p\propto 1\) says that values close to 0 are equally likely as very large values</p></li>
+<li>A seemingly noninformative prior becomes highly informative when the parameter is transformed</li>
+<li><p>when a link function is applied</p></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Flat priors are not so un-informative</h2></hgroup><article  id="flat-priors-are-not-so-un-informative">
+
+<p><img src="main_files/figure-html/unnamed-chunk-1-1.png" width="720" style="display: block; margin: auto;" /></p>
+
+<p>\[
+\textrm N(0, 500^2)
+\]</p>
+
+</article></slide><slide class=''><hgroup><h2>Weakly informative priors</h2></hgroup><article  id="weakly-informative-priors">
+
+<ul>
+<li>Weakly informative prior distributions are constructed based on the range of reasonable parameter values</li>
+<li>In a logistic regression with a z-transformed numeric predictor, a slope of 10 would mean that the probability changes from \(\textrm{logit}(-5) = .007\) to \(\textrm{logit}(5) = .993\) when Z is increased by 1 standard deviation
+
+<ul>
+<li>huge unrealistic effect in most situations</li>
+<li>better use a Norm(0,5) distribution, which assigns most of its mass to slope values from -10 to +10.</li>
+<li>effect can be something between a huge negative and a huge positive effect but implausible parameter values (&lt;10 or &gt;10) have very low probabilities</li>
+<li>in contrast, a flat prior, such as Norm(0,100), would give similar probabilities to both implausible and plausible parameter values</li>
+</ul></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Sensitivity to prior specification</h2></hgroup><article  id="sensitivity-to-prior-specification">
+
+<ul>
+<li><p>To measure the influence of the choice of \(\textrm{Normal}(0, 5)\) for the slope parameter \[
+\begin{align}
+y_i &amp;\sim \textrm{Normal}(\mu,\sigma)\\
+\mu &amp; = \beta_0 + \beta_1X_1\\
+\beta_1 &amp; \sim \textrm{Normal}(0, 5)\\
+\sigma &amp; \sim \textrm{Cauchy}(0,5)[0,]
+\end{align}
+\] Fit 20 different models using priors from</p></li>
+<li><p>very strongly informative \(\textrm{Normal}(0, .01)\) to vague \(\textrm{Normal}(0, .01)\)</p></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Model code</h2></hgroup><article  id="model-code" class="smaller">
+
+<pre class = 'prettyprint lang-r'>data {
+int&lt;lower=0&gt; n;
+vector[n] y;
+vector[n] x;
+vector[20] sdprior;
+}
+parameters {
+vector[20] beta0;
+vector[20] beta1;
+real&lt;lower=0&gt; sigma[20];
+}
+model {
+beta0 ~ normal(0,5); //priors
+sigma ~ cauchy(0,5);
+for(k in 1:20){
+beta1[k] w normal(0,sdprior[k]);
+y ~ normal(beta0[k] þ beta1[k] * x, sigma[k]);// likelihood
+}
+}</pre>
+
+</article></slide><slide class=''><hgroup><h2>Sensitivity to prior specification</h2></hgroup><article  id="sensitivity-to-prior-specification-1">
+
+<center>
+
+<img src="images/sensitivity.png" width=600>
+
+</center>
+
+</article></slide><slide class=''><hgroup><h2>Sensitivity to variance parameter</h2></hgroup><article  id="sensitivity-to-variance-parameter">
+
+<ul>
+<li>Which prior for \(\sigma\) in the linear mode or a between-group variance in a mixed model?</li>
+<li>Commonly priors are long-tailed IG or Uniform distributions over a range of positive values</li>
+<li>Uniform distribution often preferred since IG can result in improper posterior distributions</li>
+<li>Uniform priors tend to overestimate the variance parameter when the sample size is small</li>
+<li>A more natural prior is the half-Cauchy
+
+<ul>
+<li>large mass in a range of likely values with an upper tail that gradually becomes smaller and approaches zero for large values</li>
+</ul></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>General advices</h2></hgroup><article  id="general-advices">
+
+<ul>
+<li><p><em>Informative</em> priors are chosen to keep the posterior distribution within a range of reasonable values and to stabilize MCMC algorithms</p></li>
+<li><p>Write down what you think the prior should be, then spread it out</p></li>
+<li><em>Weakly informative</em> is better than <em>fully informative</em>
+
+<ul>
+<li>the loss in precision is less serious than the gain in robustness by including parts of parameter space that might be relevant</li>
+</ul></li>
+<li>Don&#39;t use uniform priors, or hard constraints more generally, unless the bounds represent true constraints
+
+<ul>
+<li>If you want to be <em>vague</em>, no specify prior at all</li>
+<li>in Stan it is equivalent to a noninformative uniform prior</li>
+</ul></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>References</h2></hgroup><article  id="references">
+
+<ul>
+<li>Penalising Model Component Complexity: A Principled, Practical Approach to Constructing Priors <strong>Statistical Sciences, 32(1):1-28, 2017</strong></li>
+<li>Stan: A probabilistic programming language for Bayesian inference and optimization. <strong>Journal of Educational and Behavioral Statistics, 40(5), 2015</strong></li>
+<li>Beyond subjective and objective in statistics. <strong>JR Statistical Society A, 180(4):1-31, 2017</strong></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Getting the slides</h2></hgroup><article  id="getting-the-slides">
+
+<ul>
+<li>The slides for this course were created with Rmarkdown: <a href='http://rmarkdown.rstudio.com/' title=''>http://rmarkdown.rstudio.com/</a>.</li>
+<li>They are available from <a href='https://github.com/berkeley3/BDA-IZSTO' title=''>https://github.com/berkeley3/BDA-IZSTO</a>.</li>
+<li><p>To re-compile the slides:</p>
+
+<ul>
+<li>Download the directory containing the lectures from Github</li>
+<li>In R open the .Rmd file and set the working directory to the lecture directory</li>
+<li>Click the <em>KnitHTML</em> button on Rstudio or run the following commands:</li>
+</ul></li>
+</ul>
+
+<pre class = 'prettyprint lang-r'>library(rmarkdown) 
+render(&quot;main.Rmd&quot;)</pre></article></slide>
+
+
+  <slide class="backdrop"></slide>
+
+</slides>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "main_files/mathjax-local/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+<!-- map slide visiblity events into shiny -->
+<script>
+  (function() {
+    if (window.jQuery) {
+       window.jQuery(document).on('slideleave', function(e) {
+         window.jQuery(e.target).trigger('hidden');
+      });
+       window.jQuery(document).on('slideenter', function(e) {
+         window.jQuery(e.target).trigger('shown');
+      });
+    }
+  })();
+</script>
+
+</body>
+</html>
