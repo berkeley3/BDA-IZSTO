@@ -14,11 +14,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
 
-  <link rel="stylesheet" media="all" href="main_files/ioslides-13.5.1/fonts/fonts.css">
-
-  <link rel="stylesheet" media="all" href="main_files/ioslides-13.5.1/theme/css/default.css">
-  <link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="main_files/ioslides-13.5.1/theme/css/phone.css">
-
   <base target="_blank">
 
   <script type="text/javascript">
@@ -47,6 +42,17 @@
             ]
     };
   </script>
+
+  <link href="main_files/ioslides-13.5.1/fonts/fonts.css" rel="stylesheet" />
+  <link href="main_files/ioslides-13.5.1/theme/css/default.css" rel="stylesheet" />
+  <link href="main_files/ioslides-13.5.1/theme/css/phone.css" rel="stylesheet" />
+  <script src="main_files/ioslides-13.5.1/js/modernizr.custom.45394.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/prettify/prettify.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/prettify/lang-r.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/prettify/lang-yaml.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/hammer.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/slide-controller.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/slide-deck.js"></script>
 
   <style type="text/css">
 
@@ -92,7 +98,6 @@
   </style>
 
   <link rel="stylesheet" href="assets\css\ioslides.css" type="text/css" />
-
 
 </head>
 
@@ -612,6 +617,22 @@ P(\theta_1 &gt; \theta_2\vert y) &amp;=&amp; \int \int I(\theta_1 &gt; \theta_2)
 
 </center>
 
+</article></slide><slide class=''><hgroup><h2>Stan is NUTS</h2></hgroup><article  id="stan-is-nuts-1">
+
+<center>
+
+<img src="images/HMC.png" width=500>
+
+</center>
+
+</article></slide><slide class=''><hgroup><h2>Stan is NUTS</h2></hgroup><article  id="stan-is-nuts-2">
+
+<center>
+
+<img src="images/HMC2.png" width=500>
+
+</center>
+
 </article></slide><slide class=''><hgroup><h2>HMC Estimates</h2></hgroup><article  id="hmc-estimates">
 
 <pre class = 'prettyprint lang-r'>library(rstanarm)
@@ -914,14 +935,6 @@ render(&quot;main.Rmd&quot;)</pre></article></slide>
   <slide class="backdrop"></slide>
 
 </slides>
-
-<script src="main_files/ioslides-13.5.1/js/modernizr.custom.45394.js"></script>
-<script src="main_files/ioslides-13.5.1/js/prettify/prettify.js"></script>
-<script src="main_files/ioslides-13.5.1/js/prettify/lang-r.js"></script>
-<script src="main_files/ioslides-13.5.1/js/prettify/lang-yaml.js"></script>
-<script src="main_files/ioslides-13.5.1/js/hammer.js"></script>
-<script src="main_files/ioslides-13.5.1/js/slide-controller.js"></script>
-<script src="main_files/ioslides-13.5.1/js/slide-deck.js"></script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>

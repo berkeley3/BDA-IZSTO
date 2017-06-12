@@ -545,6 +545,19 @@ posterior distribution
 <center><img src="images/nuts.png" width="700px" height="200px" /></center>
 <center><img src="images/noUTurn.png" width="350px" height="150px" /></center>
 
+## Stan is NUTS
+
+<center>
+<img src="images\HMC.png" width=500>
+</center>
+
+## Stan is NUTS
+
+<center>
+<img src="images\HMC2.png" width=500>
+</center>
+
+
 ## HMC Estimates
 
 ```{r, eval=FALSE}
