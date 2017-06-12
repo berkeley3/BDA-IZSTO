@@ -36,13 +36,10 @@ No specific mathematical expertise is required. Some familiarity with statistica
 - Although it is not required, it is recommend installing RStudio https://www.rstudio.com
 
 - R packages arm, rstan, rstanarm, glmer2stan, lme4, loo, shiny and shinystan are required
-- Please note that glmer2stan is not available on CRAN. You can install it from source on GitHub by using the following lines of R code:
-
-    install.packages('devtools')
-    
-    library(devtools)
-    
-    install.packages('glmer2stan')
+- Please note that glmer2stan is not available on CRAN. You can install it from source by using the following lines of R code 
+   
+   options(repos=c(getOption('repos'), glmer2stan="http://xcelab.net/R"))
+   install.packages('glmer2stan', type='source')
     
 - Other R packages that will be used: knitr, xtable, plotrix, ggplot2, gridExtra, LearnBayes, nleqslv, metafor, maptools, sp, spdep, RColorBrewer, classInt
  
