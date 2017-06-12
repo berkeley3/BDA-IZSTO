@@ -27,6 +27,8 @@ Paola Berchialla <br />
 </div>
 
 
+<img src="images\PubMed Access Denied.jpg" width="700">
+
 ## Outline {.smaller}
 
 ### Day 1
