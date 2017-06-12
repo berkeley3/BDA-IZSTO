@@ -186,8 +186,8 @@ cat(&#39;Credible intervals for the model parameters:\n&#39;)</pre>
 <pre class = 'prettyprint lang-r'>apply(coef(simple_bayesian_lm), 2, quantile, prob = c(0.025, 0.975))</pre>
 
 <pre >##       (Intercept)     betadiet
-## 2.5%     4.609162 4.734282e-05
-## 97.5%    4.891257 1.517628e-04</pre>
+## 2.5%     4.592845 4.329908e-05
+## 97.5%    4.891803 1.567029e-04</pre>
 
 </article></slide><slide class=''><hgroup><h2>A simple Bayesian model</h2></hgroup><article  id="a-simple-bayesian-model-1">
 
@@ -199,7 +199,7 @@ cat(&#39;Credible intervals for the model parameters:\n&#39;)</pre>
 <pre class = 'prettyprint lang-r'>quantile(simple_bayesian_lm@sigma, prob = c(0.025, 0.975))</pre>
 
 <pre >##      2.5%     97.5% 
-## 0.6773560 0.7944383</pre>
+## 0.6829465 0.8001309</pre>
 
 </article></slide><slide class=''><hgroup><h2>A simple Bayesian model</h2></hgroup><article  id="a-simple-bayesian-model-2">
 
@@ -212,9 +212,9 @@ cat(&#39;Credible intervals for the model parameters:\n&#39;)</pre>
 </ul></li>
 </ul>
 
-<pre >## Probability the slope parameter is &gt; 0:  0.999</pre>
+<pre >## Probability the slope parameter is &gt; 0:  1</pre>
 
-<pre >## Probability the slope parameter is &gt; 0.0001:  0.497</pre>
+<pre >## Probability the slope parameter is &gt; 0.0001:  0.465</pre>
 
 </article></slide><slide class=''><hgroup><h2>Plot the effect of X on Y</h2></hgroup><article  id="plot-the-effect-of-x-on-y">
 
@@ -250,7 +250,7 @@ y^*\vert\beta,\sigma^2,X \sim \textrm{Normal}(X\beta, \sigma^2)
 
 <pre class = 'prettyprint lang-r'>sum(newy[newdat$x==5000,]&gt;5)/1000</pre>
 
-<pre >## [1] 0.612</pre>
+<pre >## [1] 0.632</pre>
 
 </article></slide><slide class=''><hgroup><h2>What does sim do?</h2></hgroup><article  id="what-does-sim-do">
 
@@ -490,7 +490,7 @@ stanDso &lt;- stan_model( model_code = model_string )</pre>
 <pre class = 'prettyprint lang-r'>samples &lt;- extract(stanFit)
 beta_post &lt;- samples[[&#39;beta&#39;]]</pre>
 
-<p><img src="main_files/figure-html/unnamed-chunk-15-1.png" width="384" style="display: block; margin: auto;" /></p>
+<p><img src="main_files/figure-html/unnamed-chunk-15-1.png" width="672" style="display: block; margin: auto;" /></p>
 
 </article></slide><slide class=''><hgroup><h2>Plot credible intervals</h2></hgroup><article  id="plot-credible-intervals" class="smaller">
 

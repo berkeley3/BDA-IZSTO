@@ -329,7 +329,7 @@ samples <- extract(stanFit)
 beta_post <- samples[['beta']]
 ```
 
-```{r, echo=FALSE, fig.width=4, message=FALSE, fig.align='center'}
+```{r, echo=FALSE, fig.width=7, fig.height=4, message=FALSE, fig.align='center'}
 plot1 <- qplot(beta_post[,1]) # intercept posterior samples
 plot2 <- qplot(beta_post[,2]) # slope posterior samples
 
