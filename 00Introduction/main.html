@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bayesian Data Analysis for Medical Data</title>
+
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <meta name="generator" content="pandoc" />
+
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <base target="_blank">
+
+  <script type="text/javascript">
+    var SLIDE_CONFIG = {
+      // Slide settings
+      settings: {
+                title: 'Bayesian Data Analysis for Medical Data',
+                        subtitle: 'Course Introduction',
+                useBuilds: true,
+        usePrettify: true,
+        enableSlideAreas: true,
+        enableTouch: true,
+                        favIcon: 'main_files/logo.jpg',
+              },
+
+      // Author information
+      presenters: [
+            {
+        name:  'Paola Berchialla' ,
+        company: '',
+        gplus: '',
+        twitter: '',
+        www: '',
+        github: ''
+      },
+            ]
+    };
+  </script>
+
+  <link href="main_files/ioslides-13.5.1/fonts/fonts.css" rel="stylesheet" />
+  <link href="main_files/ioslides-13.5.1/theme/css/default.css" rel="stylesheet" />
+  <link href="main_files/ioslides-13.5.1/theme/css/phone.css" rel="stylesheet" />
+  <script src="main_files/ioslides-13.5.1/js/modernizr.custom.45394.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/prettify/prettify.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/prettify/lang-r.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/prettify/lang-yaml.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/hammer.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/slide-controller.js"></script>
+  <script src="main_files/ioslides-13.5.1/js/slide-deck.js"></script>
+
+  <style type="text/css">
+
+    b, strong {
+      font-weight: bold;
+    }
+
+    em {
+      font-style: italic;
+    }
+
+    slides > slide {
+      -webkit-transition: all 0.4s ease-in-out;
+      -moz-transition: all 0.4s ease-in-out;
+      -o-transition: all 0.4s ease-in-out;
+      transition: all 0.4s ease-in-out;
+    }
+
+    .auto-fadein {
+      -webkit-transition: opacity 0.6s ease-in;
+      -webkit-transition-delay: 0.4s;
+      -moz-transition: opacity 0.6s ease-in 0.4s;
+      -o-transition: opacity 0.6s ease-in 0.4s;
+      transition: opacity 0.6s ease-in 0.4s;
+      opacity: 0;
+    }
+
+    slides > slide:not(.nobackground):before {
+      font-size: 12pt;
+      content: "";
+      position: absolute;
+      bottom: 20px;
+      left: 60px;
+      background: url(main_files/logo.jpg) no-repeat 0 50%;
+      -webkit-background-size: 30px 30px;
+      -moz-background-size: 30px 30px;
+      -o-background-size: 30px 30px;
+      background-size: 30px 30px;
+      padding-left: 40px;
+      height: 30px;
+      line-height: 1.9;
+    }
+  </style>
+
+  <link rel="stylesheet" href="assets\css\ioslides.css" type="text/css" />
+
+</head>
+
+<body style="opacity: 0">
+
+<slides class="layout-widescreen">
+
+  <slide class="title-slide segue nobackground">
+        <aside class="gdbar"><img src="main_files/logo.jpg"></aside>
+        <!-- The content of this hgroup is replaced programmatically through the slide_config.json. -->
+    <hgroup class="auto-fadein">
+      <h1 data-config-title><!-- populated from slide_config.json --></h1>
+      <h2 data-config-subtitle><!-- populated from slide_config.json --></h2>
+      <p data-config-presenter><!-- populated from slide_config.json --></p>
+          </hgroup>
+  </slide>
+
+<slide class=''><hgroup><h2>Instructor</h2></hgroup><article  id="instructor">
+
+<a imageanchor="1" style="clear: right; float: right; margin-bottom: 1em; margin-right: 1em; margin-left:1em "><img src="images/pberk.jpg" alt="pberk" height="150"></a>
+
+<div style="text-align: right;">
+<p>Paola Berchialla <br /> Assistant Professor of Biostatistics<br /> Dept of Clinical and Biological Sciences <br /> University of Torino</p></div>
+
+</article></slide><slide class=''><hgroup><h2>Outline</h2></hgroup><article  id="outline" class="smaller">
+
+<h3>Day 1</h3>
+
+<ul>
+<li><strong>Brief introduction to Bayesian Inference</strong></li>
+<li><strong>Linear Regressione</strong>
+
+<ul>
+<li>examples in STAN</li>
+</ul></li>
+<li><strong>Hierarchical models</strong></li>
+</ul>
+
+<h3>Day 2</h3>
+
+<ul>
+<li><strong>Predictive distribution model checking</strong></li>
+<li><strong>Introduction to MCMC</strong></li>
+<li><strong>Sensitivity to Prior choiche</strong></li>
+<li><strong>Bayesian Latent Analysis</strong></li>
+</ul>
+
+<p>Many examples in STAN are provided along with the scripts for the practicals</p>
+
+</article></slide><slide class=''><hgroup><h2>Pre-requisites</h2></hgroup><article  id="pre-requisites" class="smaller">
+
+<ul>
+<li>There are no formal pre-requisites</li>
+<li>Analysis will be performed in the R programming language: <a href='http://www.r-project.org/' title=''>http://www.r-project.org/</a></li>
+<li>Rstudio <a href='http://www.rstudio.com/products/rstudio/' title=''>http://www.rstudio.com/products/rstudio/</a> is recommended</li>
+<li>The following R packages will be used in class:
+
+<ul>
+<li>Rstan</li>
+<li>arm</li>
+<li>glmer2stan</li>
+</ul></li>
+<li>Download and install:
+
+<ul>
+<li>Stan <a href='http://mc-stan.org/' title=''>http://mc-stan.org/</a>
+
+<ul>
+<li>make sure to follow all the instruction and setup correctly the toolchain</li>
+</ul></li>
+</ul></li>
+</ul>
+
+</article></slide><slide class=''><hgroup><h2>Getting the slides</h2></hgroup><article  id="getting-the-slides">
+
+<ul>
+<li>The slides for this course were created with Rmarkdown: <a href='http://rmarkdown.rstudio.com/' title=''>http://rmarkdown.rstudio.com/</a>.</li>
+<li>They are available from <a href='https://github.com/berkeley3/BDA' title=''>https://github.com/berkeley3/BDA-IZSTO</a>.</li>
+<li><p>To re-compile the slides:</p>
+
+<ul>
+<li>Download the directory containing the lectures from Github</li>
+<li>In R open the .Rmd file and set the working directory to the lecture directory</li>
+<li>Click the <em>KnitHTML</em> button on Rstudio or run the following commands:</li>
+</ul></li>
+</ul>
+
+<pre class = 'prettyprint lang-r'>library(rmarkdown) 
+render(&quot;main.Rmd&quot;)</pre></article></slide>
+
+
+  <slide class="backdrop"></slide>
+
+</slides>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "main_files/mathjax-local/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+<!-- map slide visiblity events into shiny -->
+<script>
+  (function() {
+    if (window.jQuery) {
+       window.jQuery(document).on('slideleave', function(e) {
+         window.jQuery(e.target).trigger('hidden');
+      });
+       window.jQuery(document).on('slideenter', function(e) {
+         window.jQuery(e.target).trigger('shown');
+      });
+    }
+  })();
+</script>
+
+</body>
+</html>

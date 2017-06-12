@@ -1,0 +1,73 @@
+---
+title: "Bayesian Data Analysis for Medical Data"
+subtitle: Course Introduction
+author      : Paola Berchialla
+job         : Department of Clinical and Biological Sciences, University of Torino
+output:
+  ioslides_presentation:
+    css: assets/css/ioslides.css
+    logo: assets/img/dscb.jpg
+    mathjax: local
+    self_contained: no
+    widescreen: yes
+  beamer_presentation: default
+  slidy_presentation: default
+---
+
+
+## Instructor
+
+
+<a imageanchor="1" style="clear: right; float: right; margin-bottom: 1em; margin-right: 1em; margin-left:1em "><img src="images/pberk.jpg" alt="pberk" height="150"></a>
+<div style="text-align: right;">
+Paola Berchialla <br />
+  Assistant Professor of Biostatistics<br />
+    Dept of Clinical and Biological Sciences <br />
+  University of Torino
+</div>
+
+
+## Outline {.smaller}
+
+### Day 1
+* __Brief introduction to Bayesian Inference__
+* __Linear Regressione__
+    * examples in STAN
+* __Hierarchical models__
+
+### Day 2
+
+* __Predictive distribution model checking__
+* __Introduction to MCMC__
+* __Sensitivity to Prior choiche__
+* __Bayesian Latent Analysis__
+
+Many examples in STAN are provided along with the scripts for the practicals
+
+## Pre-requisites {.smaller}
+* There are no formal pre-requisites
+* Analysis will be performed in the R programming language: [http://www.r-project.org/](http://www.r-project.org/)
+* Rstudio [http://www.rstudio.com/products/rstudio/](http://www.rstudio.com/products/rstudio/) is recommended
+* The following R packages will be used in class:
+    + Rstan
+    + arm
+    + glmer2stan
+
+* Download and install:
+    + Stan [http://mc-stan.org/](http://mc-stan.org/)
+        + make sure to follow all the instruction and setup correctly the toolchain
+
+## Getting the slides
+
+* The slides for this course were created with Rmarkdown: [http://rmarkdown.rstudio.com/](http://rmarkdown.rstudio.com/). 
+* They are available from [https://github.com/berkeley3/BDA-IZSTO](https://github.com/berkeley3/BDA).
+* To re-compile the slides:
+
+    + Download the directory containing the lectures from Github
+    + In R open the .Rmd file and set the working directory to the lecture directory
+    + Click the *KnitHTML* button on Rstudio or run the following commands: 
+  
+```{r RmarkdownChunk, eval=FALSE}
+library(rmarkdown) 
+render("main.Rmd")
+```
